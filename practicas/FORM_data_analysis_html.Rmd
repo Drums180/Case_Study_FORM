@@ -1,0 +1,362 @@
+#                                          **FORM** 
+#                                Exploratory Data Analysis 
+
+Author: David Saucedo
+Date: Sept 30, 2022
+
+![image info](D:\\Tec21\\CD2001C\\form_image.png)
+
+## **Company's Description** 
+**FORM** is a Mexican company located at The Parque Industrial El Sabinal at Apodoca, Nuevo León. Briefly, FORM develops packaging solutions which add value
+to the supply chain our their clients. In so doing, FORM's solutions not only protect its costumers' products, but also address the costumers' needs during 
+the transportation and storage operations. 
+
+#### loding required libriaries
+```{r message=FALSE, warning=FALSE}
+library(foreign)
+library(dplyr)        # data manipulation 
+library(forcats)      # to work with categorical variables
+library(ggplot2)      # data visualization 
+library(janitor)      # data exploration and cleaning 
+library(Hmisc)        # several useful functions for data analysis 
+library(psych)        # functions for multivariate analysis 
+library(naniar)       # summaries and visualization of missing values NAs
+library(dlookr)       # summaries and visualization of missing values NAs
+library(corrplot)     # correlation plots
+library(jtools)       # presentation of regression analysis 
+library(lmtest)       # diagnostic checks - linear regression analysis 
+library(car)          # diagnostic checks - linear regression analysis
+library(olsrr)        # diagnostic checks - linear regression analysis 
+library(data.table)   # used for working with tabular data
+library(viridis)      # use color scales to make plots that better represent data analysis 
+library(kableExtra)   # HTML table attributes
+library(arsenal)      # make statistical summaries reporting easy
+library(tidyverse)    # collection of R packages designed for data science
+library(gt)                      # good-looking tables
+```
+
+## **PRODUCCIÓN**
+
+#### lets analyze the dataset over the period 01-August-2022 to 31-August-2022
+```{r}
+produccion<-read.csv("D:\\Tec21\\CD2001C\\FORM - Datos\\form_produc_datos.csv")
+produccion<-as.data.frame(produccion)
+summary(produccion)   # get the variables' names to select columns
+```
+
+#### select columns / variables from the original dataset so we can focus on relevant info
+```{r}
+produccion_alt<-select(produccion,Fecha,CLIENTE,PIEZAS.PROG.,TMO..MIN.,ESTACION.ARRANQUE,Laminas.procesadas,TIEMPO.CALIDAD)
+colnames(produccion_alt)<-c('fecha','cliente','piezas_prog','tiempo_min','estacion_arranque','laminas_procesadas','tiempo_calidad')
+```
+
+#### lets verify type of variables (quantitative and qualitative)
+```{r}
+str(produccion_alt)
+```
+
+#### lets convert character variables to numeric 
+```{r}
+produccion_alt$piezas_prog<-as.numeric(produccion_alt$piezas_prog)               ### missing values are converted to NA's
+produccion_alt$tiempo_min<-as.numeric(produccion_alt$tiempo_min)                 ### missing values are converted to NA's
+produccion_alt$laminas_procesadas<-as.numeric(produccion_alt$laminas_procesadas) ### missing values are converted to NA's
+produccion_alt$tiempo_calidad<-as.numeric(produccion_alt$tiempo_calidad)         ### missing values are converted to NA's
+```
+
+#### lets convert character variables to factor so we can calculate descriptive statistics 
+```{r}
+produccion_alt$cliente<-as.factor(produccion_alt$cliente)  
+produccion_alt$estacion_arranque<-as.factor(produccion_alt$estacion_arranque) 
+```
+
+#### identify missing values
+```{r}
+colSums(is.na(produccion_alt))
+```
+
+#### replace missing values by the median: piezas_prog, tiempo_min, estacion_arranque, laminas_procesadas, tiempo_calidad
+```{r}
+produccion_alt<-produccion_alt %>% mutate(piezas_prog=ifelse(is.na(piezas_prog),median(piezas_prog,na.rm=T),piezas_prog))
+produccion_alt<-produccion_alt %>% mutate(tiempo_min=ifelse(is.na(tiempo_min),median(tiempo_min,na.rm=T),tiempo_min))
+produccion_alt<-produccion_alt %>% mutate(estacion_arranque=ifelse(is.na(estacion_arranque),median(estacion_arranque,na.rm=T),estacion_arranque))
+produccion_alt<-produccion_alt %>% mutate(laminas_procesadas=ifelse(is.na(laminas_procesadas),median(laminas_procesadas,na.rm=T),laminas_procesadas))
+produccion_alt<-produccion_alt %>% mutate(tiempo_calidad=ifelse(is.na(tiempo_calidad),median(tiempo_calidad,na.rm=T),tiempo_calidad))
+```
+
+#### lets verify that we replaced missing values
+```{r}
+colSums(is.na(produccion_alt))
+summary(produccion_alt)
+```
+
+#### lets convert "fecha" to date format 
+```{r}
+produccion_alt$fecha<-as.Date(produccion_alt$fecha,format="%m/%d/%Y") 
+```
+
+#### lets double check that our "produccion" dataset displays the suggested changes
+```{r}
+str(produccion_alt)
+summary(produccion_alt) # lets verify the structure and descriptive statistics of our final version - produccion  
+```
+
+#### exporting cleaned dataset
+##### Example: write.csv(produccion_alt,"D:\\Tec21\\CD2001C\\FORM - Datos\\form_produccion_final.csv", row.names=FALSE)
+
+**Hint:** The following questions can be answered using the library(dplyr)
+
+#### which client represent the highest level of "piezas_programadas"?
+```{r}
+produccion_alt1<-produccion_alt %>% select(cliente,piezas_prog) %>% group_by(cliente) %>% summarise(piezas_prog=sum(piezas_prog)) %>% arrange(desc(piezas_prog))
+ggplot(produccion_alt1, aes(x=reorder(cliente,piezas_prog), y=piezas_prog)) +
+  geom_bar(stat="identity")+
+  coord_flip()
+```
+
+#### how is the "tiempo_calidad performance by the top 5 clients?
+```{r}
+produccion_alt2<-produccion_alt %>% select(cliente,piezas_prog,tiempo_calidad) %>% group_by(cliente) %>% summarise(across(everything(),mean,na.rm=TRUE)) %>% arrange(desc(piezas_prog))
+ggplot(produccion_alt2, aes(x=reorder(cliente,piezas_prog), y=piezas_prog, fill=(tiempo_calidad))) +
+  geom_bar(stat="identity")+
+  coord_flip()+
+  guides(fill=guide_legend(reverse=FALSE))
+```
+
+#### **Tabla 1: Resumen de Estadísticos Descriptivos de la Producción por Cliente**
+```{r results='asis'}
+require(knitr)
+require(survival)
+produccion_alt2.1<-produccion_alt2 %>% filter(cliente %in% c('STABILUS 1','STABILUS 3','YANFENG','TRMX','DENSO')) 
+summary_tab1<-tableby(cliente ~ piezas_prog + tiempo_calidad, data=produccion_alt2.1, test=FALSE) 
+summary(summary_tab1, title= "Summary Statistics of Production by Client", width=45)
+```
+
+#### how is the relationship between "laminas_procesadas" and "piezas_prog"? Please describe this relationsip for the top 5 clients
+```{r}
+produccion_alt3<-produccion_alt %>% select(cliente,piezas_prog,laminas_procesadas,tiempo_calidad) %>% group_by(cliente) %>% 
+  summarise(piezas_prog=sum(piezas_prog),laminas_procesadas=sum(laminas_procesadas),tiempo_calidad=sum(tiempo_calidad)) %>% arrange(desc(piezas_prog))
+produccion_alt3<-produccion_alt3[-c(7,8,9),] # remove the last 3 rows 
+```
+
+```{r}
+ggplot(produccion_alt3, aes(x=laminas_procesadas, y=piezas_prog, color=cliente, shape=cliente)) + 
+  geom_point(shape=19,size=5)+
+   labs(title="Piezas Programadas por Tiempo de Calidad",
+       x="Laminas Procesadas", y = "Piezas Programadas")
+```
+
+```{r}
+ggplot(produccion_alt3, aes(x=tiempo_calidad, y=piezas_prog, color=cliente, shape=cliente)) + 
+  geom_point(shape=19,size=5)+
+  labs(title="Piezas Programadas por Tiempo de Calidad",
+       x="Tiempo Calidad", y = "Piezas Programadas")
+```
+
+#### which clients display the greatest dispersion on "piezas_prog"?
+```{r}
+produccion_alt4<-produccion_alt %>% select(cliente,piezas_prog) %>% arrange(desc(piezas_prog))
+produccion_alt4<-produccion_alt4[-c(1099),] # remove client "VL-017-14086" 
+```
+
+```{r}
+ggplot(produccion_alt4, aes(x=cliente, y=piezas_prog)) + 
+  geom_boxplot(color="red", fill="orange", alpha=0.2)
+```
+
+#### how is the "tiempo_min" performance by the top 5 clients? 
+```{r}
+produccion_alt5<-produccion_alt %>% select(cliente,piezas_prog,tiempo_min) %>% group_by(cliente) %>% 
+  summarise(piezas_prog=sum(piezas_prog),tiempo_min=sum(tiempo_min)) %>% arrange(desc(piezas_prog))
+produccion_alt5<-produccion_alt5[-c(7,8,9),] # remove the last 3 rows 
+```
+
+```{r}
+ggplot(produccion_alt5,aes(x=reorder(tiempo_min,piezas_prog), y=piezas_prog,fill=cliente)) +
+  geom_bar(stat="identity")
+```
+
+## **RECURSOS HUMANOS**
+
+#### lets import the dataset
+```{r}
+rh<-read.csv("D:\\Tec21\\CD2001C\\FORM - Datos\\form_rh_datos.csv") 
+```
+
+#### lets very the structure of the dataset
+```{r}
+str(rh) 
+```
+
+#### select columns / variables
+```{r}
+rh_alt<-rh %>% select(-one_of('No..De.Empleado','APELLIDOS','NOMBRE','RFC','FECHA.DE.ALTA','Primer.mes','X4to.mes','BAJA','NO.SEGURO.SOCIAL','FACTOR.CRED.INFONAVIT','NO..CREDITO.INFONAVIT','LUGAR.DE.NACIMIENTO',
+                          'CURP','CALLE','NUMERO.INTERNO','COLONIA','CODIGO.POSTAL','TARJETA.CUENTA'))
+```
+
+#### lets rename the selected columns / variables
+```{r}
+colnames(rh_alt)<-c('fecha_nacimiento','fecha_actual','genero','puesto','depto','salario_diario','mpio','estado','estado_civil')
+```
+
+#### lets convert "fecha_nacimiento" to date format 
+```{r}
+rh_alt$fecha_nacimiento<-as.Date(rh_alt$fecha_nacimiento,format="%m/%d/%Y") 
+rh_alt$fecha_actual<-as.Date(rh_alt$fecha_actual,format="%m/%d/%Y") 
+```
+
+#### lets calculate the variable "age" in years so we can realize additional characteristics of "colaboradores"
+```{r}
+library(lubridate)
+edad<-trunc((rh_alt$fecha_nacimiento %--% rh_alt$fecha_actual) / years(1)) # %--% creates a time interval based on as.date() format
+rh_alt$edad<-edad
+```
+
+#### lets convert character variables to factor so we can display descriptive statistics
+```{r}
+rh_alt$genero<-as.factor(rh_alt$genero)
+rh_alt$puesto<-as.factor(rh_alt$puesto)
+rh_alt$depto<-as.factor(rh_alt$depto)
+rh_alt$mpio<-as.factor(rh_alt$mpio)
+rh_alt$estado<-as.factor(rh_alt$estado)
+rh_alt$estado_civil<-as.factor(rh_alt$estado_civil)
+```
+
+#### lets verify the structure of our rh_alt dataset 
+```{r}
+str(rh_alt)
+summary(rh_alt)
+```
+
+#### lets verify the presence of missing values 
+```{r}
+rh_alt<-rh_alt[-c(53),] # remove row # 53 because it shows a missing value. 
+summary(rh_alt) # no missing values
+```
+
+#### lets display data visualization plots so we can identify relevant insights from our rh_alt dataset
+```{r}
+tapply(rh_alt$salario_diario,
+       list(rh_alt$genero,rh_alt$estado_civil), mean)
+```
+
+#### replace the "outlier" of salario_diario with the median
+```{r}
+rh_alt$salario_diario<-replace(rh_alt$salario_diario,rh_alt$salario_diario>1000000,181)
+```
+
+```{r}
+hist(rh_alt$edad, freq=TRUE, col='light blue', main="Histograma de Edad",xlab="Edad en Años")
+```
+
+```{r}
+ggplot(rh_alt, aes(x=genero, y=edad, fill=genero)) + 
+  geom_boxplot() 
+```
+
+```{r}
+ggplot(rh_alt, aes(x=genero, y=salario_diario, fill=genero)) + 
+  geom_boxplot() 
+```
+
+```{r}
+ggplot(rh_alt, aes(genero,salario_diario,fill=genero)) +                                    
+  geom_bar(stat = "identity") +
+  scale_fill_brewer(palette = "Set2") + ggtitle("Salario Diario por Género")
+```
+
+```{r}
+ggplot(rh_alt, aes(x=genero, y=salario_diario, fill=genero)) + 
+  geom_bar(stat="identity") + 
+  facet_grid(~estado_civil) + scale_fill_brewer(palette = "Set1")
+```
+
+#### **Tabla 2: Salario Diario por Estado Civil y Género**
+```{r results='asis'}
+require(knitr)
+require(survival)
+summary_tab2<-tableby(genero ~ salario_diario + edad + estado_civil, data=rh_alt,test=FALSE)
+summary(summary_tab2, title="Daily Wage and Marital Status by Gender")
+```
+
+## **DISTRIBUCIÓN**
+
+#### lets import the dataset
+```{r}
+delivery_performance<-read.csv("D:\\Tec21\\CD2001C\\FORM - Datos\\form_delivery_performance.csv") 
+str(delivery_performance)
+```
+
+#### lets convert our dataset to data.frame format and set the date format 
+```{r}
+delivery_performance<-as.data.frame(delivery_performance) 
+delivery_performance$fecha<-as.Date(delivery_performance$fecha,format="%m/%d/%Y") 
+delivery_performance$cliente<-as.factor(delivery_performance$cliente) 
+```
+
+#### lets verify the dataset's structure and summary of descriptive statistics
+```{r}
+summary(delivery_performance)
+```
+
+#### lets plot delay performance by client 
+```{r}
+ggplot(delivery_performance,aes(x=fecha, y=delay_performance,color=cliente))+
+  geom_line()+
+  labs(x="Fecha",y="Delay in Minutes", color="Legend")+
+  ggtitle("Delays in Performance by Client")
+```
+
+#### lets remove two clients displaying 0's values of delay performance 
+```{r}
+delivery_performance<-delivery_performance[delivery_performance$cliente!="Magna",]
+delivery_performance<-delivery_performance[delivery_performance$cliente!="Varroc",]
+```
+
+#### lets get the mean value of delay performance so we can display it in the next plot 
+```{r}
+summary(delivery_performance$delay_performance)
+```
+
+#### lets plot again the 2 clients characterized by the longest delay
+```{r}
+ggplot(delivery_performance,aes(x=fecha, y=delay_performance,fill=cliente))+
+  geom_bar(stat="identity")+
+  geom_hline(yintercept=33,linetype="dashed",color="black")+
+  labs(x="Fecha",y="Delay in Minutes", color="Legend")+
+  ggtitle("Delays in Performance by Client")
+```
+
+#### importing and preparing delivery_plan dataset 
+```{r}
+del_plan_alt<-read.csv("D:\\Tec21\\CD2001C\\delivery_plan.csv") 
+colnames(del_plan_alt)<-c('cliente','Jan','Feb','Mar','Apr','May','June','July','Aug','Sept','Oct','Nov','Dec')
+del_plan_alt1<-del_plan_alt %>% group_by(cliente) %>% summarise(Jan=sum(Jan),Feb=(sum(Feb)),Mar=sum(Mar),Apr=sum(Apr),May=sum(May),June=sum(June),
+                                                                July=sum(July),Aug=sum(Aug),Sept=sum(Sept),Oct=sum(Oct),Nov=sum(Nov),Dec=sum(Dec))
+```
+
+#### lets drop clients showing 0 values
+```{r}
+del_plan_alt1<-del_plan_alt1[-c(1,2,8,10,19),]
+del_plan_alt1<-as.data.frame(del_plan_alt1)
+```
+
+#### lets convert to our delivery_plan dataset to format that we can display it in a heat map 
+#### it organizes the data values in a long data frame format
+```{r}
+del_plan_alt2<-melt(del_plan_alt1,id.vars='cliente',variable.name='series')
+summary(del_plan_alt2)
+```
+
+#### lets visualize a heatmap to detect important delivery dates by client 
+```{r}
+del_plan_alt2 %>%
+  ggplot(aes(series,cliente)) +
+  geom_tile(aes(fill=value))+
+  geom_text(aes(label=value),size=5.5)+
+  scale_fill_viridis(discrete=FALSE,direction=-1,option="G")+
+  labs(title="Heatmap of Delivery Plan", 
+       subtitle="Used to Explore Customer's Orders in 2021",
+       x="Date",
+       y="Client")+
+  theme(text=element_text(size=30)) 
+```
