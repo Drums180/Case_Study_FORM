@@ -5,3 +5,37 @@ date: "2024-03-05"
 output: html_document
 ---
 
+CD2001C – Analítica para Negocios: De Los Datos a las Decisiones
+Febrero – Junio 2024
+
+# Entregable 1 – Evidencia 1
+
+## 1. Explorar y Conocer la Empresa y su Contexto
+### Antecedentes de la Empresa FORM
+#### Visión, Misión, y Objetivos Estratégicos
+
+#### Análisis de las áreas de la Empresa (incluir 3-5 gráficos usando R*)usando datos
+
+#### Desempeño reciente
+
+### Contexto de la Industria
+
+#### Análisis de la Industria (cartón, autopartes, automotriz) 
+Para el caso de México y E.U.A. (incluir 3-5 gráficos usando R*) usando fuentes de
+datos secundarias
+
+#### Amenazas y oportunidades identificados
+
+## FODA Cruzado
+Apartir de los antecedentes de la empresa y el contexto de la
+industrias de México y E.U.A. elaborar FODA cruzado que identifique
+y describa 2-3 estrategias a seguir por parte de la empresa en el
+corto plazo.
+
+### PESTLE
+Con base en el análisis de las industrias de México y E.U.A. identificar
+variables / factores relevantes para la elaboración de PESTLE y
+describir 2-3 estrategias a seguir por parte de la empresa en el corto
+plazo.
+
+## REFERENCIAS
