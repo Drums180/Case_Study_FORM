@@ -1,0 +1,119 @@
+# Guía de Bases de Datos del Caso FORM: Industria Automotriz en México
+
+Este documento sirve como un glosario e índice de las variables contenidas dentro de un conjunto de carpetas con bases de datos relevantes para el análisis de la industria automotriz en México.
+
+## FORM
+
+### BDD_FORM_BAJAS_2023
+
+- No.
+- Apellidos
+- Nombre
+- Fecha de Nacimiento
+- Género
+- RFC
+- Fecha de Alta
+- Primer Mes
+- Cuarto Mes
+- Fecha de Baja
+- Motivo de Baja
+- Observaciones
+- Puesto
+- Dpto
+- Imss
+- SD
+- Factor de Crédito
+- Infonavit
+- No. De Crédito Infonavit
+- Lugar de Nacimiento
+- CURP
+- Calle
+- Número
+- Colonia
+- Municipio
+- Estado
+- CP
+- Estado Civil
+- Número de Télefono
+
+## Industry Autos Mx
+
+### Venta de Vehículos en México (`mx_venta_vehiculos`)
+
+Variables:
+
+- `PROD_EST`: Estimación de producción.
+- `COBERTURA`: Ámbito geográfico de los datos.
+- `ANIO`: Año de los datos.
+- `ID_MES`: Identificador numérico del mes.
+- `ID_ENTIDAD`: Identificador numérico de la entidad federativa.
+- `VEH_ELECTR`: Cantidad de vehículos eléctricos.
+- `VEH_HIBRIDAS_PLUGIN`: Cantidad de vehículos híbridos enchufables.
+- `VEH_HIBRIDAS`: Cantidad de vehículos híbridos no enchufables.
+
+### Flujos Trimestrales de IED en Fabricación de Partes de Vehículos Motorizados (`Quarterly FDI Flows in Motor Vehicle Parts Manufacturing`)
+
+Variables:
+
+- `Industry Group ID`: Identificador del grupo industrial.
+- `Industry Group`: Nombre del grupo industrial.
+- `Quarter ID`: Identificador numérico del trimestre.
+- `Quarter_`: Etiqueta del trimestre.
+- `Time ID`: Identificador temporal de los datos.
+- `Investment (USD)`: Monto de la inversión en dólares estadounidenses.
+
+### Exportación de Vehículos (`exportacion_vehiculos`)
+
+Variables:
+
+- `Tema`: Temática de la exportación.
+- `Año`: Año de la exportación.
+- `Mes`: Mes de la exportación.
+- `Marca`: Marca del vehículo.
+- `Modelo`: Modelo del vehículo.
+- `Tipo`: Tipo de vehículo.
+- `Segmento`: Segmento de mercado del vehículo.
+- `País destino`: País de destino de la exportación.
+- `Cantidad`: Cantidad de vehículos exportados.
+
+### Exportación de Vehículos de México (`exportacion_vehiculos_mx`)
+
+Variables:
+
+- `year`: Año de la exportación.
+- `year_quarter`: Año y trimestre de la exportación.
+- `quarter`: Trimestre de la exportación.
+- `state_id`: Identificador de la entidad federativa.
+- `State`: Nombre de la entidad federativa.
+- `trade_value region`: Valor comercial por región.
+
+Fuente: Instituto Nacional de Estadística y Geografía (INEGI)
+
+### Ventas de Pasajeros en México (`mx_passenger_sales`)
+
+Variables:
+
+- `year`: Año de los datos.
+- `total_local_production`: Producción local total.
+- `total_exports`: Total de exportaciones.
+- `total_imports`: Total de importaciones.
+- `imports_from_US`: Importaciones provenientes de Estados Unidos.
+- `imports_used_vehicles`: Importaciones de vehículos usados.
+- `total_market_size`: Tamaño total del mercado.
+- `exchange_rate`: Tipo de cambio.
+
+Fuente: [Guía Comercial de México - Industria Automotriz](https://www.trade.gov/country-commercial-guides/mexico-automotive-industry). Unidades: Miles de Vehículos.
+
+### Mercado de Autopartes en México (`mx_autoparts_market`)
+
+Variables:
+
+- `year`: Año de los datos.
+- `total_local_production`: Producción local total.
+- `total_exports`: Total de exportaciones.
+- `total_imports`: Total de importaciones.
+- `imports_from_US`: Importaciones provenientes de Estados Unidos.
+- `total_market_size`: Tamaño total del mercado.
+- `exchange_rate`: Tipo de cambio.
+
+Fuente: [Guía Comercial de México - Industria Automotriz](https://www.trade.gov/country-commercial-guides/mexico-automotive-industry). Unidades: Miles de Millones de USD.
