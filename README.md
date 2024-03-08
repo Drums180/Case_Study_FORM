@@ -26,17 +26,3 @@ La predicción precisa de la demanda representa un desafío igualmente significa
 
 FORM enfrenta estos desafíos con un espíritu de innovación y una dedicación inquebrantable a la excelencia. A través de un enfoque estratégico y la implementación de soluciones creativas, estamos comprometidos a superar estas problemáticas y a continuar liderando el camino en la industria de empaques para autopartes.
 
-NECESIDADES:
-
-- BASE DATOS COMPLETA DE PERSONAL
-- DATA DE ENCUESTAS DE BAJAS
-- DATA DE TIEMPOS DE INVENTARIO
-- DATA DE DESGLOSE DE VENTA DE UNIDADES POR CLIENTE / O POR TIPO DE PARTE
--
-
-ENTREGABLES:
-
-- PORQUE ENSEÑAR LO QUE VAN A ENSEÑAR
-- COMO SE LLEGO AHI
-- EL ENTREGABLE, DASHBOARD, MODELO, ETC
--
