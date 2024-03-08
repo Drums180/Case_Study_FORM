@@ -1,6 +1,6 @@
 ---
 title: "Form-Deliverable1"
-author: "David Dominguez - A01570975"
+author: "David Dominguez - A01570975, Alejandra Suárez - A00835247, Daniel Nájera - A01709578, Eduardo Camacho - A01026437, Gabriel Medina - A01275763"
 date: "2024-03-05"
 output: html_document
 editor_options: 
@@ -233,6 +233,32 @@ Apartir de los antecedentes de la empresa y el contexto de la industrias
 de México y E.U.A. elaborar FODA cruzado que identifique y describa 2-3
 estrategias a seguir por parte de la empresa en el corto plazo.
 
+### Fortalezas:
+1.	Expertos en desarrollar soluciones de empaque sostenibles e innovadoras con un enfoque en la industria automotriz, optimizando el espacio de almacenamiento, así como los costos logísticos lo que indica un profundo entendimiento de las necesidades del sector automotriz.
+2.	Asociaciones con marcas de alto prestigio, la empresa de Form ha establecido relaciones comerciales como lo es Tesla, lo que nos indica la alta calidad y confiabilidad de sus soluciones de empaque.
+3.	Compromiso con la sostenibilidad, la empresa integra prácticas sostenibles en su modelo de negocio, desde reducciones de uso de materiales hasta la optimización de logística, que se alinean con la demanda actual de la industria hacia prácticas más ecológicas.
+
+### Oportunidades:
+1.	Crecimiento del mercado en la industria con empaques sostenibles. La conciencia ambiental y regulaciones de la sostenibilidad, presentan una gran oportunidad para la empresa en liderar el desarrollo y oferta de soluciones en los empaques sostenibles.
+2.	Demanda creciente de empaques personalizados para los clientes debido a cambios en los consumidores. La tendencia hacia servicios y productos personalizados para sus clientes, requiere una mayor demanda de empaques que se ajusten a las necesidades individuales de sus clientes.
+3.	Oportunidad de expansión en industrias fuera de la industria automotriz que requieren de soluciones innovadoras de empaque. Otras industrias también requieren de soluciones de empaque innovadoras lo que presenta una oportunidad para la empresa de expandir su mercado a otros sectores.
+
+### Debilidades: 
+1.	Actualmente se encuentran en potencial dependencia de la industria automotriz. Esto podría representar un alto riesgo si el sector llegará a enfrentar disminuciones en la demanda o desafíos económicos.
+2.	Necesidad en estar actualizados continuamente frente a tecnologías en desarrollo de empaque. Mantenerse en constante innovación requiere inversión en investigaciones y desarrollo, lo que puede ser un reto en recursos y capital.
+3.	Limitaciones en la diversificación de productos. La especialización que tienen sobre los empaques de autopartes podría limitar la capacidad de la empresa para capitalizar y explorar oportunidades en otros mercados y productos.
+
+### Amenazas: 
+1.	Constante cambio en las regulaciones ambientales que pueden afectar los materiales para realizar los empaques. Puede haber un gran impacto al usar ciertos procesos y materiales que requieren de adaptaciones costosas.
+2.	Gran competencia creciente en el sector de empaques sostenibles. El crecimiento de la industria y su demanda de soluciones de empaques sostenibles atrae a nuevos competidores, esto incrementa la presión para la empresa por diferenciarse y continuar innovando. 
+3.	Volatilidad en los costos de materiales debido a fluctuaciones del mercado. Esto puede afectar los márgenes de beneficio y la competitividad de precios de las soluciones de FORM.
+
+### Estrategias:
+1.	Diversificación en las Industrias: Ampliar su enfoque en otras industrias que requieran de soluciones de empaque innovador, así mismo reduce la dependencia que tiene la empresa en el sector automotriz.
+2.	Expansión de Mercado en E.U.A: Explorar en oportunidades de mercado en Estados Unidos, aprovechando la tecnología y las tendencias de crecimiento en la demanda de los empaques sostenibles y personalizados a sus clientes.
+3.	Sostenibilidad e Innovación: Invertir en realizar investigación y desarrollo para generar soluciones de empaque más ecológicas  que cumplan con las regulaciones ambientales emergentes y esto posicionaría a la empresa como líder en la industria.
+
+
 ### PESTLE
 
 Con base en el análisis de las industrias de México y E.U.A. identificar
@@ -333,3 +359,7 @@ comercio con México por fábricas de carros chinos. El Carro Colombiano.
 Juárez, P. (2024, March 7). Industria de autopartes Alcanza Récord de
 Producción en 2023. Revista TyT.
 <https://www.tyt.com.mx/nota/industria-de-autopartes-alcanza-record-de-produccion-en-2023>
+Packing, F.-. R. F. O. (2021, 23 agosto). The form way -. Form. Recuperado 7 de marzo de 2024, de <https://form.com.mx/the-form-way/>
+Isidore, C. (2018, 29 noviembre). La amenaza existencial que enfrenta la industria automotriz. Expansión. Recuperado 7 de marzo de 2024, de <https://expansion.mx/empresas/2018/11/29/la-amenaza-existencial-que-enfrenta-la-industria-automotriz>
+FORM: transformando el mundo del empaque para el sector automotriz. (2022, 27 diciembre). Cluster Indutrial. Recuperado 7 de marzo de 2024, de <https://www.clusterindustrial.com.mx/noticia/5640/form-transformando-el-mundo-del-empaque-para-el-sector-automotriz>
+
