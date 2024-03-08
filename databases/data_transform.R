@@ -35,11 +35,70 @@ cat("El dataframe se ha guardado correctamente en:", nuevo_archivo, "\n")
 
 
 ###################################
-# form
+# form bajas
 ###################################
 
-# Establece el camino hacia la carpeta donde están los archivos
-path <- "/Users/daviddrums180/Tec/Case_Study_Form/databases/form"
+# Cargar las bibliotecas necesarias
+library(readxl)
+library(dplyr)
+library(writexl)
 
+# Leer el archivo Excel
+form_bajas <- read_excel("form/form_bajas.xlsx")
 
+# Transformar las columnas especificadas a minusculas sin modificar el dataframe original
+form_bajas <- form_bajas %>%
+  mutate(
+    Dpto = iconv(tolower(Dpto), "UTF-8", "ASCII//TRANSLIT"),
+    Puesto = iconv(tolower(Puesto), "UTF-8", "ASCII//TRANSLIT"),
+    `Estado Civil` = iconv(tolower(`Estado Civil`), "UTF-8", "ASCII//TRANSLIT"),
+    Genero = iconv(tolower(Genero), "UTF-8", "ASCII//TRANSLIT"),
+    Estado = iconv(tolower(Estado), "UTF-8", "ASCII//TRANSLIT"),
+    Municipio = iconv(tolower(Municipio), "UTF-8", "ASCII//TRANSLIT")
+  ) %>%
+  mutate(
+    Dpto = str_replace_all(Dpto, 'produccion carton mc', 'produccion cartón mc') %>%
+      str_replace_all('produccion carton mdl', 'produccion cartón mdl') %>%
+      str_replace_all("produccion cart'on mdl", 'produccion cartón mc') %>%
+      str_replace_all("produccion cart'on mc", 'produccion cartón mc') %>%
+      str_replace_all('paileria y pintura', 'paileria') %>%
+      str_replace_all('paileria y pintura', 'paileria') %>%
+      str_replace_all('costura t2', 'costura'),
+    Puesto = str_replace_all(Puesto, 'ayudante de embarques', 'ayud. de embarques') %>%
+      str_replace_all('inspector de calidad', 'inspector calidad') %>%
+      str_replace_all('ayud. de embarques', 'ayudante de embarques') %>%
+      str_replace_all('customer service inf', 'customer service') %>%
+      str_replace_all('ayu. de pintor', 'ayudante de pintor') %>%
+      str_replace_all('costurera', 'costurero'), # Unificando géneros cuando el puesto es el mismo
+    `Estado Civil` = str_replace_all(`Estado Civil`, 'matrimonio', 'casado') %>%
+      str_replace_all('solteria', 'soltero') %>%
+      str_replace_all('soltera', 'soltero') %>%
+      str_replace_all('casada', 'casado') %>%
+      str_replace_all('union libre', 'soltero'), # Asumiendo que quieres unificar 'unión libre' con 'soltero'
+    Estado = str_replace_all(Estado, 'nuevo le.on', 'nuevo leon'),
+    Municipio = str_replace_all(Municipio, 'ramoz arizpe', 'ramos arizpe') %>%
+      str_replace_all('ca.nada blanca', 'cañada blanca') %>%
+      str_replace_all('san nicolas de los g', 'san nicolas')
+  )
+
+# Mostrar valores únicos para análisis sin modificar el dataframe
+valores_unicos_dpto <- unique(form_bajas$Dpto)
+valores_unicos_puesto <- unique(form_bajas$Puesto)
+valores_unicos_estado_civil <- unique(form_bajas$`Estado Civil`)
+valores_unicos_genero <- unique(form_bajas$Genero)
+valores_unicos_estado <- unique(form_bajas$Estado)
+valores_unicos_municipio <- unique(form_bajas$Municipio)
+
+# Puedes imprimir los valores únicos para cada columna como necesites
+list(
+  Dpto = valores_unicos_dpto,
+  Puesto = valores_unicos_puesto,
+  `Estado Civil` = valores_unicos_estado_civil,
+  Genero = valores_unicos_genero,
+  Estado = valores_unicos_estado,
+  Municipio = valores_unicos_municipio
+)
+
+# Escribir el dataframe limpio a un nuevo archivo Excel, reemplazando el original
+write_xlsx(form_bajas, "form/form_bajas.xlsx")
 
