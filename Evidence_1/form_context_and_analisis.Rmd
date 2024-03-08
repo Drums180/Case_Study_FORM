@@ -10,8 +10,31 @@ Febrero – Junio 2024
 
 # Entregable 1 – Evidencia 1
 
+## Librerías Necesarias
+```{r message=FALSE, warning=FALSE}
+library(readr)
+library(ggplot2)
+library(tidyr)
+library(viridis)
+library(scales) 
+library(readxl)
+library(RColorBrewer)
+```
+
 ## 1. Explorar y Conocer la Empresa y su Contexto
 ### Antecedentes de la Empresa FORM
+La empresa FORM, con sede en México, se ha destacado en el desarrollo de innovaciones en el empaque de autopartes, enfocándose en soluciones que permiten reducir el espacio necesario para almacenamiento y generando ahorros en logística. Han introducido un producto patentado globalmente que aumenta la capacidad de empaque y reduce significativamente el uso de materia prima, lo cual también tiene un impacto positivo en el medio ambiente.
+
+Desde su fundación en 2011, FORM ha crecido significativamente, comenzando con un solo cliente y seis empleados, y expandiéndose a más de 150 colaboradores y atendiendo a más de 15 clientes automotrices. Entre sus clientes se encuentran nombres prominentes como Denso, Magna, International Automotive Components y Varroc Lighting Systems.
+
+La especialización de FORM en empaques para autopartes delicadas y costosas la ha llevado a ser proveedor de armadoras de prestigio como Tesla, BMW y Mercedes Benz. Ofrecen soluciones personalizadas que aseguran la protección y la integridad de las autopartes durante su transporte, lo que es crucial para piezas de acabado delicado o espejo.
+
+Con una planta en Apodaca, Nuevo León, la empresa ha establecido un área especializada para empaques termoformados, esenciales para el transporte de piezas electrónicas y otras autopartes sensibles que requieren cuidado especial para evitar daños durante el tránsito.
+
+La filosofía de FORM de reducir el espacio de almacenamiento, la mano de obra para la administración y el armado de empaques, junto con la protección del producto, se alinea con la demanda creciente de la industria automotriz por eficiencia y sostenibilidad en las cadenas de suministro.
+
+Las innovaciones de FORM y su enfoque en la sostenibilidad y eficiencia reflejan un compromiso con la mejora continua y la adaptación a las necesidades cambiantes del mercado automotriz, lo que les ha permitido mantenerse competitivos y relevantes en un sector en constante evolución. 
+
 #### Visión, Misión, y Objetivos Estratégicos
 
 #### Análisis de las áreas de la Empresa (incluir 3-5 gráficos usando R*)usando datos
@@ -23,6 +46,178 @@ Febrero – Junio 2024
 #### Análisis de la Industria (cartón, autopartes, automotriz) 
 Para el caso de México y E.U.A. (incluir 3-5 gráficos usando R*) usando fuentes de
 datos secundarias
+
+El mercado automotriz en México constituye un sector vital para la economía del país, no solo por su significativa contribución al Producto Interno Bruto (PIB) sino también por su papel en la creación de empleos y en el fomento de la innovación tecnológica. Una faceta crucial de esta industria es el mercado de autopartes, que se erige como un pilar fundamental para la operatividad y el desarrollo de la industria automotriz en su conjunto. Este segmento incluye desde la fabricación de componentes esenciales del vehículo hasta sistemas avanzados que mejoran la seguridad, el rendimiento y la comodidad.
+
+La interacción entre los fabricantes de automóviles y los proveedores de autopartes es intrínseca al ciclo de vida del producto automotriz, afectando directamente la cadena de suministro, la innovación en el diseño de productos y, en última instancia, la competitividad en el mercado global. Además, el mercado de autopartes en México se ve influenciado por factores como las regulaciones gubernamentales, los tratados de libre comercio, las tendencias de consumo y los avances tecnológicos, lo que lo convierte en un campo de estudio dinámico y complejo.
+
+#### Exploración de Exportación de Vehículos
+
+Para profundizar en el entendimiento de esta industria, se realizará un análisis exhaustivo utilizando diversas bases de datos recopiladas de múltiples fuentes. Este análisis buscará identificar tendencias, desafíos y oportunidades dentro del mercado de autopartes, así como su interconexión con la industria automotriz en general. Se examinarán aspectos como la evolución de la demanda de autopartes, la cadena de valor, el impacto de la tecnología en la producción y el diseño de autopartes, así como las estrategias adoptadas por las empresas para navegar en un entorno económico y regulatorio en constante cambio.
+
+**Analisis de Exportación de Vehiculos**
+```{r message=FALSE, warning=FALSE}
+mx_vehicle_exports <- read_excel("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_mx/exportacion_vehiculos.xlsx")
+
+mx_vehicle_exports_summary <- mx_vehicle_exports %>%
+  group_by(Año, Segmento) %>%
+  summarise(Cantidad_Total = sum(Cantidad, na.rm = TRUE))
+
+# Definir la paleta de colores personalizada
+colores <- c("#2D3250", "#435585", "#7077A1", "#F6B17A", "#9EC8B9", "#BE3144")
+
+# Asegurarse de que hay suficientes colores para los segmentos
+# Repetir la paleta si hay más segmentos que colores
+n_segmentos <- length(unique(mx_vehicle_exports_summary$Segmento))
+if (n_segmentos > length(colores)) {
+  colores <- rep(colores, length.out = n_segmentos)
+}
+
+# Gráfico de líneas con la paleta de colores personalizada
+ggplot(mx_vehicle_exports_summary, aes(x = Año, y = Cantidad_Total, color = Segmento, group = Segmento)) + 
+  geom_line() + # Dibuja líneas
+  geom_point() + # Añade puntos en cada dato
+  scale_color_manual(values = colores) + # Usa la paleta de colores definida
+  theme_minimal() + # Usa un tema minimalista
+  labs(title = "Evolución de la Exportación de Segmento de Vehículo a lo Largo de los Años",
+       x = "Año",
+       y = "Cantidad Total") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**1. Crecimiento de SUVs:**
+     - La exportación de SUVs ha visto un crecimiento significativo hasta 2018, seguido de una disminución. Esto podría indicar cambios en la preferencia del consumidor o en la dinámica del mercado. FORM puede aprovechar esta tendencia ofreciendo soluciones de empaque personalizadas para este segmento, que parece tener una alta variabilidad en la demanda.
+
+**2. Volatilidad en Segmento de Lujo:**
+     - El segmento de lujo muestra volatilidad con un pico marcado alrededor de 2018. Esto puede abrir oportunidades para FORM en términos de proporcionar empaques de alta calidad que coincidan con las expectativas de los fabricantes de vehículos de lujo y sus consumidores.
+
+**3. Caída General Post-2018:**
+     - Después de 2018, todos los segmentos excepto los subcompactos muestran una caída, lo que podría deberse a factores económicos globales, políticas comerciales o la pandemia. FORM debe estar atento a estos factores externos que afectan la demanda de sus productos.
+
+**4. Beneficios Potenciales para FORM:**
+     - El análisis de estas tendencias es vital para FORM, ya que proporciona información sobre qué segmentos podrían requerir más empaques en el futuro. Esto puede guiar sus decisiones de inversión y estrategias de producción para los próximos años.
+
+**5. Modelo Predictivo para la Demanda:**
+     - Utilizar estos datos para desarrollar un modelo predictivo podría ayudar a FORM a anticiparse a las necesidades del mercado. Herramientas de análisis predictivo, como el Machine Learning, podrían usarse para prever la demanda futura basándose en las tendencias históricas y factores externos.
+
+```{r message=FALSE, warning=FALSE}
+# Sumarizar la cantidad total por País destino y obtener los top 5
+top_paises_destino <- mx_vehicle_exports %>%
+  group_by(`País destino`) %>%
+  summarise(Cantidad_Total = sum(Cantidad, na.rm = TRUE)) %>%
+  arrange(desc(Cantidad_Total)) %>%
+  slice_head(n = 5)
+
+# Filtrar el dataframe original para tener solo los top 5 País destino
+mx_vehicle_exports_top5 <- mx_vehicle_exports %>%
+  filter(`País destino` %in% top_paises_destino$`País destino`)
+
+# Código para un box plot de la variable Cantidad por los top 5 País destino
+ggplot(mx_vehicle_exports_top5, aes(x = `País destino`, y = Cantidad)) + 
+  geom_boxplot() +  
+  theme_minimal() + 
+  labs(title = "Box Plot de Cantidad por Top 5 País Destino",
+       x = "País Destino",
+       y = "Cantidad") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5))
+```
+**1. Dominancia de Estados Unidos:**
+     - Estados Unidos muestra una mediana y un rango intercuartílico superior a otros destinos, lo cual indica que es el principal mercado para la exportación. FORM puede centrarse en aumentar la capacidad de producción y mejorar las soluciones logísticas para satisfacer la alta demanda de empaques en este mercado.
+
+**2. Variabilidad en 'No Especificado':**
+     - La categoría 'No Especificado' tiene una alta variabilidad y valores atípicos, lo que podría indicar oportunidades no exploradas o datos incompletos. FORM podría investigar estos casos para identificar posibles nuevos mercados o mejorar la precisión en la recopilación de datos.
+
+**3. Consistencia en Alemania y Brasil:**
+     - Alemania y Brasil muestran una menor dispersión y consistencia en los envíos, lo que podría reflejar mercados establecidos con demandas predecibles. FORM puede utilizar esta información para optimizar inventarios y prever recursos de producción.
+
+**4. Beneficios del Análisis para FORM:**
+     - Analizar esta distribución de exportaciones podría ayudar a FORM a entender mejor la variabilidad y la consistencia en la demanda entre diferentes mercados. Esta información puede ser crítica para optimizar la cadena de suministro y poder desarrollar un modelo que ayude a predecir y controlar los niveles de inventario necesarios.
+
+**5. Modelo Predictivo para la Demanda:**
+     - Desarrollar un modelo predictivo basado en estos datos permitiría a FORM anticipar la demanda y ajustar la producción de forma proactiva. La utilización de técnicas estadísticas como la regresión, conjuntamente con algoritmos de machine learning, podría proporcionar estimaciones precisas de la demanda futura basándose en patrones históricos y tendencias actuales.
+
+
+#### Exploración a Mercado de Autopartes
+
+A través de este enfoque analítico, se espera obtener insights valiosos que contribuyan a una mejor comprensión del mercado de autopartes en México y su rol crítico dentro de la industria automotriz. Estos hallazgos podrían ofrecer directrices para la toma de decisiones estratégicas por parte de los actores de la industria, así como para el diseño de políticas públicas que promuevan el crecimiento y la sostenibilidad del sector. La metodología y los resultados de este análisis estarán fundamentados en la información detallada proporcionada en las bases de datos, cuyas fuentes se encuentran meticulosamente documentadas en el README adjunto a las bases de datos, asegurando así la transparencia y la fiabilidad de la investigación realizada.
+
+**Importaciónes, Exportaciónes y Producción de Autopartes**
+```{r message=FALSE, warning=FALSE}
+mx_autoparts_market <- read_csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_mx/mx_autoparts_market.csv")
+
+# Colores
+colors <- c("Producción local total" = "#00BFC4",
+            "Exportaciones totales" = "#F8766D",
+            "Importaciones totales" = "#7CAE00",
+            "Importaciones de EE.UU." = "#C77CFF")
+
+
+# Usar ggplot2 para graficar directamente los datos
+ggplot(data = mx_autoparts_market) +
+  geom_line(aes(x = year, y = total_local_production, group = 1, colour = "Producción local total"), size = 1) +
+  geom_line(aes(x = year, y = total_exports, group = 1, colour = "Exportaciones totales"), size = 1) +
+  geom_line(aes(x = year, y = total_imports, group = 1, colour = "Importaciones totales"), size = 1) +
+  geom_line(aes(x = year, y = imports_from_US, group = 1, colour = "Importaciones de EE.UU."), size = 1) +
+  geom_point(aes(x = year, y = total_local_production, colour = "Producción local total"), size = 3) +
+  geom_point(aes(x = year, y = total_exports, colour = "Exportaciones totales"), size = 3) +
+  geom_point(aes(x = year, y = total_imports, colour = "Importaciones totales"), size = 3) +
+  geom_point(aes(x = year, y = imports_from_US, colour = "Importaciones de EE.UU."), size = 3) +
+  scale_colour_manual(values = colors) +
+  labs(title = "Mercado de Autopartes en México (2018-2022)",
+       x = "Año",
+       y = "Valor (en miles de millones de USD)",
+       colour = "Variable") +
+  theme_minimal() 
+
+```
+
+**1. Producción Local Total:**
+     - La línea que representa la producción local total muestra una tendencia decreciente de 2018 a 2019.
+     - Hay una leve recuperación en 2020, seguida de una caída en 2021, y un ligero aumento en 2022.
+     - Esta tendencia puede indicar desafíos en el sector de la producción o cambios en la demanda interna.
+
+**2. Exportaciones Totales:**
+     - Las exportaciones muestran una reducción significativa en 2020, posiblemente debido al impacto de la pandemia de COVID-19 en el comercio global.
+     - Se observa una recuperación fuerte en 2021 y 2022, indicando una posible resiliencia o adaptación del mercado de exportación.
+
+**3. Importaciones Totales:**
+     - Las importaciones presentan un incremento constante a lo largo de los años, con una pequeña disminución en 2021.
+     - La tendencia ascendente podría reflejar una creciente dependencia de componentes externos o un aumento en la demanda de autopartes no producidas localmente.
+
+**4. Importaciones de EE.UU.:**
+     - Las importaciones desde EE.UU. han disminuido significativamente desde 2018 hasta 2020.
+     - Hay un aumento notable en 2021, que se revierte en 2022, sugiriendo fluctuaciones en las dinámicas comerciales con EE.UU.
+
+
+**Mercado de Autopartes Mx**
+```{r}
+mx_autoparts_market <- na.omit(mx_autoparts_market)
+
+turquoise_palette <- c("#8ae0db", "#5dc1b9", "#42a8a1", "#239089")
+
+# Crear la gráfica de barras con escala de color personalizada
+ggplot(mx_autoparts_market, aes(x = factor(year), y = total_market_size, fill = total_market_size)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradientn(colors = turquoise_palette) +
+  labs(x = "Año", y = "Tamaño Total del Mercado (en miles de millones de USD)",
+       title = "Tamaño Total del Mercado de Autopartes en México (2018-2022)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**1. Impacto de la Pandemia en 2020:**
+     - La marcada caída en 2020 puede correlacionarse con la pandemia de COVID-19, que afectó globalmente la producción y venta de automóviles. Para una empresa como FORM, especializada en empaques para autopartes, esto podría haber representado un reto significativo, posiblemente llevando a una reducción en la demanda de sus productos de empaquetado.
+
+**2. Recuperación Post-Pandemia:**
+     - El rebote en 2021 sugiere una recuperación post-pandemia que habría podido generar un aumento en la demanda de vehículos y, consecuentemente, de autopartes. Esto puede haber sido una oportunidad para FORM de expandir o diversificar su línea de productos de empaque, aprovechando la reactivación del mercado.
+
+**3. Innovación como Factor de Crecimiento:**
+     - La innovación de productos de empaque que permiten ahorros significativos en espacio y costos de logística por parte de FORM podría haber sido un factor determinante en su potencial de crecimiento durante el periodo de recuperación económica, especialmente considerando la tendencia creciente hacia la eficiencia y sostenibilidad en la industria automotriz.
+
+**4. Potencial para el Futuro:**
+     - Dada la tendencia de recuperación del mercado en 2022, empresas como FORM están bien posicionadas para capitalizar el crecimiento continuo de la industria automotriz. La adaptación a las nuevas normativas ambientales y la mejora en la eficiencia de la cadena de suministro serán claves para su éxito futuro.
+
 
 #### Amenazas y oportunidades identificados
 

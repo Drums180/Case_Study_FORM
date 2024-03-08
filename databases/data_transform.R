@@ -41,6 +41,7 @@ cat("El dataframe se ha guardado correctamente en:", nuevo_archivo, "\n")
 # Cargar las bibliotecas necesarias
 library(readxl)
 library(dplyr)
+library(writexl)
 
 # Leer el archivo Excel
 form_bajas <- read_excel("form/form_bajas.xlsx")
@@ -98,6 +99,6 @@ list(
   Municipio = valores_unicos_municipio
 )
 
-
-
+# Escribir el dataframe limpio a un nuevo archivo Excel, reemplazando el original
+write_xlsx(form_bajas, "form/form_bajas.xlsx")
 
