@@ -3,12 +3,15 @@ title: "Form-Deliverable1"
 author: "David Dominguez - A01570975"
 date: "2024-03-05"
 output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
-CD2001C – Analítica para Negocios: De Los Datos a las Decisiones
-Febrero – Junio 2024
+CD2001C -- Analítica para Negocios: De Los Datos a las Decisiones
+Febrero -- Junio 2024
 
-# Entregable 1 – Evidencia 1
+# Entregable 1 -- Evidencia 1
 
 ## Librerías Necesarias
 ```{r message=FALSE, warning=FALSE}
@@ -22,6 +25,7 @@ library(RColorBrewer)
 ```
 
 ## 1. Explorar y Conocer la Empresa y su Contexto
+
 ### Antecedentes de la Empresa FORM
 La empresa FORM, con sede en México, se ha destacado en el desarrollo de innovaciones en el empaque de autopartes, enfocándose en soluciones que permiten reducir el espacio necesario para almacenamiento y generando ahorros en logística. Han introducido un producto patentado globalmente que aumenta la capacidad de empaque y reduce significativamente el uso de materia prima, lo cual también tiene un impacto positivo en el medio ambiente.
 
@@ -35,17 +39,19 @@ La filosofía de FORM de reducir el espacio de almacenamiento, la mano de obra p
 
 Las innovaciones de FORM y su enfoque en la sostenibilidad y eficiencia reflejan un compromiso con la mejora continua y la adaptación a las necesidades cambiantes del mercado automotriz, lo que les ha permitido mantenerse competitivos y relevantes en un sector en constante evolución. 
 
+
 #### Visión, Misión, y Objetivos Estratégicos
 
-#### Análisis de las áreas de la Empresa (incluir 3-5 gráficos usando R*)usando datos
+#### Análisis de las áreas de la Empresa (incluir 3-5 gráficos usando R\*)usando datos
 
 #### Desempeño reciente
 
 ### Contexto de la Industria
 
-#### Análisis de la Industria (cartón, autopartes, automotriz) 
-Para el caso de México y E.U.A. (incluir 3-5 gráficos usando R*) usando fuentes de
-datos secundarias
+#### Análisis de la Industria (cartón, autopartes, automotriz)
+
+Para el caso de México y E.U.A. (incluir 3-5 gráficos usando R\*) usando
+fuentes de datos secundarias
 
 El mercado automotriz en México constituye un sector vital para la economía del país, no solo por su significativa contribución al Producto Interno Bruto (PIB) sino también por su papel en la creación de empleos y en el fomento de la innovación tecnológica. Una faceta crucial de esta industria es el mercado de autopartes, que se erige como un pilar fundamental para la operatividad y el desarrollo de la industria automotriz en su conjunto. Este segmento incluye desde la fabricación de componentes esenciales del vehículo hasta sistemas avanzados que mejoran la seguridad, el rendimiento y la comodidad.
 
@@ -222,15 +228,108 @@ ggplot(mx_autoparts_market, aes(x = factor(year), y = total_market_size, fill = 
 #### Amenazas y oportunidades identificados
 
 ## FODA Cruzado
-Apartir de los antecedentes de la empresa y el contexto de la
-industrias de México y E.U.A. elaborar FODA cruzado que identifique
-y describa 2-3 estrategias a seguir por parte de la empresa en el
-corto plazo.
+
+Apartir de los antecedentes de la empresa y el contexto de la industrias
+de México y E.U.A. elaborar FODA cruzado que identifique y describa 2-3
+estrategias a seguir por parte de la empresa en el corto plazo.
 
 ### PESTLE
+
 Con base en el análisis de las industrias de México y E.U.A. identificar
 variables / factores relevantes para la elaboración de PESTLE y
 describir 2-3 estrategias a seguir por parte de la empresa en el corto
 plazo.
 
+#### Políticos.
+
+EE.UU. advierte terminar tratado de comercio con México por fábricas de
+carros chinos. Las futuras elecciones pueden ser un factor muy
+importante en la industria automotriz, ya que según BBC News, Trump se
+muestra de manera muy hostil ante los fabricantes de automóviles. Por lo
+que, puede que imponga alguna ley que afecte negativamente la industria.
+El Tratado entre México, Estados Unidos y Canadá (T-MEC) establece
+reglas para el comercio entre los tres países, incluyendo la industria
+automotriz. El T-MEC ha sido positivo para la industria automotriz
+mexicana, ya que ha aumentado la producción y las exportaciones. El
+gobierno mexicano ha implementado una serie de políticas para promover
+la industria automotriz, como la creación de un fondo de apoyo a la
+industria y la reducción de impuestos a la importación de autopartes.
+
+#### Económicos.
+
+Sector automotriz, con la mayor demanda de espacios industriales por
+Nearshoring. Industria automotriz aumenta 7.8% la producción en febrero.
+México recibirá 2 mil 300 mdd de inversión extranjera en autopartes en
+2024: INA. El nearshoring puede reducir los costos de producción al
+aprovechar la mano de obra más barata en países cercanos. Esto puede
+mejorar la competitividad de FORM en el mercado. La tasa de interés en
+Estados Unidos ha aumentado en los últimos años. Esto ha encarecido el
+crédito para los consumidores, lo que podría afectar la demanda de
+vehículos.
+
+#### Sociales.
+
+La clase media en México está creciendo. Esto ha aumentado la demanda de
+vehículos, ya que las personas de la clase media tienen más dinero para
+gastar. Las preocupaciones ambientales están aumentando en Estados
+Unidos. Esto podría afectar la demanda de vehículos, ya que los
+consumidores podrían optar por comprar vehículos más eficientes en
+combustible o vehículos eléctricos.
+
+#### Tecnológicos.
+
+Se busca que en México solo se vendan autos eléctricos. Protagonistas de
+la industria automotriz en México han unido fuerzas para crear la
+Electro Movilidad Asociación (EMA), alianza que nace con el objetivo de
+alcanzar el 100 por ciento de ventas de vehículos eléctricos para el año
+2035.
+
+#### Legales.
+
+Exportación de autos made in México crece 22.6% en febrero y acelera a
+máximo histórico. Stellantis anuncia importante plan de inversiones para
+América Latina. Las regulaciones de seguridad para los vehículos están
+aumentando en todo el mundo. Esto está obligando a las empresas
+automotrices a invertir en nuevas tecnologías de seguridad.
+
+#### Ecológicos.
+
+La Industria Nacional de Autopartes aseguró que la producción de
+baterías para autos eléctricos en Norteamérica es fundamental para
+cumplir con las reglas de origen del T-MEC. El cambio climático es una
+preocupación importante para la industria automotriz. Las empresas
+automotrices están desarrollando vehículos más eficientes en combustible
+y vehículos eléctricos para reducir su impacto ambiental.
+
 ## REFERENCIAS
+
+Mendoza, C. (2024, March 6). La Industria Automotriz en pro de la
+electromovilidad. La Jornada.
+<https://www.jornada.com.mx/noticia/2024/03/05/autos/la-industria-se-une-en-pro-de-la-electromovilidad-9327>
+Sáez, C. (2024, March 6). Industria Automotriz Aumenta 7.8% La
+Producción en Febrero. MVS Noticias.
+<https://mvsnoticias.com/economia/2024/3/6/industria-automotriz-aumenta-78-la-produccion-en-febrero-629503.html>
+El nearshoring Cuadriplicó La Demanda de Espacios Industriales ...
+(n.d.).
+<https://www.eleconomista.com.mx/econohabitat/El-nearshoring-cuadriplico-la-demanda-de-espacios-industriales-en-el-pais-20230315-0126.html>
+México Batió Récord de exportación de autos ligeros para un febrero.
+(n.d.-b).
+<https://www.eleconomista.com.mx/empresas/Exportacion-de-autos-made-in-Mexico-crece-22.6-en-febrero-y-acelera-a-maximo-historico-20240306-0058.html>
+Stellantis, Noticias Sobre Stellantis \| El Economista. (n.d.-c).
+<https://www.eleconomista.com.mx/tags/Stellantis> Nexteer coloca La
+primera piedra de mxtc para promover la innovación automotriz en
+querétaro. Cluster Indutrial. (n.d.).
+<https://www.clusterindustrial.com.mx/noticia/7386/nexteer-coloca-la-primera-piedra-de-mxtc-para-promover-la-innovacion-automotriz-en-queretaro>
+Navarrete, F. (2024, March 5). Venta de Autos "Acelera" 14.8% en el
+primer bimestre del 2024. El Financiero.
+<https://www.elfinanciero.com.mx/empresas/2024/03/05/venta-de-autos-acelera-148-en-el-primer-bimestre-del-2024/>
+Cecilia Conde / Diario de Querétaro. (2024, March 6). Dispara
+crecimiento el sector autopartes en querétaro. Diario de Querétaro \|
+Noticias Locales, Policiacas, de México, Querétaro y el Mundo.
+<https://www.diariodequeretaro.com.mx/finanzas/dispara-crecimiento-el-sector-autopartes-en-queretaro-11550455.html>
+Bohórquez, P. R. (2024, March 4). EE.UU. Advierte terminar tratado de
+comercio con México por fábricas de carros chinos. El Carro Colombiano.
+<https://www.elcarrocolombiano.com/industria/ee-uu-advierte-terminar-tratado-de-comercio-con-mexico-por-fabricas-de-carros-chinos/>
+Juárez, P. (2024, March 7). Industria de autopartes Alcanza Récord de
+Producción en 2023. Revista TyT.
+<https://www.tyt.com.mx/nota/industria-de-autopartes-alcanza-record-de-produccion-en-2023>
