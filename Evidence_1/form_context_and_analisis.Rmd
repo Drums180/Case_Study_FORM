@@ -22,6 +22,7 @@ library(viridis)
 library(scales) 
 library(readxl)
 library(RColorBrewer)
+library(dplyr)
 ```
 
 ## 1. Explorar y Conocer la Empresa y su Contexto
@@ -39,12 +40,183 @@ La filosofía de FORM de reducir el espacio de almacenamiento, la mano de obra p
 
 Las innovaciones de FORM y su enfoque en la sostenibilidad y eficiencia reflejan un compromiso con la mejora continua y la adaptación a las necesidades cambiantes del mercado automotriz, lo que les ha permitido mantenerse competitivos y relevantes en un sector en constante evolución. 
 
+### Misión 
 
-#### Visión, Misión, y Objetivos Estratégicos
+Transformar nuestro entorno y resolver retos industriales de nuestros clientes a través de la colaboración, provocando nuevas oportunidades que potencian nuestro modelo de negocio, para alcanzar nuestros ideales.
+
+### Visión
+
+En 2033 seremos una de las cinco mejores compañías de México que generan valor dentro de la cadena de suministro de las industrias que más valoran la forma en la que se protegen y trasladan las cosas.
+
+### Objetivo Estratégico
+
+“Ahora estamos volteando a los Estados Unidos, y ahora con la posibilidad de que Tesla llegue a Nuevo León, con mayor sentido volteamos hacia allá. Si todos nuestros clientes son automotrices e internacionales por qué no proveerlos en Estados Unidos, estamos trabajando fuerte para lograrlo”. - Felipe Flores García
+
 
 #### Análisis de las áreas de la Empresa (incluir 3-5 gráficos usando R\*)usando datos
 
+
+```{r}
+df= read_xlsx("C:\\Users\\Eduardo\\Downloads\\BDD_FORM_BAJAS_2023.xlsx")
+head(df)
+```
+
+```{r}
+df <- df %>% drop_na()
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+df <- df %>% 
+  mutate(Dpto = if_else(Dpto == "Produccion Cartón MC", "Producción Cartón MC", Dpto))
+```
+
+### Bajas por Departamento
+
+```{r}
+bajas_por_departamento <- df %>%
+  group_by(Dpto) %>%
+  summarise(Total_Bajas = n())
+
+ggplot(bajas_por_departamento, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Dpto)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Bajas por Departamento", x = "Departamento", y = "Total de Bajas")
+```
+
+```{r}
+bajas_por_departamento <- df %>%
+  group_by(Dpto) %>%
+  summarise(Total_Bajas = n()) %>%
+  filter(Total_Bajas > 1)
+
+# Ordenamos las bajas por departamento de mayor a menor en el gráfico
+ggplot(bajas_por_departamento, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Dpto)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Bajas por Departamento (Filtrado)", x = "Departamento", y = "Total de Bajas")
+
+```
+
+
+### Bajas por Departamento y Género
+
+```{r}
+bajas_por_departamento_genero <- df %>%
+  group_by(Dpto, Género) %>%
+  summarise(Total_Bajas = n())
+
+ggplot(bajas_por_departamento_genero, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Género)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "Bajas por Departamento y Género", x = "Departamento", y = "Total de Bajas")
+```
+
+```{r}
+bajas_por_departamento_genero <- df %>%
+  group_by(Dpto, Género) %>%
+  summarise(Total_Bajas = n()) %>%
+  filter(Total_Bajas > 1)
+
+ggplot(bajas_por_departamento_genero, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Género)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "Bajas por Departamento y Género (Filtrado)", x = "Departamento", y = "Total de Bajas")
+
+```
+
+### Bajas por Motivo y Género
+
+```{r}
+bajas_por_motivo_genero <- df %>%
+  group_by(`Motivo de Baja`, Género) %>%
+  summarise(Total_Bajas = n())
+
+ggplot(bajas_por_motivo_genero, aes(x = `Motivo de Baja`, y = Total_Bajas, fill = Género)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "Bajas por Motivo y Género", x = "Motivo de Baja", y = "Total de Bajas") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+Como podemos observar en estas gráficas, los dos departamentos donde vemos una mayor cantidad de bajas es en Producción de Cartón tanto MC como ML. Esto nos hace entender que ahí hay un problema grave y se tienen que tomar cartas en el asunto para detectarlo lo antes posible para generar alguna estrategia para abolirlo. De las 18 personas que fueron bajas de la empresa 17 fueron mujeres, algo que nos podría indicar un problema grave relacionado al tema de género.
+
+
+```{r}
+df$`Fecha de Baja` <- as.Date(df$`Fecha de Baja`, origin = "1899-12-30")
+
+df$AñoMes <- format(df$`Fecha de Baja`, "%Y-%m")
+```
+
+### Tendencia de Bajas a lo Largo del Tiempo
+
+```{r}
+bajas_por_fecha <- df %>%
+  group_by(AñoMes) %>%
+  summarise(Total_Bajas = n())
+
+ggplot(bajas_por_fecha, aes(x = AñoMes, y = Total_Bajas, group = 1)) +
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Tendencia de Bajas a lo Largo del Tiempo", x = "Año y Mes", y = "Total de Bajas") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+### Bajas Totales por Mes
+
+```{r}
+
+df$`Fecha de Baja` <- as.Date(df$`Fecha de Baja`, origin = "1899-12-30")
+
+bajas_por_mes <- df %>%
+  mutate(Mes = format(`Fecha de Baja`, "%B")) %>%
+  group_by(Mes) %>%
+  summarise(Total_Bajas = n())
+
+meses <- format(seq(as.Date("2000-01-01"), as.Date("2000-12-01"), by = "month"), "%B")
+bajas_por_mes$Mes <- factor(bajas_por_mes$Mes, levels = meses)
+
+# Ahora ordenamos los datos para el gráfico
+bajas_por_mes <- bajas_por_mes %>%
+  mutate(Mes = reorder(Mes, -Total_Bajas))
+
+# Gráfico de barras mostrando las bajas totales por mes, ordenadas de mayor a menor
+ggplot(bajas_por_mes, aes(x = Mes, y = Total_Bajas, fill = Mes)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Bajas Totales por Mes Ordenadas", x = "Mes", y = "Total de Bajas")
+
+```
+
+A falta datos de Marzo a Mayo, podemos inferir que no hubieron bajas en la empresa, sin embargo vemos un gran incremento en las bajas en el mes de junio, lo que hace mucho sentido. Esto que se observa puede ser por una razón legal en cuanto a temas de cotratos o puede tener cierta relación con un problema que pudo haber dentro de la parte de producción de cartón, pues la mayoría de estas bajas en el mes fueron de igual manera por esta razón. Se debe de realizar un análisis a mayor profundidad para entender de una mejor forma.
+
+
+### Bajas por Estado Civil
+
+```{r}
+bajas_por_estado_civil <- df %>%
+  group_by(`Estado Civil`) %>%
+  summarise(Total_Bajas = n()) %>%
+  mutate(`Estado Civil` = reorder(`Estado Civil`, -Total_Bajas))
+
+ggplot(bajas_por_estado_civil, aes(x = `Estado Civil`, y = Total_Bajas, fill = `Estado Civil`)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Bajas por Estado Civil", x = "Estado Civil", y = "Total de Bajas") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
 #### Desempeño reciente
+
+En cuanto al desempeño reciente de la empresa, podemos ver que es una empresa sólida, líder en el mercado mexicano para la producción de empaques de cartón y empaque retornable para autopartes y que busca internacionalizarse. Aunado a esto, se está generando una nueva oportunidad como lo es el nearshoring, que ya está sucediendo en la República Mexicana, que va a permitir a empresas como FORM tener un crecimiento exponencial, prestándoles sus servicios o sus productos a diferentes empresas, en este caso de automovilismo. 
+
+Sin embargo, podemos ver que la empresa se enfrenta a una alta rotación de sus empleados, lo que está provocando que sea mucho más ineficiente dentro de la producción de las cajas y al estar constantemente capacitando personal nuevo, lo que quita mucho tiempo para poder ser más eficiente dentro de las tareas, pues se tratan de tareas manuales y repetitivas que con el paso del tiempo hacen que las personas se vuelvan más eficientes haciendo esa tarea en específico, lo que ha llevado a FORM a querer entender de una mucho mejor manera a sus empleados
 
 ### Contexto de la Industria
 
@@ -362,4 +534,4 @@ Producción en 2023. Revista TyT.
 Packing, F.-. R. F. O. (2021, 23 agosto). The form way -. Form. Recuperado 7 de marzo de 2024, de <https://form.com.mx/the-form-way/>
 Isidore, C. (2018, 29 noviembre). La amenaza existencial que enfrenta la industria automotriz. Expansión. Recuperado 7 de marzo de 2024, de <https://expansion.mx/empresas/2018/11/29/la-amenaza-existencial-que-enfrenta-la-industria-automotriz>
 FORM: transformando el mundo del empaque para el sector automotriz. (2022, 27 diciembre). Cluster Indutrial. Recuperado 7 de marzo de 2024, de <https://www.clusterindustrial.com.mx/noticia/5640/form-transformando-el-mundo-del-empaque-para-el-sector-automotriz>
-
+Industrial C., (2022), FORM: transformando el mundo del empaque para el sector automotriz, Cluster Industrial. <https://www.clusterindustrial.com.mx/noticia/5640/form-transformando-el-mundo-del-empaque-para-el-sector-automotriz>
