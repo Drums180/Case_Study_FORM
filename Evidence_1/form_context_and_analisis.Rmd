@@ -2,11 +2,15 @@
 title: "Form-Deliverable1"
 author: "David Dominguez - A01570975, Alejandra Suárez - A00835247, Daniel Nájera - A01709578, Eduardo Camacho - A01026437, Gabriel Medina - A01275763"
 date: "2024-03-05"
-output: rmdformats::material 
-editor_options: 
-  markdown: 
-    wrap: 72
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
 ---
+
+![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
 
 CD2001C -- Analítica para Negocios: De Los Datos a las Decisiones
 Febrero -- Junio 2024
@@ -57,11 +61,8 @@ En 2033 seremos una de las cinco mejores compañías de México que generan valo
 
 
 ```{r}
-df= read_xlsx("C:\\Users\\Eduardo\\Downloads\\BDD_FORM_BAJAS_2023.xlsx")
-head(df)
-```
+df= read_xlsx("/Users/daviddrums180/Tec/Case_Study_Form/databases/form/temporary/BDD_FORM_BAJAS_2023.xlsx")
 
-```{r}
 df <- df %>% drop_na()
 ```
 
@@ -399,14 +400,16 @@ ggplot(mx_autoparts_market, aes(x = factor(year), y = total_market_size, fill = 
 #### Industria del cartón
 
 ```{r}
-carton_exp = read.csv("/Users/gabrielmedina/Desktop/Escritorio/GIT/Case_Study_FORM/databases/industry_carton/Exporters of Carton boxes cases of corrugated paper or board 2020-2021.csv")
-summary(carton_exp)
-
-```
-
-```{r}
-carton_imp = read.csv("/Users/gabrielmedina/Desktop/Escritorio/GIT/Case_Study_FORM/databases/industry_carton/Importers of Cartons boxes cases of corrugated paper or board 2020-2021.csv")
-summary(carton_imp)
+carton_exp = read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_carton/temporary/Exporters of Carton boxes cases of corrugated paper or board 2020-2021.csv")
+carton_imp = read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_carton/temporary/Importers of Cartons boxes cases of corrugated paper or board 2020-2021.csv")
+electric_2016=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2016.csv")
+electric_2017=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2017.csv")
+electric_2018=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2018.csv")
+electric_2019=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2019.csv")
+electric_2020=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibiridos_electricos_2020.csv")
+electric_2021=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2021.csv")
+electric_2022=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2022.csv")
+electric_2023=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2023.csv")
 ```
 
 *Exportaciones*
@@ -448,8 +451,6 @@ ggplot(carton_exp, aes(x = Continent, y = Trade.Value.Growth * 100, fill = Conti
        x = "Continente",
        y = "Crecimiento del Valor de Comercio (%)") +
   theme_minimal()
-
-
 ```
 
 En cuanto al crecimiento de la industria del cartón por continente, podemos ver que Oceanía es el continente con el mayor porcentaje de crecimiento, sin embargo, la mediana del continente norteamericano es de poco menos del 20%, lo que indica que hay una tendencia positiva de esta industria en nuestro continente.
@@ -530,7 +531,6 @@ ggplot(sales_df, aes(x = Year, y = ElectricVehicleSales)) +
 ```
 
 Como se puede apreciar en la gráfica, las ventas en México de los vehículos eléctricos tienen una clara tendencia positiva desde hace varios años, esto refleja la oportunidad y la necesidad de que empresas como FORM adapten su oferta de soluciones a las nuevas autopartes que requieren este nuevo tipo de vehículos. 
-
 
 ```{r}
 #Se detectó un error en ID_ENTIDAD, existiendo el ID=99. 
