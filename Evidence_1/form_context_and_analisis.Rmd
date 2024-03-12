@@ -57,7 +57,7 @@ En 2033 seremos una de las cinco mejores compañías de México que generan valo
 
 
 ```{r}
-df= read_xlsx("C:\\Users\\Eduardo\\Downloads\\BDD_FORM_BAJAS_2023.xlsx")
+df= read_xlsx("/Users/ale/Downloads/BDD_FORM_BAJAS_2023.xlsx")
 head(df)
 ```
 
@@ -173,7 +173,6 @@ ggplot(bajas_por_fecha, aes(x = AñoMes, y = Total_Bajas, group = 1)) +
 ```{r}
 
 df$`Fecha de Baja` <- as.Date(df$`Fecha de Baja`, origin = "1899-12-30")
-
 bajas_por_mes <- df %>%
   mutate(Mes = format(`Fecha de Baja`, "%B")) %>%
   group_by(Mes) %>%
@@ -181,11 +180,9 @@ bajas_por_mes <- df %>%
 
 meses <- format(seq(as.Date("2000-01-01"), as.Date("2000-12-01"), by = "month"), "%B")
 bajas_por_mes$Mes <- factor(bajas_por_mes$Mes, levels = meses)
-
 # Ahora ordenamos los datos para el gráfico
 bajas_por_mes <- bajas_por_mes %>%
   mutate(Mes = reorder(Mes, -Total_Bajas))
-
 # Gráfico de barras mostrando las bajas totales por mes, ordenadas de mayor a menor
 ggplot(bajas_por_mes, aes(x = Mes, y = Total_Bajas, fill = Mes)) +
   geom_bar(stat = "identity") +
@@ -195,16 +192,12 @@ ggplot(bajas_por_mes, aes(x = Mes, y = Total_Bajas, fill = Mes)) +
 ```
 
 A falta datos de Marzo a Mayo, podemos inferir que no hubieron bajas en la empresa, sin embargo vemos un gran incremento en las bajas en el mes de junio, lo que hace mucho sentido. Esto que se observa puede ser por una razón legal en cuanto a temas de cotratos o puede tener cierta relación con un problema que pudo haber dentro de la parte de producción de cartón, pues la mayoría de estas bajas en el mes fueron de igual manera por esta razón. Se debe de realizar un análisis a mayor profundidad para entender de una mejor forma.
-
-
 ### Bajas por Estado Civil
-
 ```{r}
 bajas_por_estado_civil <- df %>%
   group_by(`Estado Civil`) %>%
   summarise(Total_Bajas = n()) %>%
   mutate(`Estado Civil` = reorder(`Estado Civil`, -Total_Bajas))
-
 ggplot(bajas_por_estado_civil, aes(x = `Estado Civil`, y = Total_Bajas, fill = `Estado Civil`)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
@@ -426,9 +419,27 @@ estrategias a seguir por parte de la empresa en el corto plazo.
 3.	Volatilidad en los costos de materiales debido a fluctuaciones del mercado. Esto puede afectar los márgenes de beneficio y la competitividad de precios de las soluciones de FORM.
 
 ### Estrategias:
-1.	Diversificación en las Industrias: Ampliar su enfoque en otras industrias que requieran de soluciones de empaque innovador, así mismo reduce la dependencia que tiene la empresa en el sector automotriz.
-2.	Expansión de Mercado en E.U.A: Explorar en oportunidades de mercado en Estados Unidos, aprovechando la tecnología y las tendencias de crecimiento en la demanda de los empaques sostenibles y personalizados a sus clientes.
-3.	Sostenibilidad e Innovación: Invertir en realizar investigación y desarrollo para generar soluciones de empaque más ecológicas  que cumplan con las regulaciones ambientales emergentes y esto posicionaría a la empresa como líder en la industria.
+##Fortalezas-Oportunidades (FO)
+1. Sostenibilidad e Innovación: Utilizar la experiencia y el compromiso de la empresa con la sostenibilidad para poder liderar en la industria y en el mercado con empaques renovables y ecológicos para seguir creciendo ante la demanda. También, en las gráficas se observa bajas por género con un predominio en bajas femeninas en los departamentos. Esto nos indica que podrían mejorar las políticas de diversidad e inclusión ya que se promueve un ambiente de trabajo inclusivo. Con esto, además de mejorar su imagen siendo líder en sostenibilidad social, también aprovechan una diversidad de perspectivas para impulsar la innovación.
+
+2. Expansión en Servicios Personalizados: Desarrollar soluciones personalizadas a los clientes y mejorar su relación con marcas de prestigio. Así como la empresa ha trabajado con Tesla, se busca su crecimiento con empresas internacionales.
+
+
+##Debilidades-Oportunidades (DO)
+1. Mitigar dependencias en el mercado: Ampliar el mercado hacia nuevas industrias, para reducir la dependencia del sector automotriz, creciendo a nuevos mercados con demanda creciente a soluciones innovadoras. Las gráficas observan bajas mensuales y esto nos indica la necesidad de estabilizar la fuerza laboral a través de la expansión a nuevos mercados. Esto podría ayudar a estabilizar la empresa frente a fluctuaciones estacionales y específicas del sector automotriz.
+
+2. Colaboraciones con Innovación: Realizar colaboraciones estratégicas para dividir el costo de riesgo de innovación y desarrollo, dándole a la empresa un gran alcance para ser el líder en la industria.
+
+
+##Fortalezas-Amenazas (FA)
+1. Liderazgo ante Cambios regulatorios: Emplear compromiso con la innovación y sostenibilidad para que la empresa se adapte ante los cambios en regulaciones ecológicas, posicionando a FORM como un referente en cumplimiento y adaptabilidad. También, en base a las gráficas en antecedentes, se pueden implementar tendencias de bajas a lo largo del tiempo con picos específicos, debido a que la capacidad de adaptación de los picos requieren más flexibilidad en la gestión de recursos humanos.
+
+2. Valor agregado frente a la Competencia: Fortalecer a la empresa a través de su confiabilidad con sus clientes, aprovechando su calidad para destacarse en el mercado competitivo, así mismo aprovechando sus colaboraciones con marcas de alto prestigio.
+
+##Debilidades-Amenazas (DA)
+1. Cobertura de riesgo en Costos: Realizar estrategias para tomar medidas de prevención para protegerse contra la volatilidad de los precios de los materiales, como lo es la diversificación de los proveedores y los contratos de la empresa a largo plazo.
+
+2. Programas de Lealtad con Clientes: Implementar programas de colaboración y lealtad con los clientes actuales, para poder mejorar la relación a largo plazo y mitigar el impacto de la competencia y las fluctuaciones del mercado. En los antecedentes de la empresa podemos observar que existe una alta rotación en ciertos departamentos (especialmente en producción de cartón). Aunque esta estrategia se enfoca en clientes, puede adaptarse internamente para mejorar la retención de empleados. Esto reforzaría la lealtad y mejoraría la satisfacción laboral, esto reduce la rotación del personal, y aumenta la eficiencia en la producción.
 
 
 ### PESTLE
