@@ -40,20 +40,20 @@ La filosofía de FORM de reducir el espacio de almacenamiento, la mano de obra p
 
 Las innovaciones de FORM y su enfoque en la sostenibilidad y eficiencia reflejan un compromiso con la mejora continua y la adaptación a las necesidades cambiantes del mercado automotriz, lo que les ha permitido mantenerse competitivos y relevantes en un sector en constante evolución. 
 
-### Misión 
+#### Misión 
 
 Transformar nuestro entorno y resolver retos industriales de nuestros clientes a través de la colaboración, provocando nuevas oportunidades que potencian nuestro modelo de negocio, para alcanzar nuestros ideales.
 
-### Visión
+#### Visión
 
 En 2033 seremos una de las cinco mejores compañías de México que generan valor dentro de la cadena de suministro de las industrias que más valoran la forma en la que se protegen y trasladan las cosas.
 
-### Objetivo Estratégico
+#### Objetivo Estratégico
 
 “Ahora estamos volteando a los Estados Unidos, y ahora con la posibilidad de que Tesla llegue a Nuevo León, con mayor sentido volteamos hacia allá. Si todos nuestros clientes son automotrices e internacionales por qué no proveerlos en Estados Unidos, estamos trabajando fuerte para lograrlo”. - Felipe Flores García
 
 
-#### Análisis de las áreas de la Empresa (incluir 3-5 gráficos usando R\*)usando datos
+### Análisis de las áreas de la Empresa (incluir 3-5 gráficos usando R\*)usando datos
 
 
 ```{r}
@@ -74,7 +74,7 @@ df <- df %>%
   mutate(Dpto = if_else(Dpto == "Produccion Cartón MC", "Producción Cartón MC", Dpto))
 ```
 
-### Bajas por Departamento
+#### Bajas por Departamento
 
 ```{r}
 bajas_por_departamento <- df %>%
@@ -102,7 +102,7 @@ ggplot(bajas_por_departamento, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Ba
 ```
 
 
-### Bajas por Departamento y Género
+#### Bajas por Departamento y Género
 
 ```{r}
 bajas_por_departamento_genero <- df %>%
@@ -128,7 +128,7 @@ ggplot(bajas_por_departamento_genero, aes(x = reorder(Dpto, -Total_Bajas), y = T
 
 ```
 
-### Bajas por Motivo y Género
+#### Bajas por Motivo y Género
 
 ```{r}
 bajas_por_motivo_genero <- df %>%
@@ -152,7 +152,7 @@ df$`Fecha de Baja` <- as.Date(df$`Fecha de Baja`, origin = "1899-12-30")
 df$AñoMes <- format(df$`Fecha de Baja`, "%Y-%m")
 ```
 
-### Tendencia de Bajas a lo Largo del Tiempo
+#### Tendencia de Bajas a lo Largo del Tiempo
 
 ```{r}
 bajas_por_fecha <- df %>%
@@ -168,7 +168,7 @@ ggplot(bajas_por_fecha, aes(x = AñoMes, y = Total_Bajas, group = 1)) +
 
 ```
 
-### Bajas Totales por Mes
+#### Bajas Totales por Mes
 
 ```{r}
 
@@ -197,7 +197,7 @@ ggplot(bajas_por_mes, aes(x = Mes, y = Total_Bajas, fill = Mes)) +
 A falta datos de Marzo a Mayo, podemos inferir que no hubieron bajas en la empresa, sin embargo vemos un gran incremento en las bajas en el mes de junio, lo que hace mucho sentido. Esto que se observa puede ser por una razón legal en cuanto a temas de cotratos o puede tener cierta relación con un problema que pudo haber dentro de la parte de producción de cartón, pues la mayoría de estas bajas en el mes fueron de igual manera por esta razón. Se debe de realizar un análisis a mayor profundidad para entender de una mejor forma.
 
 
-### Bajas por Estado Civil
+#### Bajas por Estado Civil
 
 ```{r}
 bajas_por_estado_civil <- df %>%
@@ -397,52 +397,49 @@ ggplot(mx_autoparts_market, aes(x = factor(year), y = total_market_size, fill = 
      - Dada la tendencia de recuperación del mercado en 2022, empresas como FORM están bien posicionadas para capitalizar el crecimiento continuo de la industria automotriz. La adaptación a las nuevas normativas ambientales y la mejora en la eficiencia de la cadena de suministro serán claves para su éxito futuro.
 
 
-#### Amenazas y oportunidades identificados
-
-## FODA Cruzado
-
+### FODA Cruzado
 Apartir de los antecedentes de la empresa y el contexto de la industrias
 de México y E.U.A. elaborar FODA cruzado que identifique y describa 2-3
 estrategias a seguir por parte de la empresa en el corto plazo.
 
-### Fortalezas:
+#### Fortalezas:
 1.	Expertos en desarrollar soluciones de empaque sostenibles e innovadoras con un enfoque en la industria automotriz, optimizando el espacio de almacenamiento, así como los costos logísticos lo que indica un profundo entendimiento de las necesidades del sector automotriz.
 2.	Asociaciones con marcas de alto prestigio, la empresa de Form ha establecido relaciones comerciales como lo es Tesla, lo que nos indica la alta calidad y confiabilidad de sus soluciones de empaque.
 3.	Compromiso con la sostenibilidad, la empresa integra prácticas sostenibles en su modelo de negocio, desde reducciones de uso de materiales hasta la optimización de logística, que se alinean con la demanda actual de la industria hacia prácticas más ecológicas.
 
-### Oportunidades:
+#### Oportunidades:
 1.	Crecimiento del mercado en la industria con empaques sostenibles. La conciencia ambiental y regulaciones de la sostenibilidad, presentan una gran oportunidad para la empresa en liderar el desarrollo y oferta de soluciones en los empaques sostenibles.
 2.	Demanda creciente de empaques personalizados para los clientes debido a cambios en los consumidores. La tendencia hacia servicios y productos personalizados para sus clientes, requiere una mayor demanda de empaques que se ajusten a las necesidades individuales de sus clientes.
 3.	Oportunidad de expansión en industrias fuera de la industria automotriz que requieren de soluciones innovadoras de empaque. Otras industrias también requieren de soluciones de empaque innovadoras lo que presenta una oportunidad para la empresa de expandir su mercado a otros sectores.
 
-### Debilidades: 
+#### Debilidades: 
 1.	Actualmente se encuentran en potencial dependencia de la industria automotriz. Esto podría representar un alto riesgo si el sector llegará a enfrentar disminuciones en la demanda o desafíos económicos.
 2.	Necesidad en estar actualizados continuamente frente a tecnologías en desarrollo de empaque. Mantenerse en constante innovación requiere inversión en investigaciones y desarrollo, lo que puede ser un reto en recursos y capital.
 3.	Limitaciones en la diversificación de productos. La especialización que tienen sobre los empaques de autopartes podría limitar la capacidad de la empresa para capitalizar y explorar oportunidades en otros mercados y productos.
 
-### Amenazas: 
+#### Amenazas: 
 1.	Constante cambio en las regulaciones ambientales que pueden afectar los materiales para realizar los empaques. Puede haber un gran impacto al usar ciertos procesos y materiales que requieren de adaptaciones costosas.
 2.	Gran competencia creciente en el sector de empaques sostenibles. El crecimiento de la industria y su demanda de soluciones de empaques sostenibles atrae a nuevos competidores, esto incrementa la presión para la empresa por diferenciarse y continuar innovando. 
 3.	Volatilidad en los costos de materiales debido a fluctuaciones del mercado. Esto puede afectar los márgenes de beneficio y la competitividad de precios de las soluciones de FORM.
 
-### Estrategias:
+#### Estrategias:
 Estrategias FODA Cruzado para FORM
-Fortalezas-Oportunidades (FO)
-Sostenibilidad e Innovación: Utilizar la experiencia y el compromiso de la empresa con la sostenibilidad para poder liderar en la industria y en el mercado con empaques renovables y ecológicos para seguir creciendo ante la demanda.
-Expansión en Servicios Personalizados: Desarrollar soluciones personalizadas a los clientes y mejorar su relación con marcas de prestigio.
 
-Debilidades-Oportunidades (DO)
-Mitigar dependencias en el mercado: Ampliar el mercado hacia nuevas industrias, para reducir la dependencia del sector automotriz, creciendo a nuevos mercados con demanda creciente a soluciones innovadoras.
-Colaboraciones con Innovación: Realizar colaboraciones estratégicas para dividir el costo de riesgo de innovación y desarrollo, dándole a la empresa un gran alcance para ser el líder en la industria.
+##### Fortalezas-Oportunidades (FO)
+- **Sostenibilidad e Innovación:** Utilizar la experiencia y el compromiso de la empresa con la sostenibilidad para poder liderar en la industria y en el mercado con empaques renovables y ecológicos para seguir creciendo ante la demanda.
+- **Expansión en Servicios Personalizados:** Desarrollar soluciones personalizadas a los clientes y mejorar su relación con marcas de prestigio.
 
-Fortalezas-Amenazas (FA)
-Liderazgo ante Cambios regulatorios: Emplear compromiso con la innovación y sostenibilidad para que la empresa se adapte ante los cambios en regulaciones ecológicas, posicionando a FORM como un referente en cumplimiento y adaptabilidad.
-Valor agregado frente a la Competencia: Fortalecer a la empresa a través de su confiabilidad con sus clientes, aprovechando su calidad para destacarse en el mercado competitivo, así mismo aprovechando sus colaboraciones con marcas de alto prestigio.
+##### Debilidades-Oportunidades (DO)
+- **Mitigar dependencias en el mercado:** Ampliar el mercado hacia nuevas industrias, para reducir la dependencia del sector automotriz, creciendo a nuevos mercados con demanda creciente a soluciones innovadoras.
+- **Colaboraciones con Innovación:** Realizar colaboraciones estratégicas para dividir el costo de riesgo de innovación y desarrollo, dándole a la empresa un gran alcance para ser el líder en la industria.
 
-Debilidades-Amenazas (DA)
-Cobertura de riesgo en Costos: Realizar estrategias para tomar medidas de prevención para protegerse contra la volatilidad de los precios de los materiales, como lo es la diversificación de los proveedores y los contratos de la empresa a largo plazo.
-Programas de Lealtad con Clientes: Implementar programas de colaboración y lealtad con los clientes actuales, para poder mejorar la relación a largo plazo y mitigar el impacto de la competencia y las fluctuaciones del mercado.
+##### Fortalezas-Amenazas (FA)
+- **Liderazgo ante Cambios regulatorios:** Emplear compromiso con la innovación y sostenibilidad para que la empresa se adapte ante los cambios en regulaciones ecológicas, posicionando a FORM como un referente en cumplimiento y adaptabilidad.
+- **Valor agregado frente a la Competencia:** Fortalecer a la empresa a través de su confiabilidad con sus clientes, aprovechando su calidad para destacarse en el mercado competitivo, así mismo aprovechando sus colaboraciones con marcas de alto prestigio.
 
+##### Debilidades-Amenazas (DA)
+- **Cobertura de riesgo en Costos:** Realizar estrategias para tomar medidas de prevención para protegerse contra la volatilidad de los precios de los materiales, como lo es la diversificación de los proveedores y los contratos de la empresa a largo plazo.
+- **Programas de Lealtad con Clientes:** Implementar programas de colaboración y lealtad con los clientes actuales, para poder mejorar la relación a largo plazo y mitigar el impacto de la competencia y las fluctuaciones del mercado.
 
 ### PESTLE
 
