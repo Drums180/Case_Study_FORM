@@ -2,7 +2,7 @@
 title: "Form-Deliverable1"
 author: "David Dominguez - A01570975"
 date: "2024-03-05"
-output: html_document
+output: rmdformats::material 
 ---
 
 CD2001C – Analítica para Negocios: De Los Datos a las Decisiones
@@ -19,6 +19,181 @@ Febrero – Junio 2024
 #### Desempeño reciente
 
 ### Contexto de la Industria
+
+#### Industria del cartón
+
+```{r}
+carton_exp = read.csv("/Users/gabrielmedina/Desktop/Escritorio/GIT/Case_Study_FORM/databases/industry_carton/Exporters of Carton boxes cases of corrugated paper or board 2020-2021.csv")
+summary(carton_exp)
+
+```
+
+```{r}
+carton_imp = read.csv("/Users/gabrielmedina/Desktop/Escritorio/GIT/Case_Study_FORM/databases/industry_carton/Importers of Cartons boxes cases of corrugated paper or board 2020-2021.csv")
+summary(carton_imp)
+```
+
+*Exportaciones*
+
+```{r}
+# Filtrar los 15 países con mayores valores de comercio de exportación
+top_countries <- carton_exp %>%
+  group_by(Country) %>%
+  summarize(TotalTradeValue = sum(Trade.Value)) %>%
+  top_n(15, TotalTradeValue) %>%
+  arrange(desc(TotalTradeValue))
+
+# Unir los datos filtrados con el data.frame original para obtener los datos completos de esos países
+top_countries_data <- carton_exp %>%
+  filter(Country %in% top_countries$Country)
+
+# Crear el gráfico
+ggplot(top_countries_data, aes(x = reorder(Country, Trade.Value), y = Trade.Value)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() + # Hacer que el gráfico sea horizontal para mejor lectura
+  labs(title = "Top 15 Países en Valor de Exportación de Cartón",
+       x = "País",
+       y = "Valor de Comercio (USD)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10))
+```
+
+El análisis de las exportaciones globales de cartón revela que México se posiciona como uno de los líderes en este sector, destacándose por sus significativos valores de exportación. Esta fortaleza en el mercado del cartón refleja no solo la alta competitividad de la industria mexicana, sino también su capacidad para producir materiales de calidad superior. Para una empresa emergente especializada en cartón para autopartes, esto representa una oportunidad única para aprovechar la infraestructura existente, las economías de escala y las redes de suministro eficientes dentro de México. 
+
+```{r warning=FALSE}
+ggplot(carton_exp, aes(x = Continent, y = Trade.Value.Growth * 100, fill = Continent)) +
+  geom_boxplot() +
+  scale_y_continuous(limits = c(0, 50), breaks = seq(0, 50, 10), labels = paste0(seq(0, 50, 10), "%")) +
+  labs(title = "Crecimiento del Valor de Comercio de Exportaciones de Cartón por Continente",
+       x = "Continente",
+       y = "Crecimiento del Valor de Comercio (%)") +
+  theme_minimal()
+
+
+```
+
+En cuanto al crecimiento de la industria del cartón por continente, podemos ver que Oceanía es el continente con el mayor porcentaje de crecimiento, sin embargo, la mediana del continente norteamericano es de poco menos del 20%, lo que indica que hay una tendencia positiva de esta industria en nuestro continente.
+
+*Importaciones*
+
+```{r}
+# Filtrar los 15 países con mayores valores de comercio de importación
+
+top_countries_2 <- carton_imp %>%
+  group_by(Country) %>%
+  summarize(TotalTradeValue = sum(Trade.Value)) %>%
+  top_n(15, TotalTradeValue) %>%
+  arrange(desc(TotalTradeValue))
+
+# Unir los datos filtrados con el data.frame original para obtener los datos completos de esos países
+top_countries_data_2 <- carton_imp %>%
+  filter(Country %in% top_countries_2$Country)
+
+# Crear el gráfico
+ggplot(top_countries_data_2, aes(x = reorder(Country, Trade.Value), y = Trade.Value)) +
+  geom_col(fill = "blue") +
+  coord_flip() + 
+  labs(title = "Top 15 Países en Valor de Importación de Cartón",
+       x = "País",
+       y = "Valor de Comercio (USD)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10))
+```
+En cuanto a las importaciones, México se consolida como el cuarto mayor importador mundial de cartón, destacando su rol clave en la industria global. Justo delante, Estados Unidos ocupa la segunda posición, reflejando la intensa actividad comercial y la demanda de materiales de calidad entre estos países vecinos. Esta situación subraya la importancia estratégica de México en el mercado de cartón y su cercanía con uno de los mayores importadores, Estados Unidos, potenciando las oportunidades de sinergia y cooperación transfronteriza en la cadena de suministro.
+
+#### Industria de vehículos eléctricos
+
+```{r}
+
+# Crear una lista de dataframes para iterar 
+electric_dfs <- list(electric_2016 = electric_2016, electric_2017 = electric_2017,
+                     electric_2018 = electric_2018, electric_2019 = electric_2019,
+                     electric_2020 = electric_2020, electric_2021 = electric_2021,
+                     electric_2022 = electric_2022, electric_2023 = electric_2023)
+
+# Inicializar un vector para almacenar los totales de ventas de vehículos eléctricos por año
+total_sales_by_year <- numeric(length(electric_dfs))
+names(total_sales_by_year) <- names(electric_dfs)
+
+# Sumar las ventas de vehículos eléctricos por año
+for (year in names(electric_dfs)) {
+  total_sales_by_year[year] <- sum(electric_dfs[[year]]$VEH_ELECTR, na.rm = TRUE)
+}
+
+# Convertir a data.frame
+sales_df <- data.frame(Year = names(total_sales_by_year), 
+                       ElectricVehicleSales = total_sales_by_year)
+
+# Ver el resultado
+print(sales_df)
+
+# Asumiendo que sales_df ya está creado y contiene las columnas 'Year' y 'ElectricVehicleSales'
+ggplot(sales_df, aes(x = Year, y = ElectricVehicleSales)) +
+  geom_col(fill = "steelblue", color = "black") + # Usamos barras con colores personalizados
+  geom_text(aes(label = ElectricVehicleSales), vjust = -0.5, size = 3.5) + # Añadir etiquetas de texto sobre las barras
+  labs(title = "Ventas de Vehículos Eléctricos en México por Año",
+       subtitle = "Datos de ventas desde 2016 hasta 2023",
+       x = "Año",
+       y = "Ventas de Vehículos Eléctricos") +
+  theme_minimal() + # Tema minimalista
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"), # Centrar y dar formato al título
+        plot.subtitle = element_text(hjust = 0.5, size = 12), # Centrar el subtítulo
+        axis.title.x = element_text(size = 14, face = "bold"), # Formato para el título del eje X
+        axis.title.y = element_text(size = 14, face = "bold"), # Formato para el título del eje Y
+        axis.text.x = element_text(angle = 45, hjust = 1)) # Rotar las etiquetas del eje X para mejorar la legibilidad
+
+
+```
+
+Como se puede apreciar en la gráfica, las ventas en México de los vehículos eléctricos tienen una clara tendencia positiva desde hace varios años, esto refleja la oportunidad y la necesidad de que empresas como FORM adapten su oferta de soluciones a las nuevas autopartes que requieren este nuevo tipo de vehículos. 
+
+
+```{r}
+#Se detectó un error en ID_ENTIDAD, existiendo el ID=99. 
+# Filtrar para eliminar ID_ENTIDAD = 99
+datos_filtrados <- electric_2023 %>%
+  filter(ID_ENTIDAD != 99)
+
+
+
+# Agrupar datos por ID_ENTIDAD y sumar las ventas de vehículos eléctricos
+ventas_por_estado <- datos_filtrados %>%
+  group_by(ID_ENTIDAD) %>%
+  summarise(Total_VEH_ELECTR = sum(VEH_ELECTR, na.rm = TRUE))
+
+estados_mexico <- c("Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas",
+                    "Chihuahua", "Ciudad de México", "Coahuila", "Colima", "Durango", "Guanajuato",
+                    "Guerrero", "Hidalgo", "Jalisco", "México", "Michoacán", "Morelos", "Nayarit",
+                    "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí",
+                    "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas")
+
+datos_filtrados$ID_ENTIDAD <- as.numeric(datos_filtrados$ID_ENTIDAD)
+
+# Agregar una nueva columna con los nombres de los estados
+datos_filtrados <- datos_filtrados %>%
+  mutate(Estado = estados_mexico[ID_ENTIDAD])
+
+# Crear la gráfica
+ggplot(ventas_por_estado, aes(x = factor(ID_ENTIDAD), y = Total_VEH_ELECTR, fill = factor(ID_ENTIDAD))) +
+  geom_bar(stat = "identity", color = "black", show.legend = FALSE) +
+  scale_fill_viridis_d() +
+  labs(title = "Ventas de Vehículos Eléctricos de México por Estado en 2023",
+       x = "ID del Estado",
+       y = "Total de Ventas de Vehículos Eléctricos",
+       caption = "Nota: ID del Estado: 1 = Aguascalientes, etc. ID_ENTIDAD = 99 excluido.") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+En cuanto a los estados con mayores ventas de vehículos eléctricos en el último año, destacan los estados con las capitales más importantes del país como Nuevo León, CDMX, Jalisco, Querétaro y Puebla. Esto puede representar para FORM oportunidades en cuanto a cómo enfocar su cadena de suministro para las mayores ventas de sus clientes. 
 
 #### Análisis de la Industria (cartón, autopartes, automotriz) 
 Para el caso de México y E.U.A. (incluir 3-5 gráficos usando R*) usando fuentes de
