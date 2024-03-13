@@ -1,0 +1,69 @@
+---
+title: "form_problem_situation"
+author: "David Dominguez - A01570975"
+date: "2024-03-13"
+output: html_document
+---
+
+![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
+
+CD2001C -- Analítica para Negocios: De Los Datos a las Decisiones
+Febrero -- Junio 2024
+
+# Entregable 2 -- Evidencia 1
+
+## Situación Problema 1: 
+Explorar, definir, y describir cuáles son los principales factores del clima organizacional de FORM que propician la satisfacción y/o no satisfacción de trabajar en dicha empresa.
+
+## Situación Problema 2:  
+Explorar, desarrollar, y describir la(s) posible(s) estrategia(s) de predicción de la demanada de productos fabricados por la empresa FORM.
+
+## Análisis Descriptivo de los Datos
+A partir de las diferentes bases de datos compartidas por la empresa FORM y las industrias relacionadas con dicha empresa, seleccionar al menos 1 situación problema y elaborar lo siguiente:
+
+### Preguntas de Análisis
+Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que se puedan responder mediante el análisis de datos.
+
+## Pronosticos y Nearshoring
+¿Cómo es el posible impacto del Nearshoring sobre la Empresa FORM?
+
+- Mediante el uso de visualización de datos describir el posible impacto del fenómeno nearshoring sobre el desempeño de la empresa FORM.
+
+- Pronosticar el evento de Nearshoring.
+
+- Pronosticar el desempeño de FORM.
+
+## Diseño, Organización, y Limpieza de Base de Datos
+
+- Seleccionar información y datos que consideren relevantes para responder las preguntas de análisis.
+
+- Diseñar y organizar base(s) de datos a partir de la información y datos seleccionados.
+
+- Visualizar en R los primeros 6 renglones de la nueva base de datos.
+
+- Elaborar glosario de las variables que se incluyen en la nueva base de datos.
+
+## Análisis Exploratorio de los Datos (EDA)
+
+- Desarrollar EDA que responda cada una de las preguntas de análisis.
+
+- Considerar los siguientes elementos en el desarrollo de EDA para responder las preguntas de análsis:
+
+- a. Estadísticos Descriptivos
+- b. Medidas de Dispersión
+- c. 4-6 Gráficos (barras, líneas, pastel, dispersión, burbujas, correlación, mapas)
+- d. Tablas (frequencia, contingencia)
+- e. Pronóstico de ventas (e.g., unidades de producción, ventas en $)
+
+- Interpretar los hallazgos identificados en el desarrollo de EDA para responder las preguntas de análisis.
+
+## Búsqueda de información y datos
+
+- ¿Qué tipo de información / datos solicitarías al socio formador para mejorar EDA?
+
+- ¿Qué tipo de información / datos de fuentes secundarias buscarías para mejorar EDA?
+
+- (Opcional) Buscar información / datos de fuentes secundarias (por ejemplo, INEGI, Industria Nacional de Autopartes, etc.) que contribuyan a mejorar EDA y la identificación de hallazgosn releventes que respondan las preguntas de análisis. Citar las fuentes secundarias seleccionadas.
+
+##Referencias
+
