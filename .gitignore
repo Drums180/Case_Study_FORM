@@ -1,2 +1,7 @@
 # Archivos de Almacenamiento Interno
 .DS_Store
+
+# Bases de datos sensibles
+databases/form/FORM-Ventas.xlsx
+databases/form/form-bajas.xlsx
+databases/form/temporary/BDD_FORM_BAJAS-2023.xlsx
