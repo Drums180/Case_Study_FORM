@@ -12,11 +12,26 @@ Febrero -- Junio 2024
 
 # Entregable 2 -- Evidencia 1
 
-## Situación Problema 1: 
+## Situación Problema 1: Rotación de Personal
 Explorar, definir, y describir cuáles son los principales factores del clima organizacional de FORM que propician la satisfacción y/o no satisfacción de trabajar en dicha empresa.
 
-## Situación Problema 2:  
+La rotación de personal se ha identificado como el desafío más crítico que enfrenta FORM en el presente. A pesar de nuestros esfuerzos continuos para crear un ambiente laboral atractivo y retener a nuestros valiosos empleados, nos encontramos con una tasa de rotación especialmente alta entre los operadores. Este fenómeno no solo afecta la continuidad y la eficiencia de nuestras operaciones, sino que también incrementa los costos asociados con el reclutamiento y la capacitación de nuevo personal.
+
+- **Principales Puntos:**
+  - La estabilidad familiar y las condiciones laborales son factores significativos que influyen en la decisión de los empleados de permanecer en la empresa.
+  - Los jóvenes, especialmente aquellos sin compromisos familiares, tienden a buscar oportunidades de desarrollo profesional fuera de FORM.
+  - Es crucial mejorar nuestras estrategias de reclutamiento y retención para abordar las causas subyacentes de la rotación de personal.
+
+
+## Situación Problema 2: Predicción de Demanda 
 Explorar, desarrollar, y describir la(s) posible(s) estrategia(s) de predicción de la demanada de productos fabricados por la empresa FORM.
+
+La predicción precisa de la demanda representa un desafío igualmente significativo para FORM, dada la variabilidad inherente en la producción y venta de autopartes. La habilidad para anticipar con exactitud cuántas unidades de un determinado componente serán necesarias es crucial para optimizar nuestros procesos de producción y empaque, y para asegurar que se maximice la eficiencia en el uso de recursos.
+
+- **Principales Puntos:**
+  - La naturaleza fluctuante de la demanda automotriz complica la planificación y gestión de inventarios.
+  - Es esencial desarrollar herramientas y procesos más sofisticados para mejorar la precisión en nuestras predicciones de demanda.
+  - La adaptabilidad y la capacidad de responder rápidamente a los cambios en el mercado son fundamentales para mantener nuestra competitividad.
 
 ## Análisis Descriptivo de los Datos
 A partir de las diferentes bases de datos compartidas por la empresa FORM y las industrias relacionadas con dicha empresa, seleccionar al menos 1 situación problema y elaborar lo siguiente:
