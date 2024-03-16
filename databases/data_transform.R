@@ -147,4 +147,164 @@ NS_St$Inseguridad_Homicidio[26] <- maximo_inseguridad
 
 write_xlsx(NS_St, "/Users/danielnajera/Desktop/Inteligencia_Aritificial/Time_Series_Datos_NS.xlsx")
 
+###################################
+# encuestas
+###################################
 
+# Cargar las bibliotecas necesarias
+library(readxl)
+library(dplyr)
+library(writexl)
+
+# Leer el archivo Excel
+form_encuesta <- read_excel("/Users/daviddrums180/Tec/Case_Study_Form/databases/form/Encuesta_Datos_FORM_Fall2023.xlsx")
+
+# Modificar los nombres de las columnas
+form_encuesta <- form_encuesta %>%
+  rename_with(~ str_to_lower(.) %>% # Convertir a minúsculas
+                str_replace_all("\\\\", "") %>% # Eliminar el caracter de escape "\"
+                str_replace_all("ü", "u") %>% # Reemplazar "ü" por "u"
+                iconv(to = 'ASCII//TRANSLIT') %>% # Remover acentos
+                str_replace_all("[.]", "") %>% # Opcional: remover puntos si es necesario
+                str_replace_all(" ", "_") %>% # Cambiar espacios por guiones bajos
+                str_replace_all("-", "_") %>% # Cambiar guiones por guiones bajos
+                # Reemplazo manual para "antigüedad"
+                str_replace_all("antig\"uedad", "antiguedad")) 
+
+# Mostrar los nombres de las columnas modificados
+print(names(form_encuesta))
+
+# Transformar el texto de las columnas especificadas
+form_encuesta <- form_encuesta %>%
+  mutate(across(c(puesto, puesto_otro, molestias_puesto, sentimiento_form),
+                ~ str_to_lower(.) %>% 
+                  iconv(to = 'ASCII//TRANSLIT') %>% 
+                  str_replace_all("[^a-z0-9 ]", "") %>% # Conservar solo letras minúsculas, números y espacios
+                  str_trim())) # Elimina espacios al inicio y al final
+
+# Obtener valores únicos para cada una de las columnas transformadas
+valores_unicos_puesto <- unique(form_encuesta$puesto)
+valores_unicos_puesto_otro <- unique(form_encuesta$puesto_otro)
+valores_unicos_molestias_puesto <- unique(form_encuesta$molestias_puesto)
+valores_unicos_sentimiento_form <- unique(form_encuesta$sentimiento_form)
+
+# Imprimir los valores únicos para verificar
+print(valores_unicos_puesto)
+print(valores_unicos_puesto_otro)
+print(valores_unicos_molestias_puesto)
+print(valores_unicos_sentimiento_form)
+
+### puesto
+form_encuesta$puesto_otro <- form_encuesta$puesto_otro %>%
+  str_replace("maquina cnc", "operador") %>%
+  str_replace("maquinas", "operador") %>%
+  str_replace("director", "administrativo") %>%
+  str_replace("comercial", "administrativo") %>%
+  str_replace("internpracticante", "administrativo") %>%
+  str_replace("coordinadora", "administrativo") %>%
+  str_replace("jefe de sgc", "supervisor") %>%
+  str_replace("materiales", "administrativo") %>%
+  str_replace("laminado", "operador") %>%
+  str_replace("desfajadora", "operador") %>%
+  str_replace("ingenieria", "administrativo") %>%
+  str_replace("montacarguista", "operador") %>%
+  str_replace("pintura", "operador") %>%
+  na_if("") # Convertir cadenas vacías a NA si es necesario
+
+# Actualización de 'puesto' basada en 'puesto_otro' para filas con 'puesto' == "otro"
+form_encuesta <- form_encuesta %>%
+  mutate(puesto = if_else(puesto == "otro" & !is.na(puesto_otro), puesto_otro, puesto))
+
+# Ahora que hemos transferido los valores de 'puesto_otro' a 'puesto', podemos eliminar 'puesto_otro'
+form_encuesta <- dplyr::select(form_encuesta, -puesto_otro)
+
+# Verificamos los cambios
+print(unique(form_encuesta$puesto))
+
+### molestias_puesto
+# Definir un vector simple de stopwords
+stopwords <- c("de", "la", "que", "el", "en", "y", "a", "los", "del", "se", "las", "por", "un", "para", "con", "no", "una", "su", "al", "es", "lo", "como", "más", "pero", "sus", "le", "ya", "o", "este", "sí", "porque", "esta", "entre", "cuando", "muy", "sin", "sobre", "también", "me", "hasta", "hay", "donde", "quien", "desde", "todo", "nos", "durante", "todos", "uno", "les", "ni", "contra", "otros", "ese", "eso", "ante", "ellos", "e", "esto", "mí", "antes", "algunos", "qué", "unos", "yo", "otro", "otras", "otra", "él", "tanto", "esa", "estos", "mucho", "quienes", "nada", "muchos", "cual", "poco", "ella", "estar", "estas", "algunas", "algo", "nosotros", "mi", "mis", "tú", "te", "ti", "tu", "tus", "ellas", "nosotras", "vosotros", "vosotras", "os", "mío", "mía", "míos", "mías", "tuyo", "tuya", "tuyos", "tuyas", "suyo", "suya", "suyos", "suyas", "nuestro", "nuestra", "nuestros", "nuestras", "vuestro", "vuestra", "vuestros", "vuestras", "esos", "esas", "estoy", "estás", "está", "estamos", "estáis", "están", "esté", "estés", "estemos", "estéis", "estén", "estaré", "estarás", "estará", "estaremos", "estaréis", "estarán", "estaría", "estarías", "estaríamos", "estaríais", "estarían", "estaba", "estabas", "estábamos", "estabais", "estaban", "estuve", "estuviste", "estuvo", "estuvimos", "estuvisteis", "estuvieron", "estuviera", "estuvieras", "estuviéramos", "estuvierais", "estuvieran", "estuviese", "estuvieses", "estuviésemos", "estuvieseis", "estuviesen", "estando", "estado", "estada", "estados", "estadas", "estad", "he", "has", "ha", "hemos", "habéis", "han", "haya", "hayas", "hayamos", "hayáis", "hayan", "habré", "habrás", "habrá", "habremos", "habréis", "habrán", "habría", "habrías", "habríamos", "habríais", "habrían", "había", "habías", "habíamos", "habíais", "habían", "hube", "hubiste", "hubo", "hubimos", "hubisteis", "hubieron", "hubiera", "hubieras", "hubiéramos", "hubierais", "hubieran", "hubiese", "hubieses", "hubiésemos", "hubieseis", "hubiesen", "habiendo", "habido", "habida", "habidos", "habidas", "soy", "eres", "es", "somos", "sois", "son", "sea", "seas", "seamos", "seáis", "sean", "seré", "serás", "será", "seremos", "seréis", "serán", "sería", "serías", "seríamos", "seríais", "serían", "era", "eras", "éramos", "erais", "eran", "fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron", "fuera", "fueras", "fuéramos", "fuerais", "fueran", "fuese", "fueses", "fuésemos", "fueseis", "fuesen", "siendo", "sido", "sed", "tengo", "tienes", "tiene", "tenemos", "tenéis", "tienen", "tenga", "tengas", "tengamos", "tengáis", "tengan", "tendré", "tendrás", "tendrá", "tendremos", "tendréis", "tendrán", "tendría", "tendrías", "tendríamos", "tendríais", "tendrían", "tenía", "tenías", "teníamos", "teníais", "tenían", "tuve", "tuviste", "tuvo", "tuvimos", "tuvisteis", "tuvieron", "tuviera", "tuvieras", "tuviéramos", "tuvierais", "tuvieran", "tuviese", "tuvieses", "tuviésemos", "tuvieseis", "tuviesen", "teniendo", "tenido", "tenida", "tenidos", "tenidas", "tened")
+
+# Eliminar stopwords de la columna 'molestias_puesto'
+form_encuesta$molestias_puesto <- sapply(form_encuesta$molestias_puesto, function(x) {
+  palabras <- str_split(x, " ")[[1]]
+  palabras_filtradas <- palabras[!palabras %in% stopwords]
+  paste(palabras_filtradas, collapse = " ")
+})
+
+# Reemplazar respuestas que no expresan una molestia por NA
+form_encuesta$molestias_puesto <- ifelse(form_encuesta$molestias_puesto %in% c("", "nada", "no", "ninguno", "ninguna", "todo bien", "todo perfecto", "nada todo bien", "no hay", "na"), NA, form_encuesta$molestias_puesto)
+
+# Verificar los cambios
+print(unique(form_encuesta$molestias_puesto))
+
+# sentimiento form
+library(stringi)
+# Diccionario de mapeo de sentimientos para simplificación
+mapeo_sentimientos <- c("agusto" = "cómodo", 
+                        "a gusto" = "cómodo", 
+                        "feliz" = "contento",
+                        "tranquila" = "cómodo",
+                        "tranquilo" = "cómodo",
+                        "contenta" = "contento",
+                        "bien" = "cómodo",
+                        "satisfecho" = "contento",
+                        "satisfecha" = "contento",
+                        "perfecto" = "contento",
+                        "alegre" = "contento")
+
+# Lista de stopwords en español (simplificada para el ejemplo)
+stopwords <- c("y", "en", "con", "por", "el", "la", "lo", "los", "las", "un", "una", "unos", "unas", "al", "del", "me", "se", "que", "de", "no", "es")
+
+# Ajustar la función para eliminar apóstrofos directamente
+limpiar_y_simplificar_sentimientos <- function(frase) {
+  # Convertir a minúsculas
+  frase <- tolower(frase)
+  
+  # Remover acentos usando stringi
+  frase <- stringi::stri_trans_general(frase, "Latin-ASCII")
+  
+  # Eliminar apóstrofos específicamente
+  frase <- str_replace_all(frase, "'", "")
+  
+  # Reemplazar términos según el mapeo de sentimientos
+  for (palabra in names(mapeo_sentimientos)) {
+    patron <- paste0("\\b", palabra, "\\b")
+    frase <- str_replace_all(frase, regex(patron, ignore_case = TRUE), mapeo_sentimientos[palabra])
+  }
+  
+  # Eliminar stopwords
+  palabras <- unlist(str_split(frase, " "))
+  frase_sin_stopwords <- paste(palabras[!palabras %in% stopwords], collapse = " ")
+  
+  return(frase_sin_stopwords)
+}
+
+# Aplicar la limpieza y simplificación a la columna sentimiento_form de nuevo
+form_encuesta$sentimiento_form <- sapply(form_encuesta$sentimiento_form, limpiar_y_simplificar_sentimientos)
+
+# Extraer y mostrar los valores únicos después de la limpieza
+valores_unicos_sentimiento_form <- unique(form_encuesta$sentimiento_form)
+print(valores_unicos_sentimiento_form)
+
+#. razon
+# Ajustar el texto en la columna razon_entrada
+form_encuesta$razon_entrada <- sapply(form_encuesta$razon_entrada, function(frase) {
+  # Convertir a minúsculas y eliminar acentos
+  frase <- tolower(stringi::stri_trans_general(frase, "Latin-ASCII"))
+  
+  # Eliminar apóstrofos
+  frase <- str_replace_all(frase, "'", "")
+  
+  # Separar en palabras y eliminar stopwords
+  palabras <- str_split(frase, " ")[[1]]
+  palabras_filtradas <- palabras[!palabras %in% stopwords]
+  
+  # Reconstruir la frase
+  frase_final <- paste(palabras_filtradas, collapse = " ")
+  
+  return(frase_final)
+})
+
+library(writexl)
+write_xlsx(form_encuesta, "/Users/daviddrums180/Tec/Case_Study_Form/databases/form/Encuesta_Datos_FORM_Fall2023.xlsx")
