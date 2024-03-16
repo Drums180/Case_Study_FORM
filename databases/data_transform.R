@@ -102,6 +102,51 @@ list(
 # Escribir el dataframe limpio a un nuevo archivo Excel, reemplazando el original
 write_xlsx(form_bajas, "form/form_bajas.xlsx")
 
+######################################
+# Nearshoring Datos Series de Tiempo
+#####################################
+
+library(readxl)
+library(writexl)
+library(stringi)
+
+NS_St <- read_excel("/Users/danielnajera/Desktop/Inteligencia_Aritificial/Time_Series_Datos_NS.xlsx")
+View(NS_St)
+str(NS_St)
+
+NS_St[NS_St == "-"] <- NA
+
+NS_St$Empleo <- as.numeric(NS_St$Empleo)
+NS_St$Educación <- as.numeric(NS_St$Educacion)
+NS_St$Innovación <- as.numeric(NS_St$Innovacion)
+NS_St$Inseguridad_Homicidio <- as.numeric(NS_St$Inseguridad_Homicidio)
+NS_St$CO2_Emisiones <- as.numeric(NS_St$CO2_Emisiones)
+
+#NS_St <- NS_St[, -which(names(NS_St) == "Empleo")]
+#NS_St <- NS_St[, -which(names(NS_St) == "CO2_Emisiones")]
+
+mediana_educacion <- median(NS_St$Educacion, na.rm = TRUE)
+NS_St$Educacion[24] <- mediana_educacion
+
+maximo_educacion <- max(NS_St$Educacion, na.rm = TRUE)
+NS_St$Educacion[25] <- maximo_educacion
+
+minimo_educacion <- min(NS_St$Educacion, na.rm = TRUE)
+NS_St$Educacion[26] <- minimo_educacion
+
+maximo_innovacion <- max(NS_St$Innovacion, na.rm = TRUE)
+NS_St$Innovacion[25] <- maximo_innovacion
+
+minimo_innovacion <- min(NS_St$Innovacion, na.rm = TRUE)
+NS_St$Innovacion[26] <- minimo_innovacion
+
+maximo_inseguridad <- max(NS_St$Inseguridad_Homicidio, na.rm = TRUE)
+NS_St$Inseguridad_Homicidio[26] <- maximo_inseguridad
+
+#names(NS_St)[names(NS_St) == "Flujo_Real"] <- "IED_Flujos_Reales"
+
+write_xlsx(NS_St, "/Users/danielnajera/Desktop/Inteligencia_Aritificial/Time_Series_Datos_NS.xlsx")
+
 ###################################
 # encuestas
 ###################################
