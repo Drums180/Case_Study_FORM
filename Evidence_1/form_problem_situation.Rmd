@@ -1,8 +1,13 @@
 ---
-title: "form_problem_situation"
-author: "David Dominguez - A01570975"
+title: "Form-Deliverable2"
+author: "David Dominguez - A01570975, Alejandra Suárez - A00835247, Daniel Nájera - A01709578, Eduardo Camacho - A01026437, Gabriel Medina - A01275763"
 date: "2024-03-13"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
 ---
 
 ![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
