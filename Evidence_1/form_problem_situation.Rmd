@@ -80,10 +80,34 @@ Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que 
 ## Búsqueda de información y datos
 
 - ¿Qué tipo de información / datos solicitarías al socio formador para mejorar EDA?
+soluciones efectivas a los problemas de la empresa, principalmente en la rotación de personal y la predicción de la demanda en producción es por eso que pediríamos información como:
+
+Para poder tener un Análisis Exploratorio de los Datos completo, debemos de desarrollar soluciones efectivas a los problemas de la empresa, principalmente en la rotación de personal y la predicción de la demanda en producción es por eso que pediríamos información como:
+1. Información detallada sobre las bases de datos, como base de datos completa de personal. También, en la base de datos de ventas incluir más información, ya que cuenta con NA, lo que hace complicaciones en el análisis, que no podamos trabajar con muy pocos datos y eso limita nuestro trabajo para poder seguir identificando hallazgos importantes para la empresa
+2. Data de encuestas de bajas, sobre todo incluyendo las razones de la renuncia para poder detectar diferentes tendencias y patrones.
+3. Un Análisis Demográfico para saber datos de la edad, género, situación familiar y ubicación geográfica de los empleados para poder relacionar patrones con la rotación que existe en FORM.
+
 
 - ¿Qué tipo de información / datos de fuentes secundarias buscarías para mejorar EDA?
 
+Para complementar el EDA, con información de fuentes externas, buscamos información en:
+
+1. Informes de la Industria (Statista) debido a que nos proporciona estadísticas globales sobre la industria automotriz. incluyendo las tendencias tecnológicas.
+2. Estudios sobre el mercado de los empaques (Smithers) publican análisis de tendencias e informes de mercado de los empaques que se utilizan en el sector automotriz.
+3. Datos de Comercio Internacional y económicos (Banco Mundial) para los datos de tarifas y economía global que afectan el comercio de los empaques
+4. (Hoovers) para un Análisis de Competencia, donde se ofrecen datos importantes sobre las empresas y un análisis detallado de competidores en la industria de empaques.
+
 - (Opcional) Buscar información / datos de fuentes secundarias (por ejemplo, INEGI, Industria Nacional de Autopartes, etc.) que contribuyan a mejorar EDA y la identificación de hallazgosn releventes que respondan las preguntas de análisis. Citar las fuentes secundarias seleccionadas.
 
-##Referencias
+Para tener un análisis más  detallado buscamos información en diferentes fuentes:
 
+1. Crecimiento del Sector Automotriz, en el 2024 se espera que la cifra de vehículos comercializados en México incremente en un 8% y esto representa 100 mil unidades más que en el 2023. En 2023 tuvo un crecimiento del 24.4% en vehículos comercializados comparado con el 2022. (Mexico Industry, 2024). Estos datos son un potencial aumento de demanda en los empaques de autopartes lo que es un impacto positivo para FORM.
+2. Impacto en la electromovilidad, ya que existe una transición hacia la electromovilidad y esto genera una oportunidad para la creación de empleos y la demanda de competencias especializadas, esto impacta e influye de manera significativa a la demanda de empaques para los autopartes y componentes electrónicos y sistemas avanzados en los automóviles.
+
+##Referencias
+1. *D&B Hoovers is Your Sales Accelerator – Dun & Bradstreet*. (s. f.). Recuperado 16 de marzo de 2024, de https://www.dnb.com/products/dnb-hoovers.html
+2. *World Bank Group - International Development, Poverty, & Sustainability*. (s. f.). World Bank. Recuperado 16 de marzo de 2024, de https://www.worldbank.org/en/home
+3. *Smithers - Innovate with confidence*. (s. f.). Smithers. Recuperado 16 de marzo de 2024, de https://www.smithers.com/home
+4. Statista. (s. f.). *Statista - the statistics portal*. Recuperado 16 de marzo de 2024, de https://www.statista.com/
+5. MexicoIndustry. (s. f.). *Incrementará 8% el sector automotriz en 2024*. MexicoIndustry. Recuperado 16 de marzo de 2024, de https://mexicoindustry.com/noticia/incrementara-8-el-sector-automotriz-en-2024
+6. Newsroom Infobae. (2023, 12 abril). Industria automotriz en México espera más empleos por electromovilidad. *Infobae*. Recuperado 16 de marzo de 2024, de https://www.infobae.com/america/agencias/2023/04/12/industria-automotriz-en-mexico-espera-mas-empleos-por-electromovilidad/
