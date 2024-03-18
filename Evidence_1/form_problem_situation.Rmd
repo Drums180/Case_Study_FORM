@@ -12,102 +12,126 @@ output:
 
 ![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
 
-CD2001C -- Analítica para Negocios: De Los Datos a las Decisiones
-Febrero -- Junio 2024
+CD2001C -- Analítica para Negocios: De Los Datos a las Decisiones Febrero -- Junio 2024
 
 # Entregable 2 -- Evidencia 1
 
 ## Situación Problema 1: Rotación de Personal
+
 Explorar, definir, y describir cuáles son los principales factores del clima organizacional de FORM que propician la satisfacción y/o no satisfacción de trabajar en dicha empresa.
 
 La rotación de personal se ha identificado como el desafío más crítico que enfrenta FORM en el presente. A pesar de nuestros esfuerzos continuos para crear un ambiente laboral atractivo y retener a nuestros valiosos empleados, nos encontramos con una tasa de rotación especialmente alta entre los operadores. Este fenómeno no solo afecta la continuidad y la eficiencia de nuestras operaciones, sino que también incrementa los costos asociados con el reclutamiento y la capacitación de nuevo personal.
 
-- **Principales Puntos:**
-  - La estabilidad familiar y las condiciones laborales son factores significativos que influyen en la decisión de los empleados de permanecer en la empresa.
-  - Los jóvenes, especialmente aquellos sin compromisos familiares, tienden a buscar oportunidades de desarrollo profesional fuera de FORM.
-  - Es crucial mejorar nuestras estrategias de reclutamiento y retención para abordar las causas subyacentes de la rotación de personal.
+-   **Principales Puntos:**
+    -   La estabilidad familiar y las condiciones laborales son factores significativos que influyen en la decisión de los empleados de permanecer en la empresa.
+    -   Los jóvenes, especialmente aquellos sin compromisos familiares, tienden a buscar oportunidades de desarrollo profesional fuera de FORM.
+    -   Es crucial mejorar nuestras estrategias de reclutamiento y retención para abordar las causas subyacentes de la rotación de personal.
 
+## Situación Problema 2: Predicción de Demanda
 
-## Situación Problema 2: Predicción de Demanda 
 Explorar, desarrollar, y describir la(s) posible(s) estrategia(s) de predicción de la demanada de productos fabricados por la empresa FORM.
 
 La predicción precisa de la demanda representa un desafío igualmente significativo para FORM, dada la variabilidad inherente en la producción y venta de autopartes. La habilidad para anticipar con exactitud cuántas unidades de un determinado componente serán necesarias es crucial para optimizar nuestros procesos de producción y empaque, y para asegurar que se maximice la eficiencia en el uso de recursos.
 
-- **Principales Puntos:**
-  - La naturaleza fluctuante de la demanda automotriz complica la planificación y gestión de inventarios.
-  - Es esencial desarrollar herramientas y procesos más sofisticados para mejorar la precisión en nuestras predicciones de demanda.
-  - La adaptabilidad y la capacidad de responder rápidamente a los cambios en el mercado son fundamentales para mantener nuestra competitividad.
+-   **Principales Puntos:**
+    -   La naturaleza fluctuante de la demanda automotriz complica la planificación y gestión de inventarios.
+    -   Es esencial desarrollar herramientas y procesos más sofisticados para mejorar la precisión en nuestras predicciones de demanda.
+    -   La adaptabilidad y la capacidad de responder rápidamente a los cambios en el mercado son fundamentales para mantener nuestra competitividad.
 
 ## Análisis Descriptivo de los Datos
+
 A partir de las diferentes bases de datos compartidas por la empresa FORM y las industrias relacionadas con dicha empresa, seleccionar al menos 1 situación problema y elaborar lo siguiente:
 
 ### Preguntas de Análisis
+
 Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que se puedan responder mediante el análisis de datos.
 
 ## Pronosticos y Nearshoring
+
 ¿Cómo es el posible impacto del Nearshoring sobre la Empresa FORM?
 
-- Mediante el uso de visualización de datos describir el posible impacto del fenómeno nearshoring sobre el desempeño de la empresa FORM.
+-   Mediante el uso de visualización de datos describir el posible impacto del fenómeno nearshoring sobre el desempeño de la empresa FORM.
 
-- Pronosticar el evento de Nearshoring.
+-   Pronosticar el evento de Nearshoring.
 
-- Pronosticar el desempeño de FORM.
+-   Pronosticar el desempeño de FORM.
 
 ## Diseño, Organización, y Limpieza de Base de Datos
 
-- Seleccionar información y datos que consideren relevantes para responder las preguntas de análisis.
+-   Seleccionar información y datos que consideren relevantes para responder las preguntas de análisis.
 
-- Diseñar y organizar base(s) de datos a partir de la información y datos seleccionados.
+-   Diseñar y organizar base(s) de datos a partir de la información y datos seleccionados.
 
-- Visualizar en R los primeros 6 renglones de la nueva base de datos.
+-   Visualizar en R los primeros 6 renglones de la nueva base de datos.
 
-- Elaborar glosario de las variables que se incluyen en la nueva base de datos.
+-   Elaborar glosario de las variables que se incluyen en la nueva base de datos.
 
 ## Análisis Exploratorio de los Datos (EDA)
 
-- Desarrollar EDA que responda cada una de las preguntas de análisis.
+-   Desarrollar EDA que responda cada una de las preguntas de análisis.
 
-- Considerar los siguientes elementos en el desarrollo de EDA para responder las preguntas de análsis:
+-   Considerar los siguientes elementos en el desarrollo de EDA para responder las preguntas de análsis:
 
-- a. Estadísticos Descriptivos
-- b. Medidas de Dispersión
-- c. 4-6 Gráficos (barras, líneas, pastel, dispersión, burbujas, correlación, mapas)
-- d. Tablas (frequencia, contingencia)
-- e. Pronóstico de ventas (e.g., unidades de producción, ventas en $)
+-   **a. Estadísticos Descriptivos**
 
-- Interpretar los hallazgos identificados en el desarrollo de EDA para responder las preguntas de análisis.
+-   **b. Medidas de Dispersión**
+
+-   **c. 4-6 Gráficos (barras, líneas, pastel, dispersión, burbujas, correlación, mapas)**
+
+-   **d. Tablas (frequencia, contingencia)**
+
+-   **e. Pronóstico de ventas (e.g., unidades de producción, ventas en \$)**
+
+-   **Interpretación** Interpretar los hallazgos identificados en el desarrollo de EDA para responder las preguntas de análisis.
 
 ## Búsqueda de información y datos
 
-- ¿Qué tipo de información / datos solicitarías al socio formador para mejorar EDA?
-soluciones efectivas a los problemas de la empresa, principalmente en la rotación de personal y la predicción de la demanda en producción es por eso que pediríamos información como:
+-   ¿Qué tipo de información / datos solicitarías al socio formador para mejorar EDA? soluciones efectivas a los problemas de la empresa, principalmente en la rotación de personal y la predicción de la demanda en producción es por eso que pediríamos información como:
 
 Para poder tener un Análisis Exploratorio de los Datos completo, debemos de desarrollar soluciones efectivas a los problemas de la empresa, principalmente en la rotación de personal y la predicción de la demanda en producción es por eso que pediríamos información como:
-1. Información detallada sobre las bases de datos, como base de datos completa de personal. También, en la base de datos de ventas incluir más información, ya que cuenta con NA, lo que hace complicaciones en el análisis, que no podamos trabajar con muy pocos datos y eso limita nuestro trabajo para poder seguir identificando hallazgos importantes para la empresa
-2. Data de encuestas de bajas, sobre todo incluyendo las razones de la renuncia para poder detectar diferentes tendencias y patrones.
-3. Un Análisis Demográfico para saber datos de la edad, género, situación familiar y ubicación geográfica de los empleados para poder relacionar patrones con la rotación que existe en FORM.
 
+1.  Información detallada sobre las bases de datos, como base de datos completa de personal. También, en la base de datos de ventas incluir más información, ya que cuenta con NA, lo que hace complicaciones en el análisis, que no podamos trabajar con muy pocos datos y eso limita nuestro trabajo para poder seguir identificando hallazgos importantes para la empresa
 
-- ¿Qué tipo de información / datos de fuentes secundarias buscarías para mejorar EDA?
+2.  Data de encuestas de bajas, sobre todo incluyendo las razones de la renuncia para poder detectar diferentes tendencias y patrones.
+
+3.  Un Análisis Demográfico para saber datos de la edad, género, situación familiar y ubicación geográfica de los empleados para poder relacionar patrones con la rotación que existe en FORM.
+
+De forma más simple, los datos explicitos más necesarios son: 
+-⁠ **⁠BASE DATOS COMPLETA DE PERSONAL**
+-⁠ **⁠DATA DE ENCUESTAS DE RAZON DE BAJAS**
+-⁠ **⁠DATA DE TIEMPOS DE INVENTARIO**
+-⁠ **⁠DATA DE DESGLOSE DE VENTA DE UNIDADES POR CLIENTE / O POR TIPO DE PARTE**
+
+-   ¿Qué tipo de información / datos de fuentes secundarias buscarías para mejorar EDA?
 
 Para complementar el EDA, con información de fuentes externas, buscamos información en:
 
-1. Informes de la Industria (Statista) debido a que nos proporciona estadísticas globales sobre la industria automotriz. incluyendo las tendencias tecnológicas.
-2. Estudios sobre el mercado de los empaques (Smithers) publican análisis de tendencias e informes de mercado de los empaques que se utilizan en el sector automotriz.
-3. Datos de Comercio Internacional y económicos (Banco Mundial) para los datos de tarifas y economía global que afectan el comercio de los empaques
-4. (Hoovers) para un Análisis de Competencia, donde se ofrecen datos importantes sobre las empresas y un análisis detallado de competidores en la industria de empaques.
+1.  Informes de la Industria (Statista) debido a que nos proporciona estadísticas globales sobre la industria automotriz. incluyendo las tendencias tecnológicas.
 
-- (Opcional) Buscar información / datos de fuentes secundarias (por ejemplo, INEGI, Industria Nacional de Autopartes, etc.) que contribuyan a mejorar EDA y la identificación de hallazgosn releventes que respondan las preguntas de análisis. Citar las fuentes secundarias seleccionadas.
+2.  Estudios sobre el mercado de los empaques (Smithers) publican análisis de tendencias e informes de mercado de los empaques que se utilizan en el sector automotriz.
 
-Para tener un análisis más  detallado buscamos información en diferentes fuentes:
+3.  Datos de Comercio Internacional y económicos (Banco Mundial) para los datos de tarifas y economía global que afectan el comercio de los empaques
 
-1. Crecimiento del Sector Automotriz, en el 2024 se espera que la cifra de vehículos comercializados en México incremente en un 8% y esto representa 100 mil unidades más que en el 2023. En 2023 tuvo un crecimiento del 24.4% en vehículos comercializados comparado con el 2022. (Mexico Industry, 2024). Estos datos son un potencial aumento de demanda en los empaques de autopartes lo que es un impacto positivo para FORM.
-2. Impacto en la electromovilidad, ya que existe una transición hacia la electromovilidad y esto genera una oportunidad para la creación de empleos y la demanda de competencias especializadas, esto impacta e influye de manera significativa a la demanda de empaques para los autopartes y componentes electrónicos y sistemas avanzados en los automóviles.
+4.  (Hoovers) para un Análisis de Competencia, donde se ofrecen datos importantes sobre las empresas y un análisis detallado de competidores en la industria de empaques.
 
-##Referencias
-1. *D&B Hoovers is Your Sales Accelerator – Dun & Bradstreet*. (s. f.). Recuperado 16 de marzo de 2024, de https://www.dnb.com/products/dnb-hoovers.html
-2. *World Bank Group - International Development, Poverty, & Sustainability*. (s. f.). World Bank. Recuperado 16 de marzo de 2024, de https://www.worldbank.org/en/home
-3. *Smithers - Innovate with confidence*. (s. f.). Smithers. Recuperado 16 de marzo de 2024, de https://www.smithers.com/home
-4. Statista. (s. f.). *Statista - the statistics portal*. Recuperado 16 de marzo de 2024, de https://www.statista.com/
-5. MexicoIndustry. (s. f.). *Incrementará 8% el sector automotriz en 2024*. MexicoIndustry. Recuperado 16 de marzo de 2024, de https://mexicoindustry.com/noticia/incrementara-8-el-sector-automotriz-en-2024
-6. Newsroom Infobae. (2023, 12 abril). Industria automotriz en México espera más empleos por electromovilidad. *Infobae*. Recuperado 16 de marzo de 2024, de https://www.infobae.com/america/agencias/2023/04/12/industria-automotriz-en-mexico-espera-mas-empleos-por-electromovilidad/
+-   (Opcional) Buscar información / datos de fuentes secundarias (por ejemplo, INEGI, Industria Nacional de Autopartes, etc.) que contribuyan a mejorar EDA y la identificación de hallazgos releventes que respondan las preguntas de análisis. Citar las fuentes secundarias seleccionadas.
+
+Para tener un análisis más detallado buscamos información en diferentes fuentes:
+
+**1.**  Crecimiento del Sector Automotriz, en el 2024 se espera que la cifra de vehículos comercializados en México incremente en un 8% y esto representa 100 mil unidades más que en el 2023. En 2023 tuvo un crecimiento del 24.4% en vehículos comercializados comparado con el 2022. (Mexico Industry, 2024). Estos datos son un potencial aumento de demanda en los empaques de autopartes lo que es un impacto positivo para FORM.
+
+**2.**  Impacto en la electromovilidad, ya que existe una transición hacia la electromovilidad y esto genera una oportunidad para la creación de empleos y la demanda de competencias especializadas, esto impacta e influye de manera significativa a la demanda de empaques para los autopartes y componentes electrónicos y sistemas avanzados en los automóviles.
+
+##Referencias 
+
+1. *D&B Hoovers is Your Sales Accelerator -- Dun & Bradstreet*. (s. f.). Recuperado 16 de marzo de 2024, de <https://www.dnb.com/products/dnb-hoovers.html> 
+
+2. *World Bank Group - International Development, Poverty, & Sustainability*. (s. f.). World Bank. Recuperado 16 de marzo de 2024, de <https://www.worldbank.org/en/home> 
+
+3. *Smithers - Innovate with confidence*. (s. f.). Smithers. Recuperado 16 de marzo de 2024, de <https://www.smithers.com/home> 
+
+4. Statista. (s. f.). *Statista - the statistics portal*. Recuperado 16 de marzo de 2024, de <https://www.statista.com/> 
+
+5. MexicoIndustry. (s. f.). *Incrementará 8% el sector automotriz en 2024*. MexicoIndustry. Recuperado 16 de marzo de 2024, de <https://mexicoindustry.com/noticia/incrementara-8-el-sector-automotriz-en-2024> 
+
+6. Newsroom Infobae. (2023, 12 abril). Industria automotriz en México espera más empleos por electromovilidad. *Infobae*. Recuperado 16 de marzo de 2024, de <https://www.infobae.com/america/agencias/2023/04/12/industria-automotriz-en-mexico-espera-mas-empleos-por-electromovilidad/>
