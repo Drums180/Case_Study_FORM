@@ -14,7 +14,7 @@ output:
 
 CD2001C -- Analítica para Negocios: De Los Datos a las Decisiones Febrero -- Junio 2024
 
-# Entregable 2 ---- Evidencia 1
+# Entregable 2 -- Evidencia 1
 
 ## Situación Problema 1: Rotación de Personal
 
@@ -739,21 +739,21 @@ Para ambas situaciones, se adoptarán prácticas de gestión de datos que incluy
 Visualizar en R los primeros 6 renglones de la nueva base de datos.
 
 ##### Base de Datos: Bajas FORM
-```{r}
+```{r message=FALSE, warning=FALSE}
 setwd("../databases")
 bajas <- read_xlsx("form/form-bajas.xlsx")
 head(bajas)
 ```
 
 ##### Base de Datos: Satisfacción FORM
-```{r}
+```{r message=FALSE, warning=FALSE}
 setwd("../databases")
 satis <- read_xlsx("form/Encuesta_Datos_FORM_Fall2023.xlsx")
 head(satis)
 ```
 
 ##### Base de Datos: Nearshoring
-```{r}
+```{r message=FALSE, warning=FALSE}
 setwd("../databases")
 nearshoring <- read_xlsx("nearshoring/annual_economic_data.xlsx")
 tail(nearshoring)
