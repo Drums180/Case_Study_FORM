@@ -42,23 +42,9 @@ La predicción precisa de la demanda representa un desafío igualmente significa
 
 A partir de las diferentes bases de datos compartidas por la empresa FORM y las industrias relacionadas con dicha empresa, seleccionar al menos 1 situación problema y elaborar lo siguiente:
 
-### Preguntas de Análisis
+## Librerías necesarias
 
-Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que se puedan responder mediante el análisis de datos.
-
-## Pronosticos y Nearshoring
-
-¿Cómo es el posible impacto del Nearshoring sobre la Empresa FORM?
-
--   Mediante el uso de visualización de datos describir el posible impacto del fenómeno nearshoring sobre el desempeño de la empresa FORM.
-
--   Pronosticar el evento de Nearshoring.
-
--   Pronosticar el desempeño de FORM.
-
-# BASE DE DATOS Y LIBRERIAS
-
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(imputeTS)
 library(xts)
 library(zoo)
@@ -83,40 +69,61 @@ library(readxl)
 library(heatmaply)
 ```
 
+### Preguntas de Análisis
 
-```{r}
+Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que se puedan responder mediante el análisis de datos.
+
+## Pronosticos y Nearshoring
+
+¿Cómo es el posible impacto del Nearshoring sobre la Empresa FORM?
+
+-   Mediante el uso de visualización de datos describir el posible impacto del fenómeno nearshoring sobre el desempeño de la empresa FORM.
+
+-   Pronosticar el evento de Nearshoring.
+
+### Pronosticar el desempeño de FORM
+
+#### Bases de Datos de Ventas
+```{r message=FALSE, warning=FALSE}
 #file.choose()
-ventas1 <- read_excel("/Users/danielnajera/Desktop/Inteligencia_Aritificial/Reto/Case_Study_FORM/databases/form/FORM - Ventas.xlsx")
-ventas2 <- read_excel("/Users/danielnajera/Desktop/Inteligencia_Aritificial/Reto/Case_Study_FORM/databases/form/FORM - Ventas.xlsx")
-#view(ventas1)
-#view(ventas2)
+setwd("../databases/")
+ventas1 <- read_excel("form/FORM-Ventas.xlsx")
+ventas2 <- read_excel("form/FORM-Ventas.xlsx")
+
+# data de bases
 names(ventas1)
 str(ventas1)
 ```
 
-
-
+**Analisis de Numero de Data Faltante**
 ```{r}
+# Calcula y muestra la cantidad de valores NA por columna en ventas1.
 na_count1 <- colSums(is.na(ventas1))
 na_count1
+
+# Elimina columnas con NA en ventas1 y las últimas 3 filas.
 ventas1 <- ventas1[, colSums(is.na(ventas1)) == 0]
 ventas1 <- head(ventas1, -3)
-ventas1
+
+# Calcula y muestra la cantidad de valores NA por columna en ventas2.
 na_count2 <- colSums(is.na(ventas2))
 na_count2
+
+# Elimina filas con NA en ventas2.
 ventas2 <- ventas2[complete.cases(ventas2), ]
-ventas2
+
+# Renombra la columna "Ventas Totales" a "Ventas_totales" en ventas1.
 names(ventas1)[names(ventas1) == "Ventas Totales"] <- "Ventas_totales"
 ```
 
-Vemos que hay muchos NA's, por lo que, eliminamos las columnas con NA's para la base 1 y eliminamos las filas con NA's para la base 2.
+Observamos una presencia significativa de valores NA. Por ello, decidimos eliminar las columnas que contengan valores NA en la base de datos 1 y las filas con valores NA en la base de datos 2.
 
 ```{r}
 #ventas1$Mes <- as.yearmon(paste(ventas1$Año, ventas1$Mes), "%Y %B")
 #ventas2$Mes <- as.yearmon(paste(ventas2$Año, ventas2$Mes), "%Y %B")
 ```
 
-# MODELO ARMA Y ARIMA
+#### Pruebas de Diagnostico en la Data
 
 ```{r}
 ventas1$Mes <- as.Date(paste(ventas1$Año, ventas1$Mes), format = "%Y %B")
@@ -126,43 +133,46 @@ Ventas <- ts(ventas1$Ventas_totales, start = c(2017, 1), end=c(2022,9), frequenc
 print(Ventas)
 ```
 
-La variable dependiente es "Ventas Totales", ya que, son las ventas totales de FORM.
+La variable dependiente se define como "Ventas Totales", correspondiente a las ventas totales realizadas por FORM.
 
 ```{r}
 ts_plot(Ventas)
 ```
 
-Muestra una tendencia lineal del 2018 al 2020, pero, a partir del 2020, presenta un claro componente de estacionalidad y puede haber cierta estacionariedad, sin embargo, se ve una tendencia ascendente a lo largo de toda la serie de tiempo.
+Entre 2018 y 2020, la serie de tiempo muestra una tendencia lineal. Sin embargo, después de 2020, emerge un patrón estacional claro, y aunque puede presentar cierta estacionariedad, se observa una tendencia ascendente general a lo largo de todo el periodo analizado.
 
 ```{r}
 Ventasdesc<-decompose(Ventas)
 plot(Ventasdesc)
 ```
 
-La tendencia es el componente a largo plazo de la serie de tiempo. Muestra que las ventas totales de FORM han ido aumentando constantemente durante el período de tiempo. La estacionalidad es el componente a corto plazo de la serie de tiempo. Muestra que las ventas totales de FORM tienden a ser más altas en ciertos momentos del año, como el cuarto trimestre, y más bajas en otros momentos del año, como el primer trimestre, esto puede ser debido a lo que nos conto, que la demanda de los clientes va incrementando a lo largo del año, y al final cae. La aleatoriedad es el componente impredecible de la serie de tiempo. Muestra que hay algunos puntos de datos que se desvían de la tendencia y la estacionalidad, esto puede ser porque sus clientes aumentan su demanda de la nada.
+La tendencia, que representa el componente a largo plazo de la serie de tiempo, indica un aumento constante en las ventas totales de FORM a lo largo del periodo observado. 
+
+La estacionalidad, por otro lado, refleja las variaciones a corto plazo, revelando que las ventas de FORM tienden a incrementarse en determinadas épocas del año, como el último trimestre, y disminuir en otras, como el primer trimestre, lo cual podría estar relacionado con el aumento progresivo en la demanda de los clientes a medida que avanza el año, seguido de una caída hacia el final. 
+
+La aleatoriedad, el componente impredecible de la serie de tiempo, indica fluctuaciones en los datos que no se explican por la tendencia ni por la estacionalidad, sugiriendo incrementos inesperados en la demanda por parte de los clientes.
 
 ```{r}
 adf.test(ventas1$Ventas_totales)
 ```
 
-Dado que el valor p (0.284) es mayor que el nivel de significancia comúnmente utilizado de 0.05, no hay suficiente evidencia para rechazar la hipótesis nula en contra de la no estacionariedad de la serie temporal. Por lo tanto, según este resultado, la serie temporal no es estacionaria.
+Dado que el valor p de 0.284 supera el umbral de significancia comúnmente aceptado de 0.05, no contamos con suficiente evidencia para descartar la hipótesis nula, que asume la no estacionariedad de la serie de tiempo. Por ende, de acuerdo con este análisis, la serie temporal se considera no estacionaria.
 
 ```{r}
 acf(ventas1$Ventas_totales)
 ```
 
-El gráfico muestra que la ACF es positiva para los rezagos 1, 2 y 3. Esto significa que hay una correlación positiva entre los valores de la serie de tiempo en estos puntos del tiempo. En otras palabras, los valores de la serie de tiempo tienden a aumentar o disminuir juntos en estos puntos del tiempo.
+El gráfico indica que la Función de Autocorrelación (ACF) es positiva para los rezagos 1, 2 y 3, lo que sugiere una correlación positiva entre los valores de la serie temporal en estos intervalos. Esto implica que los valores de la serie tienden a moverse en la misma dirección en estos periodos.
 
-La ACF es negativa para los rezagos 4, 5 y 6. Esto significa que hay una correlación negativa entre los valores de la serie de tiempo en estos puntos del tiempo. En otras palabras, los valores de la serie de tiempo tienden a aumentar o disminuir en direcciones opuestas en estos puntos del tiempo.
+Por otro lado, la ACF es negativa para los rezagos 4, 5 y 6, señalando una correlación negativa en estos puntos. Esto significa que los valores de la serie temporal tienden a moverse en direcciones opuestas durante estos intervalos.
 
-La serie de tiempo podría ser un proceso estacional. En este caso, la correlación positiva a corto plazo podría reflejar el hecho de que los valores de la serie de tiempo tienden a ser más altos o más bajos en ciertas épocas del año. La correlación negativa a largo plazo podría reflejar el hecho de que los valores de la serie de tiempo tienden a revertirse a la media a lo largo del año.
+Estas características sugieren que la serie temporal podría exhibir un comportamiento estacional, donde la correlación positiva a corto plazo indica patrones de movimiento conjunto debido a tendencias estacionales, como períodos de alta o baja demanda durante ciertas épocas del año. La correlación negativa a más largo plazo podría indicar una tendencia de los valores de la serie a retornar hacia un promedio a lo largo del tiempo, reflejando una reversión a la media estacional.
 
-## MODELO ARMA
+#### Modelo Arma Calculado
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 summary(ARMA<-arma(diff(Ventas)),order=c(1,1))
 ```
-
 
 ```{r}
 plot(ARMA)
@@ -171,7 +181,7 @@ plot(ARMA)
 El término AR(1) es significativo (p-value = 0.0146), lo que indica que es importante en el modelo. Sin embargo, el término MA(1) no es significativo (p-value = 0.8199).
 Los residuos del modelo tienen una varianza estimada (sigma^2) de 1.882e+12 y los resultados del ajuste muestran un AIC de 2120.88. Además, se ha incluido un término de interceptación con un valor estimado de 1.386e+05
 
-## MODELO ARIMA
+#### Modelo Arima Calculado
 
 ```{r}
 summary(ARIMA<-Arima(diff(log((Ventas))),order=c(1,1,1))) 
@@ -182,15 +192,18 @@ plot(ARIMA)
 ```
 
 Los coeficientes estimados para el término AR(1) y el término MA(1) son -0.4977 y -1.0000 respectivamente. Esto indica que hay una relación negativa entre el valor actual y los valores rezagados.
+
 Los errores estándar de los coeficientes (s.e.) son 0.1040 y 0.0422 para el término AR(1) y el término MA(1) respectivamente.
+
 La varianza estimada de los errores del modelo (sigma^2) es de aproximadamente 0.05168.
+
 El logaritmo de la verosimilitud es de aproximadamente 2.55 y el AIC es de 0.91. Estas medidas proporcionan información sobre la calidad del ajuste del modelo, con valores más bajos indicando un mejor ajuste.
+
 La serie de tiempo de las ventas no es estacionaria, lo que significa que la media y la varianza de la serie de tiempo están cambiando con el tiempo.
 
-## COMPARAR LOS 2 MODELOS
+#### Evaluación de Modelos
 
-### ARMA
-
+**ARMA**
 ```{r}
 arma_residuals<-ARMA$residuals
 Box.test(arma_residuals,lag=1,type="Ljung-Box")
@@ -213,7 +226,7 @@ hist(ARIMA$residuals)
 
 La normalidad se ve en los residuales.
 
-### ARIMA
+**ARIMA**
 
 ```{r}
 arima_residuals<-ARIMA$residuals
@@ -237,19 +250,28 @@ hist(ARIMA$residuals)
 
 La normalidad se ve en los residuales.
 
-## MODELO SELECCIONADO
+#### Selección de Modelo
 
 Se selecciono el modelo ARIMA, ya que tiene el AIC mas bajo en comparación con el modelo ARMA.
 
-## FORECAST ARIMA
+#### Forecast de Ventas de FORM
 
 ```{r}
 suppressWarnings({
-arima_restauracion<-(ARIMA$fitted) # The variables are transformed back to the originals (if log is applied, the exponential must be applied (it is the opposite))
-vector2 =c(arima_restauracion) #reverting "log" operation using "exp"
-original2 <-c(Ventas) #Converting into a vector.
-restauracion2 = vector2+original2 #reverting "diff" operation summing the original values to the differences.
-ts2 <- ts(restauracion2, start = 1, end = length(restauracion2), frequency = 12) #Make time series
+  # Asigna las predicciones ajustadas por el modelo ARIMA a la variable.
+  arima_restauracion <- (ARIMA$fitted)
+  
+  # Convierte las predicciones ajustadas en un vector.
+  vector2 <- c(arima_restauracion)
+  
+  # Convierte los datos originales de ventas en un vector.
+  original2 <- c(Ventas)
+  
+  # Realiza la operación inversa a la diferencia, sumando los valores originales a las diferencias.
+  restauracion2 <- vector2 + original2
+  
+  # Convierte el vector restaurado en una serie temporal, especificando inicio, fin y frecuencia.
+  ts2 <- ts(restauracion2, start = 1, end = length(restauracion2), frequency = 12)
 })
 ```
 
@@ -259,42 +281,49 @@ arima_forecast<-forecast(ts2,h=5)
 arima_forecast
 ```
 
-
 ```{r}
 plot(arima_forecast)
 ```
-
 
 ```{r}
 autoplot(arima_forecast)
 ```
 
-## RESULTADO ARIMA FORECAST
+**Forecast Calculado**
 
-Periodo 1: 5842742 Periodo 2: 6439323 Periodo 3: 5807800 Periodo 4: 5986388 Periodo 5: 6553629
+Los pronósticos para los próximos periodos se presentan a continuación, reflejando las expectativas de ventas futuras basadas en el análisis realizado:
 
-# MODELO VAR
+- **Periodo 1:** 5,842,742
+- **Periodo 2:** 6,439,323
+- **Periodo 3:** 5,807,800
+- **Periodo 4:** 5,986,388
+- **Periodo 5:** 6,553,629
 
-Del conjunto de datos, seleccione las variables explicativas que podrían explicar las ventas de FORM.
+Cada valor representa la proyección de ventas para el periodo correspondiente, indicando fluctuaciones en la demanda o en las tendencias de ventas identificadas por el modelo. Estos pronósticos son cruciales para la planificación estratégica y la toma de decisiones en el ámbito empresarial.
 
-```{r}
-#View(ventas2)
+#### Modelo Var Calculado
+
+Del conjunto de datos, se seleccionaron las variables explicativas que podrían explicar las ventas de FORM.
+
+```{r message=FALSE, warning=FALSE}
+setwd("../databases/")
+ventas2 <- read_excel("form/FORM-Ventas.xlsx")
+
 names(ventas2)[names(ventas2) == "Ventas Totales"] <- "Ventas_totales"
 names(ventas2)[names(ventas2) == "Total Carton"] <- "Total_carton"
 names(ventas2)[names(ventas2) == "Total Retornable"] <- "Total_retornable"
 names(ventas2)[names(ventas2) == "Variación"] <- "Variacion"
 ```
 
-## GRAFICOS DE SERES DE TIEMPO.
+#### Impacto de Variables sobre Ventas
 
 ```{r}
+Sys.setlocale("LC_TIME", "es_ES.UTF-8")
+ventas2 <- na.omit(ventas2[, c("Año", "Mes", "Ventas_totales", "Total_carton", "Total_retornable", "Variacion", "Servicios", "Muestras")])
 ventas2$Fecha <- as.Date(paste(ventas2$Año, ventas2$Mes, "01"), format = "%Y %B %d")
-
-Ventas2 <- ts(ventas2$Ventas_totales, start = c(year(min(ventas2$Fecha)), month(min(ventas2$Fecha))), frequency = 12)
-
-ts_plot(Ventas2)
+Ventas2 <- ts(ventas2$Ventas_totales, start = c(as.numeric(format(min(ventas2$Fecha), "%Y")), as.numeric(format(min(ventas2$Fecha), "%m"))), frequency = 12)
+plot(Ventas2)
 ```
-
 
 ```{r}
 Carton <- ts(ventas2$Total_carton, start = c(year(min(ventas2$Fecha)), month(min(ventas2$Fecha))), frequency = 12)
@@ -327,8 +356,12 @@ ts_plot(variacion)
 ```
 
 Total cartón: al igual que la variable dependiente, muestra una tendencia de crecimiento, esto puede significar que estan altamente relacionadas.
+
 Total retornable: al igual que la variable dependiente, muestra una tendencia de crecimiento, esto puede significar que estan altamente relacionadas.
+
 Serivicos: La serie temporal no muestra una relación clara entre los servicios y las ventas, esto puede ser debido a la demanda del mercado. 
+
+#### Tests de Diagnostico
 
 ```{r}
 adf.test(Carton) 
@@ -342,9 +375,9 @@ adf.test(Retornable)
 
 Dado que el valor p (0.8272) es mucho mayor que el nivel de significancia comúnmente utilizado de 0.05, o podemos afirmar con confianza que la serie "Carton" sea estacionaria según esta prueba.
 
-## MODELO VARSELECT
+#### Evaluación de Modelos Var
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 var_ts<-cbind(diff(log(Ventas2)), diff(log(Carton)), diff(log(Retornable)))
 colnames(var_ts)<-cbind("Ventas_2", "Carton", "Retornable") 
 acf_var_ts <- lapply(var_ts, acf)
@@ -366,7 +399,7 @@ lag_selection$criteria
 var_ts
 ```
 
-## MODELO VAR
+#### Restricciones de Modelo Var
 
 ```{r}
 var_modelo<-VAR(var_ts,p=1) 
@@ -376,24 +409,20 @@ matriz_correlacion <- cor(var_ts)
 print(matriz_correlacion)
 ```
 
-El modelo VAR no se puede, ya que hay una gran correlación entre las variables explicativas, con la variable dependiente, esto puede ser porque el total de cartón y el total de retornable, son el total de ventas, esto se puede ver en la matriz de correlación, esta muestra que:
-La correlación entre "Ventas_2" y "Carton" es aproximadamente 0.5037. Esto sugiere una correlación positiva moderada entre estas dos variables. 
-La correlación entre "Ventas_2" y "Retornable" es aproximadamente 0.3336. Esto también indica una correlación positiva, pero más débil en comparación con la correlación entre "Ventas_2" y "Carton".
+No es posible aplicar el modelo VAR debido a la alta correlación entre las variables explicativas y la variable dependiente. Este fenómeno podría explicarse por el hecho de que el **total de cartón** y el **total de retornable** constituyen conjuntamente el **total de ventas**. La matriz de correlación revela lo siguiente:
+
+- La correlación entre `Ventas_2` y `Carton` es aproximadamente **0.5037**. Esto sugiere una correlación positiva moderada entre estas dos variables.
+- La correlación entre `Ventas_2` y `Retornable` es aproximadamente **0.3336**. Esto también indica una correlación positiva, pero más débil en comparación con la correlación entre `Ventas_2` y `Carton`.
 
 ```{r message=FALSE, warning=FALSE}
 modelo <- lm(Ventas_totales ~ Total_carton + Total_retornable + servicio + muestra + variacion, data = ventas2)
 durbinWatsonTest(modelo)
-
-#granger_<-causality(var_modelo,cause="Ventas2")
-#granger_
 ```
 
 Según el test de Durbin-Watson, no hay evidencia de autocorrelación de primer orden en los residuos del modelo de regresión lineal.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 var_residuals<-data.frame(residuals(var_modelo))
-#Box.test(var_residuals$Ventas2,lag=2,type="Ljung-Box")
-#adf.test(var_residuals$Ventas2)
 
 forecast_2<-predict(var_modelo,n.ahead=5,ci=0.95) ### forecast for the next 12 months
 fanchart(forecast_2,names="Ventas",main="Ventas",xlab="Time Period",ylab="Ventas")
@@ -403,7 +432,7 @@ fanchart(forecast_2,names="Ventas",main="Ventas",xlab="Time Period",ylab="Ventas
 forecast_2
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 forecast_2$fcst$Ventas_2 <- exp(forecast_2$fcst$Ventas_2)  
 
 
@@ -418,14 +447,31 @@ forecast_2$fcst$Ventas_2[5] = forecast_2$fcst$Ventas_2[5] + tail(ventas2$Ventas_
 forecast_2$fcst$Ventas_2
 ```
 
-## RESULTADO VAR FORECAST
+#### Forecast de Ventas para Modelo VAR
 
-Periodo 1: 11,577,529 Periodo 2: 11,577,529 Periodo 3: 11,053,018 Periodo 4: 9,495,208 Periodo 5: 8,623,445
+Presentamos a continuación las proyecciones de ventas utilizando el modelo VAR para los próximos cinco periodos. Estas estimaciones nos permiten anticipar la dinámica del mercado y ajustar nuestras estrategias operativas y financieras acorde a las expectativas futuras:
 
-# CONCLUSIÓN
+- **Periodo 1:** Se espera que las ventas alcancen los 11,577,529, manteniendo una línea con los resultados anteriores.
+- **Periodo 2:** Las ventas se proyectan estables, sin variación respecto al periodo anterior, en 11,577,529.
+- **Periodo 3:** Se anticipa una leve disminución en las ventas, situándose en 11,053,018, lo que podría reflejar ajustes estacionales o de mercado.
+- **Periodo 4:** Se prevé una reducción más notable en las ventas, descendiendo a 9,495,208. Este periodo requerirá atención para mitigar los impactos negativos.
+- **Periodo 5:** Las ventas podrían disminuir hasta los 8,623,445, indicando la importancia de desarrollar estrategias de recuperación y adaptación.
 
-Los pronósticos de las ventas para los próximos cinco períodos ofrecen algunas ideas interesantes. En el primer período, se espera que las ventas alcance alrededor de 11,577,529, lo que indica cierta estabilidad en las ventas. Sin embargo, en el segundo periodo la previsión es similar, lo que sugiere una continuidad en esta tendencia.
-En el tercer periodo se observa un ligero descenso de las ventas, situándose en 11,053,018. Esta disminución podría indicar una posible reducción demanda. Sin embargo, la situación cambia significativamente en el cuarto período, donde se espera que las ventas lleguen a 9,495,208, lo que indica una caída sustancial de las ventas. Esto puede ser algo alarmante. En el quinto periodo disminuye más, esto puede ser debido a que hay más competencia o la demanda disminuyo mucho.
+Estas proyecciones son una herramienta vital para la planificación estratégica, permitiéndonos preparar con anticipación para los cambios en el entorno de ventas.
+
+#### Insights de Ambos Modelos
+
+Los pronósticos para las ventas en los próximos cinco períodos revelan tendencias y desafíos importantes para el futuro próximo. Al inicio, se espera que las ventas se mantengan estables, alcanzando una cifra proyectada de alrededor de 11,577,529 en el primer período. Esta estabilidad sugiere una fase de mercado sin grandes cambios, ofreciendo una oportunidad para consolidar estrategias actuales.
+
+Para el segundo período, las proyecciones indican una continuidad en esta tendencia, con ventas esperadas similares a las del primer período. Esta persistencia subraya una etapa de estabilidad, posiblemente debido a la efectividad de las estrategias de mercado actuales o a un equilibrio en la dinámica de demanda y oferta.
+
+No obstante, el escenario se modifica ligeramente en el tercer período, donde se prevé un descenso en las ventas hasta 11,053,018. Este ligero retroceso podría ser un indicativo de una disminución en la demanda o de la influencia de factores externos que afectan negativamente el volumen de ventas.
+
+El cuarto período presenta retos más significativos, con una proyección de ventas que disminuye considerablemente a 9,495,208. Este notable declive señala la necesidad de revisar críticamente las estrategias de mercado y, posiblemente, adaptarse a un entorno competitivo más agresivo o a cambios en las preferencias de los consumidores.
+
+Finalmente, el quinto período continúa con esta tendencia de decrecimiento, evidenciando una reducción adicional en las ventas. Este patrón sugiere un aumento en la competencia o una significativa disminución en la demanda, destacando la importancia de una estrategia empresarial flexible y proactiva para superar estos desafíos y fomentar un crecimiento renovado.
+
+Estos pronósticos no solo proporcionan una visión de los posibles escenarios futuros, sino que también enfatizan la necesidad de adaptabilidad y proactividad en la planificación estratégica para mantener la relevancia y competitividad en un mercado dinámico.
 
 ## Diseño, Organización, y Limpieza de Base de Datos
 
@@ -457,7 +503,7 @@ En el tercer periodo se observa un ligero descenso de las ventas, situándose en
 
 ## Búsqueda de información y datos
 
--   ¿Qué tipo de información / datos solicitarías al socio formador para mejorar EDA? soluciones efectivas a los problemas de la empresa, principalmente en la rotación de personal y la predicción de la demanda en producción es por eso que pediríamos información como:
+-   ¿Qué tipo de información / datos solicitarías al socio formador para mejorar EDA? 
 
 Para poder tener un Análisis Exploratorio de los Datos completo, debemos de desarrollar soluciones efectivas a los problemas de la empresa, principalmente en la rotación de personal y la predicción de la demanda en producción es por eso que pediríamos información como:
 
