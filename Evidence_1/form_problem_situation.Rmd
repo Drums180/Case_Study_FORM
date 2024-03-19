@@ -1095,7 +1095,26 @@ El análisis del sentimiento general revela una actitud positiva dentro de la em
 
 ### **e. Pronóstico de ventas (e.g., unidades de producción, ventas en \$)**
 
+```{r}
+ts_plot(Ventas)
+```
+
 ### **Interpretación** Interpretar los hallazgos identificados en el desarrollo de EDA para responder las preguntas de análisis.
+
+La interpretación comprensiva de los hallazgos revela una complejidad subyacente en la percepción y realidades del ambiente laboral en la empresa FORM. A pesar de la aparente actitud positiva general, se identifican desafíos específicos y oportunidades de mejora. Principales insights y recomendaciones incluyen:
+
+- **Insights Principales:**
+  - La metodología de recolección de datos puede influir en la percepción positiva general del ambiente laboral, sugiriendo la posibilidad de un sesgo en las respuestas obtenidas.
+  - Las altas tasas de baja entre el personal soltero y los departamentos específicos, como Producción de Cartón, apuntan a necesidades y preocupaciones únicas en estas poblaciones.
+  - Una desproporción significativa en las bajas de mujeres resalta problemas potenciales de género que necesitan ser abordados para mejorar la equidad en el lugar de trabajo.
+  - La correlación positiva entre la antigüedad y la satisfacción salarial enfatiza la importancia de las políticas de retención y recompensa basadas en la lealtad y el tiempo de servicio.
+
+- **Recomendaciones para la Empresa FORM:**
+  - **Mejorar las Condiciones de Trabajo:** Priorizar la regulación de la temperatura en áreas críticas y examinar otras condiciones laborales que pueden estar afectando negativamente la satisfacción del empleado.
+  - **Ajustar la Estructura Salarial:** Considerar revisiones en la estructura salarial para mejorar la satisfacción entre los empleados de menor antigüedad, potencialmente reduciendo la rotación.
+  - **Enfocarse en la Equidad de Género:** Implementar políticas específicas para abordar y mejorar las dinámicas de género, asegurando un entorno de trabajo inclusivo y equitativo para todos los empleados.
+
+Estas recomendaciones apuntan a fortalecer el ambiente laboral en FORM, abordando tanto los desafíos identificados como aprovechando las áreas de fortaleza para fomentar un entorno más positivo y productivo.
 
 ## Búsqueda de información y datos
 
