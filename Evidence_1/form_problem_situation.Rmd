@@ -701,13 +701,141 @@ Estos pronósticos no solo proporcionan una visión de los posibles escenarios f
 
 ## Diseño, Organización, y Limpieza de Base de Datos
 
--   Seleccionar información y datos que consideren relevantes para responder las preguntas de análisis.
+### Selección de Información
+Seleccionar información y datos que consideren relevantes para responder las preguntas de análisis.
 
--   Diseñar y organizar base(s) de datos a partir de la información y datos seleccionados.
+** Base de Datos Maestra para Situación Problema 1**
 
--   Visualizar en R los primeros 6 renglones de la nueva base de datos.
+Dado que la primera situación problema tiene un enfoque con base interna, es necesario utilizar las bases de datos relacionadas al area de capital humano para resolver este problema. Dado que hasta la fecha actual la empresa FORM unicamente ha proporcionado 2 bases de datos relacionadas a dicha problematica, actualmente solo se limpiaron y unificaron esas bases dividiendose en 2 bases maestras actualmente, FORM_Bajas y FORM_Satisfaccion, cada una teniendo un enfoque distinto. Además de esto, se descargo la base de datos official proporcionada por parte del Govierno de Mexico y de libre uso que incluye los poligonos para llevar a cabo un analisis espacial. De esta forma e integrando esta ultima base de datos, podríamos tener ambas bases listas para la creación de un modelo de clasificación.
 
--   Elaborar glosario de las variables que se incluyen en la nueva base de datos.
+** Base de Datos Maestra para Situación Problema 2**
+
+Con respecto a las problematicas asociadas a la situación problema 2, actualmente no se cuenta con la data interna suficiente como para poder crear una base maestra lista que nos permita crear un modelo util y real que permita al socio formador predecir la demanda. A pesar de esto, contamos actualmente con una base de datos ligada al fenomeno de nearshoring, una base de datos unificada para la exportación e importación de materia prima y de las industrias manufactureras relacionadas que si bien no se han unificados todas las bases en 1, ya hay una base maestra para cada campo que se puede encontrar dentro de la carpeta de databases en este mismo repositorio. Una vez con datos más especificos de producción o venta compartidos por el socio formador, sería posible realizar lo solicitado y crear una base de datos maestra que unifique tanto los factores externos como interno.
+
+### Diseño de Bases
+Diseñar y organizar base(s) de datos a partir de la información y datos seleccionados.
+
+#### **Situación Problema 1: Enfoque en Capital Humano**
+
+Para abordar los desafíos asociados al capital humano, se propone la siguiente estructura y organización de las bases de datos:
+
+- **Base de Datos `FORM_Bajas`**: Esta base se enfocará en recopilar información detallada sobre las bajas de personal, incluyendo motivos de salida, fechas de baja, duración del empleo, y cualquier dato relevante que pueda influir en la decisión de dejar la empresa. Se buscará identificar patrones que puedan prevenir futuras bajas.
+  
+- **Base de Datos `FORM_Satisfaccion`**: Contendrá resultados de encuestas de satisfacción laboral, feedback sobre el ambiente laboral, oportunidades de crecimiento, balance entre vida laboral y personal, y otros factores que afectan la satisfacción y retención del personal. Esta base se utilizará para analizar correlaciones entre satisfacción y productividad o permanencia en la empresa.
+
+Para ambas bases, se realizará un trabajo de limpieza de datos, normalización y unificación de formatos para asegurar coherencia y facilitar el análisis. Además, se integrará la base de datos de polígonos del Gobierno de México para realizar análisis espacial, permitiendo explorar la distribución geográfica de las bajas y la satisfacción del personal, y cómo estos factores pueden influir en la dinámica de trabajo.
+
+#### **Situación Problema 2: Enfoque en Demanda y Nearshoring**
+
+La estructuración de la base de datos para esta situación problema se realizará de la siguiente manera:
+
+- **Base de Datos de Nearshoring y Comercio Exterior**: Incluirá datos sobre importaciones, exportaciones, tendencias de nearshoring, y cómo estos factores impactan en las industrias relevantes para la empresa. Se desglosará por tipo de producto, origen, destino, volumen y valor de las transacciones.
+
+- **Base Maestra Integrada**: A partir de los datos de nearshoring y comercio exterior, se buscará integrar esta información con datos internos de producción, ventas, y cualquier otro dato relevante proporcionado por el socio formador. Esta base maestra permitirá analizar la demanda desde una perspectiva interna y externa, facilitando la creación de modelos predictivos.
+
+Para ambas situaciones, se adoptarán prácticas de gestión de datos que incluyen la indexación adecuada, la implementación de claves foráneas para mantener la integridad referencial, y la creación de vistas o tablas agregadas para análisis específicos. Además, se prestará especial atención a la seguridad y privacidad de los datos, asegurando que la información sensible sea manejada conforme a las normativas aplicables.
+
+### Bases Maestras
+Visualizar en R los primeros 6 renglones de la nueva base de datos.
+
+##### Base de Datos: Bajas FORM
+```{r}
+setwd("../databases")
+bajas <- read_xlsx("form/form-bajas.xlsx")
+head(bajas)
+```
+
+##### Base de Datos: Satisfacción FORM
+```{r}
+setwd("../databases")
+satis <- read_xlsx("form/Encuesta_Datos_FORM_Fall2023.xlsx")
+head(satis)
+```
+
+##### Base de Datos: Nearshoring
+```{r}
+setwd("../databases")
+nearshoring <- read_xlsx("nearshoring/annual_economic_data.xlsx")
+tail(nearshoring)
+```
+
+##### Base de Datos: Exportación de Vehiculos
+```{r message=FALSE, warning=FALSE}
+setwd("../databases")
+export <- read_csv("industry_autos_mx/exportacion_vehiculos_mx.csv")
+head(export)
+```
+
+### Glosario de Variables
+Elaborar glosario de las variables que se incluyen en la nueva base de datos.
+
+### Glosario de Variables
+
+Elaboración de un glosario para las variables incluidas en las nuevas bases de datos, sin incluir el tipo de dato.
+
+#### Base de Datos: Bajas FORM
+
+- **Motivo de Baja**: Razón por la cual el empleado dejó la empresa.
+- **Puesto**: Cargo que el empleado ocupaba en la empresa.
+- **Dpto**: Departamento al que pertenecía el empleado.
+- **SD**: Salario diario del empleado.
+- **Estado Civil**: Estado civil del empleado al momento de la baja.
+- **Género**: Género del empleado.
+- **Año**: Año en que se produjo la baja.
+- **Estado**: Estado de la república donde residía el empleado.
+- **Municipio**: Municipio de residencia del empleado.
+- **Dias_trabajados**: Total de días que el empleado trabajó en la empresa.
+- **Meses**: Número de meses que el empleado estuvo en la empresa.
+- **Edad**: Edad del empleado al momento de la baja.
+
+#### Base de Datos: Satisfacción FORM
+
+- **Encuesta**: Identificador único de la encuesta de satisfacción.
+- **Puesto**: Cargo que ocupa el empleado dentro de la empresa.
+- **Antigüedad**: Tiempo (en años) que el empleado lleva trabajando en la empresa.
+- **Razon_entrada**: Motivo principal por el que el empleado decidió ingresar a la empresa.
+- **Salario_bueno**: Percepción del empleado sobre la competitividad de su salario.
+- **Prestaciones_bueno**: Valoración del empleado sobre las prestaciones ofrecidas por la empresa.
+- **Jornada_no_excesiva**: Opinión del empleado sobre la duración de su jornada laboral.
+- **Ofrecimiento_herramientas**: Si el empleado considera que se le proporcionan las herramientas necesarias para su trabajo.
+- **No_molestia_temperatura**: Confort térmico en el lugar de trabajo.
+- **Estres_bajo**: Percepción del empleado sobre los niveles de estrés en su trabajo.
+- **Facilidad_transporte**: Facilidad para trasladarse al lugar de trabajo.
+- **Zona_trabajo_comoda**: Comodidad de la zona de trabajo.
+- **Permanencia_form_futuro**: Intención del empleado de permanecer en la empresa a futuro.
+- **Sufrido_situaciones_conflicto**: Si el empleado ha experimentado situaciones de conflicto en el trabajo.
+- **Molestias_puesto**: Incomodidades físicas relacionadas con el puesto de trabajo.
+- **Sentimiento_form**: Sentimientos generales del empleado hacia la empresa.
+- **Edad**: Edad del empleado.
+- **Género**: Género del empleado.
+- **Estado Civil**: Estado civil del empleado.
+- **Municipio**: Municipio de residencia del empleado.
+- **Nivel_escolar**: Último nivel de estudios completado por el empleado.
+- **Personas_dependientes**: Número de personas que dependen económicamente del empleado.
+
+#### Base de Datos: Nearshoring
+
+- **Año**: Año de registro de la información.
+- **IED_Flujos_Reales**: Inversión Extranjera Directa en flujos reales.
+- **Exportaciones**: Valor total de las exportaciones realizadas.
+- **Educacion**: Indicadores relacionados con la educación.
+- **Salario_Diario**: Salario diario promedio.
+- **Innovacion**: Indicadores de innovación y desarrollo tecnológico.
+- **Inseguridad_Robo**: Índices de robos.
+- **Inseguridad_Homicidio**: Índices de homicidios.
+- **Tipo_de_Cambio**: Valor del tipo de cambio.
+- **Densidad_Carretera**: Densidad de la red carretera.
+- **Densidad_Poblacion**: Densidad poblacional.
+- **PIB_Per_Capita**: Producto Interno Bruto per cápita.
+- **INPC**: Índice Nacional de Precios al Consumidor.
+- **Empleo**: Indicadores de empleo.
+- **CO2_Emisiones**: Emisiones de CO2.
+- **Empresas_Extranjeras_Registradas**: Número de empresas extranjeras registradas.
+- **Población_Economicamente_Activa**: Población económicamente activa.
+- **Poblacion_ocupada_industria_manufacturera**: Población ocupada en la industria manufacturera.
+- **Poblacion_ocupada**: Población ocupada en general.
+- **Tasa_de_ocupacion_industria_manufacturera**: Tasa de ocupación en la industria manufacturera.
+
 
 ## Análisis Exploratorio de los Datos (EDA)
 Desarrollar EDA que responda cada una de las preguntas de análisis.
@@ -724,14 +852,14 @@ datos_num[sapply(datos_num, is.factor)] <- lapply(datos_num[sapply(datos_num, is
 
 ### **a. Estadísticos Descriptivos**
 
-#### Analisis de Encuesta de Satisfacción
+#### **Analisis de Encuesta de Satisfacción**
 
-#### Estructura de la base de datos
+##### Estructura de la base de datos
 ```{r message=FALSE, warning=FALSE}
 str(datos_num)
 ```
 
-#### Medidas Descriptivas
+##### Medidas Descriptivas
 ```{r message=FALSE, warning=FALSE}
 summary(datos_num)
 ```
@@ -742,7 +870,7 @@ describe(datos_num)
 
 ###  **b. Medidas de Dispersión**
 
-#### Medidas de Dispersión
+##### Medidas de Dispersión
 
 **Cálculo de medidas de dispersión para cada variable numérica relevante**
 ```{r message=FALSE, warning=FALSE}
@@ -757,7 +885,7 @@ sapply(datos_num, IQR, na.rm = TRUE)
 
 ### **c. 4-6 Gráficos (barras, líneas, pastel, dispersión, burbujas, correlación, mapas)**
 
-#### **Relación entre el Nivel de Estrés y Puesto de Trabajo**
+##### **Relación entre el Nivel de Estrés y Puesto de Trabajo**
 ```{r message=FALSE, warning=FALSE}
 ggplot(datos, aes(x = reorder(puesto, estres_bajo, FUN = median), y = estres_bajo)) +
   geom_bar(stat = "summary", fun = "median", fill = "orange", color = "black") +
@@ -776,7 +904,7 @@ Un hallazgo importante es que estos puestos pueden tener condiciones de trabajo 
 
 Los puestos con menores niveles de estrés son asistente de producción,embarque, y mantenimiento, lo que podría indicar que estas áreas son menos propensas a experimentar rotación debido al estrés laboral.
 
-#### **Relación entre la Antigüedad y el Salario**
+##### **Relación entre la Antigüedad y el Salario**
 
 ```{r message=FALSE, warning=FALSE}
 antiguedad_por_salario <- datos %>%
@@ -809,7 +937,7 @@ Este patrón sugiere que la satisfacción salarial incrementa con el tiempo de s
 
 Ante estos hallazgos, se recomienda a la empresa FORM considerar modificaciones en su estructura salarial para incrementar la satisfacción salarial entre los empleados de menor antigüedad. Tal ajuste podría contribuir a reducir la rotación de personal, fomentando un ambiente laboral más estable y comprometido.
 
-#### **Percepción de Molestia por la Temperatura por Puesto**
+##### **Percepción de Molestia por la Temperatura por Puesto**
 
 ```{r message=FALSE, warning=FALSE}
 datos %>%
@@ -828,7 +956,7 @@ datos %>%
 
 Hemos observado una notable incomodidad con la temperatura por parte de los ayudantes generales, lo cual requiere que tomemos medidas para regular el clima en el espacio donde desempeñan sus labores. Esta situación no parece ser tan pronunciada en otras áreas.
 
-#### **Disconformidad por Puesto** 
+##### **Disconformidad por Puesto** 
 
 ```{r message=FALSE, warning=FALSE}
 datos %>% 
@@ -845,7 +973,7 @@ datos %>%
 ```
 
 
-#### **Percepción del Estrés por Rangos de Antigüedad**
+##### **Percepción del Estrés por Rangos de Antigüedad**
 
 ```{r message=FALSE, warning=FALSE}
 datos$antiguedad_rango <- cut(datos$antiguedad, breaks = seq(0, max(datos$antiguedad, na.rm = TRUE) + 5, by = 5), right = FALSE, labels = paste(seq(0, max(datos$antiguedad, na.rm = TRUE), by = 5), seq(5, max(datos$antiguedad, na.rm = TRUE) + 5, by = 5) - 1, sep = "-"))
@@ -868,7 +996,7 @@ datos %>%
 
 Contamos con indicios sólidos de que el estrés no constituye un factor adverso para nuestros trabajadores. Observamos que la mayoría, sin importar su tiempo de servicio en la empresa, reporta experimentar un nivel bajo de estrés en sus actividades laborales.
 
-####  **Percepción de Prestaciones por Puesto**
+#####  **Percepción de Prestaciones por Puesto**
 
 ```{r message=FALSE, warning=FALSE}
 datos %>%
@@ -888,6 +1016,8 @@ Observamos que entre los ayudantes generales se concentra la mayor cantidad de r
 
 Por tanto, se puede concluir que una de las principales áreas de mejora para la empresa reside en el trato hacia los ayudantes generales, quienes expresan descontento principalmente con la temperatura en su lugar de trabajo y perciben que las prestaciones que reciben no son adecuadas. Esta situación podría estar contribuyendo a la alta rotación observada en este sector de la empresa.
 
+### **d. Tablas (frequencia, contingencia)**
+
 #### Analisis de Bajas de FORM
 
 ```{r message=FALSE, warning=FALSE}
@@ -899,9 +1029,7 @@ df <- df %>%
   mutate(Dpto = if_else(Dpto == "Produccion Cartón MC", "Producción Cartón MC", Dpto))
 ```
 
-### **d. Tablas (frequencia, contingencia)**
-
-#### **Bajas por Departamento**
+##### **Bajas por Departamento**
 
 ```{r message=FALSE, warning=FALSE}
 bajas_por_departamento <- df %>%
@@ -929,7 +1057,7 @@ ggplot(bajas_por_departamento, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Ba
 ```
 
 
-#### **Bajas por Departamento y Género**
+##### **Bajas por Departamento y Género**
 
 ```{r message=FALSE, warning=FALSE}
 bajas_por_departamento_genero <- df %>%
@@ -955,7 +1083,7 @@ ggplot(bajas_por_departamento_genero, aes(x = reorder(Dpto, -Total_Bajas), y = T
 
 ```
 
-#### **Bajas por Motivo y Género**
+##### **Bajas por Motivo y Género**
 
 ```{r message=FALSE, warning=FALSE}
 bajas_por_motivo_genero <- df %>%
@@ -981,7 +1109,7 @@ df$AñoMes <- format(df$`Fecha de Baja`, "%Y-%m")
 ```
 
 
-#### **Tendencia de Bajas a lo Largo del Tiempo**
+##### **Tendencia de Bajas a lo Largo del Tiempo**
 
 ```{r message=FALSE, warning=FALSE}
 bajas_por_fecha <- df %>%
@@ -997,7 +1125,7 @@ ggplot(bajas_por_fecha, aes(x = AñoMes, y = Total_Bajas, group = 1)) +
 
 ```
 
-#### **Bajas Totales por Mes**
+##### **Bajas Totales por Mes**
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -1043,9 +1171,9 @@ ggplot(bajas_por_estado_civil, aes(x = `Estado Civil`, y = Total_Bajas, fill = `
 Se destaca claramente que las personas solteras presentan una mayor tasa de bajas en la empresa. Este patrón podría deberse a la menor cantidad de responsabilidades familiares o dependientes económicos, lo que les otorga mayor flexibilidad para tomar decisiones sobre su carrera profesional sin tener que considerar el impacto en otros miembros de una familia.
 
 
-#### **Análisis de Sentimiento**
+##### **Análisis de Sentimiento**
 
-#Las 2 tendencias de las emociones son: Positiva o Negativa
+Las 2 tendencias de las emociones son: Positiva o Negativa
 
 ```{r}
 # Función ajustada para preprocesar texto
@@ -1109,7 +1237,7 @@ La interpretación comprensiva de los hallazgos revela una complejidad subyacent
   - Una desproporción significativa en las bajas de mujeres resalta problemas potenciales de género que necesitan ser abordados para mejorar la equidad en el lugar de trabajo.
   - La correlación positiva entre la antigüedad y la satisfacción salarial enfatiza la importancia de las políticas de retención y recompensa basadas en la lealtad y el tiempo de servicio.
 
-- **Recomendaciones para la Empresa FORM:**
+- **Recomendaciones Generales para la Empresa FORM:**
   - **Mejorar las Condiciones de Trabajo:** Priorizar la regulación de la temperatura en áreas críticas y examinar otras condiciones laborales que pueden estar afectando negativamente la satisfacción del empleado.
   - **Ajustar la Estructura Salarial:** Considerar revisiones en la estructura salarial para mejorar la satisfacción entre los empleados de menor antigüedad, potencialmente reduciendo la rotación.
   - **Enfocarse en la Equidad de Género:** Implementar políticas específicas para abordar y mejorar las dinámicas de género, asegurando un entorno de trabajo inclusivo y equitativo para todos los empleados.
