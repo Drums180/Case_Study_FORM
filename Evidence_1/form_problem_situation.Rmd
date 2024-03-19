@@ -72,11 +72,28 @@ library(tidyr)
 library(readtext)
 library(syuzhet)
 library(RColorBrewer)
-library(wordcloud)
 library(tm)
+library(caret)
+library(MASS)
+library(rpart)
+library(rpart.plot)
+library(party)
+library(gmodels)
+library(knitr)
+library(cluster)    
+library(e1071)
+library(pROC)
+library(ISLR)
+library(gridExtra)
+library(car)
+library(DataExplorer)
+library(randomForest)
+library(class)
+library(factoextra)
+library(purrr)
 ```
 
-### Preguntas de Análisis
+## Preguntas de Análisis
 
 Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que se puedan responder mediante el análisis de datos.
 
@@ -88,8 +105,14 @@ Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que 
 - ¿En qué parte de la empresa el trabajador se siente más inconforme y cuál es su perfil?
 
 **Situación Problema 2: Predicción de Demanda**
+- ¿Cuáles son los patrones históricos de demanda de empaques de cartón para autopartes en los mercados objetivo de la empresa FORM, y cómo varían estos patrones según la temporada, el tipo de autoparte, y las regiones geográficas?
+- ⁠¿Cómo impactan los lanzamientos de nuevos modelos de vehículos y las tendencias en la industria automotriz en la demanda de diferentes tipos de empaques de cartón para autopartes?
+- ⁠¿Cuál ha sido el efecto de las campañas de marketing y las actividades promocionales de la empresa FORM sobre la demanda de sus productos en el pasado?
+- ⁠¿Cómo impactan algunas variables externas de carácter macroeconómico a las ventas de la empresa?
 
 ## Pronosticos y Nearshoring
+
+- **Mediante el uso de visualización de datos describir el posible impacto del fenómeno nearshoring sobre el desempeño de la empresa FORM.**
 
 En un mundo empresarial cada vez más globalizado y competitivo, las organizaciones buscan constantemente estrategias innovadoras para optimizar sus operaciones y mantenerse a la vanguardia de sus respectivas industrias. Una de estas estrategias que ha ganado protagonismo en los últimos años es el “Nearshoring”, un enfoque de outsourcing que consiste en delegar actividades y servicios a proveedores ubicados en países geográficamente cercanos. En este contexto, México emerge como un destino atractivo para el “Nearshoring”, gracias a su ubicación estratégica, recurso humano capacitado y condiciones económicas favorables.
 
@@ -97,56 +120,19 @@ México tiene una ubicación geográfica privilegiada, compartiendo fronteras co
 
 El país también cuenta con una fuerza laboral altamente calificada y diversificada, que va desde ingenieros y profesionales de tecnología hasta expertos en manufactura y servicios financieros. Los costos laborales en México son competitivos en comparación con otros destinos de subcontratación, lo que permite a las empresas obtener mayor valor agregado a un menor costo. Además, el continuo crecimiento en educación y formación ha impulsado la formación de profesionales altamente cualificados, lo que garantiza la disponibilidad del talento necesario para cubrir las demandas del “Nearshoring”. Todo esto ha hecho que en los últimos años México haya sido testigo del acelerado proceso de Nearshoring, donde muchas empresas internacionales han decidido invertir en nuestro país para abrir megafábricas. Recientemente destaca el caso de Testa y su gigafábrica en el estado de Nuevo León. . Este fenómeno podría traer grandes beneficios a nuestro país por todas las pérdidas económicas que conlleva. Según el Global Business Council (CEG) (2023), el nearshoring podría generar hasta 4 millones de empleos en territorio mexicano para 2030, recibiendo entre 30 y 50 mil millones de dólares anuales, además, el mismo estudio señala que este fenómeno puede ser responsable de aumentando el PIB de México hasta en un 2.5% en los próximos 6 años. Por lo tanto, es muy importante analizar y comprender este fenómeno a través del análisis estadístico de datos históricos de Inversión Extranjera Directa y algunas variables macroeconómicas que están estrechamente relacionadas con dicha variable dependiente.
 
-```{r}
-### loading required libraries
-library(caret)
-library(MASS)
-library(rpart)
-library(rpart.plot)
-library(party)
-library(gmodels)
-library(knitr)
-library(readxl)
-library(readr)
-library(dplyr)
-library(cluster)
-library(ggplot2)
-library(corrplot)
-library(tseries)
-library(e1071)
-library(pROC)
-library(ISLR)
-library(knitr)
-library(gridExtra)
-library(car)
-library(DataExplorer)
-library(tidyr)
-library(ggplot2)
-library(randomForest)
-library(class)
-library(caret)
-library(cluster)    
-library(factoextra) 
-library(purrr)
+### Pronosticar el evento de Nearshoring.
 
+#### Bases de Datos de Nearshoring
+```{r message=FALSE, warning=FALSE}
+setwd("../databases/nearshoring")
+df=read.csv("quarter_economic_data.csv")
 
-```
-
-```{r}
-df=read.csv("/Users/gabrielmedina/Desktop/git2/case_Study_FORM/databases/nearshoring/quarter_economic_data.csv")
-
-```
-
-##### Limpieza de datos
-
-```{r}
 summary(df)
 ```
 
 ```{r}
 str(df)
 ```
-
 
 ```{r}
 # Calculamos el número de NA por columna
@@ -159,19 +145,17 @@ df <- df %>% select(-one_of(columnas_para_eliminar))
 # Para las columnas restantes, imputamos los NA con la mediana
 df <- df %>% mutate(across(.cols = where(~ sum(is.na(.)) < 7), 
                            .fns = ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
-
 ```
 
 Se realizó una imputación de las variables y se eliminaron aquellas con demasiados valores NAS faltantes. 
 
-# EDA
+**Analisis de la Base de Nearshoring**
 
 ```{r}
 summary(df)
 ```
 
 ```{r}
-
 dataf=df
 
 data2 <- df %>% select(Year, Quarter, New_FDI_Inflows)
@@ -186,7 +170,6 @@ Se convirtió la variable de Año en el formato adecuado de fecha.
 
 ```{r}
 plot(time_serie, main = "IED quarter", xlab = "Year quarter", ylab = "IED")
-
 ```
 Podemos ver que el gráfico presenta un claro componente de estacionalidad y puede haber cierta estacionariedad, sin embargo, se ve una tendencia ascendente a lo largo de toda la serie de tiempo, por lo que es necesario aplicar diversas pruebas para comprender mejor nuestra serie de tiempo.
 
@@ -195,7 +178,9 @@ descompose<-decompose(time_serie)
 plot(descompose)
 ```
 
-En el gráfico anterior podemos observar una ligera tendencia en toda la serie temporal como se describió anteriormente, esto podría afectar la presencia de estacionariedad. Por otro lado, se evidencia el componente estacional, que aumenta en algunos trimestres de cada período. Esto se puede explicar en el contexto de la variable dependiente con estacionalidades en la demanda de bienes y servicios, eventos económicos como ferias comerciales o temporadas de impuestos. , o incluso patrones estacionales en la disponibilidad de recursos naturales. Todo esto hace que en algunas partes de cada año la IED aumente y disminuya periódicamente. Respecto al componente aleatorio residual, se observa cierto ruido en las series temporales, especialmente en el período 2013-2015 y 2020 a 2022. Esto se debe a variaciones en la serie temporal que no pueden explicarse con componentes de estacionalidad o tendencias en la serie temporal. Esto, en un contexto real, se puede explicar con fenómenos con las reformas constitucionales del presidente Enrique Peña Nieto en 2013 y la pandemia de COVID-19 a partir de 2020.
+En el gráfico anterior podemos observar una ligera tendencia en toda la serie temporal como se describió anteriormente, esto podría afectar la presencia de estacionariedad. Por otro lado, se evidencia el componente estacional, que aumenta en algunos trimestres de cada período. Esto se puede explicar en el contexto de la variable dependiente con estacionalidades en la demanda de bienes y servicios, eventos económicos como ferias comerciales o temporadas de impuestos. , o incluso patrones estacionales en la disponibilidad de recursos naturales. 
+
+Todo esto hace que en algunas partes de cada año la IED aumente y disminuya periódicamente. Respecto al componente aleatorio residual, se observa cierto ruido en las series temporales, especialmente en el período 2013-2015 y 2020 a 2022. Esto se debe a variaciones en la serie temporal que no pueden explicarse con componentes de estacionalidad o tendencias en la serie temporal. Esto, en un contexto real, se puede explicar con fenómenos con las reformas constitucionales del presidente Enrique Peña Nieto en 2013 y la pandemia de COVID-19 a partir de 2020.
 
 ```{r warning=FALSE}
 # The stationarity of the series is checked with the following ADF test.
@@ -209,7 +194,7 @@ acf(time_serie,main="Significant Autocorrelations")
 
 Podemos observar que la serie no muestra de autocorrelación serial, ya que en los periodos la función de autocorrelación no excede las líneas de significancia.
 
-#### Time Series Model 1
+#### Modelo Arma Calculado
 
 ```{r warning=FALSE}
 summary(arma<-arma(diff(time_serie)),order=c(1,1))
@@ -218,7 +203,8 @@ plot(arma)
 Estos coeficientes indican una correlación positiva débil con el valor anterior y una correlación negativa fuerte con el error en el período anterior, respectivamente. Además, se ha incluido un término de interceptación con un valor estimado de 109.8050
 
 Los residuos del modelo tienen una varianza estimada (sigma^2) de 4774485 y los resultados del ajuste muestran un AIC muy alto.
-##### MODEL 2 - ARIMA with diff and LOG
+
+#### Modelo Arima con Log y Diff Calculado
 
 ```{r warning=FALSE}
 summary(arima<-Arima(diff(log((time_serie))),order=c(1,1,1))) 
@@ -229,10 +215,9 @@ El coeficiente autorregresivo (AR1) es -0,6977 y el coeficiente de media móvil 
 
 La varianza estimada del modelo (sigma^2) es 0,0.5655. El valor logarítmico de verosimilitud es -73.89, y los criterios de información, como el AIC (Akaike Information Criterion), el AIC corregido (AICc) y el BIC (Bayesian Information Criterion), indican que este modelo podría ser apropiado para la serie temporal.
 
-##### Pruebas de diagnóstico
+#### Pruebas de Diagnostico en la Data
 
-###### Modelo 1
-
+**Modelo Arma**
 ```{r}
 arma_residuals<-arma$residuals
 Box.test(arma_residuals,lag=1,type="Ljung-Box")
@@ -255,8 +240,7 @@ hist(arma$residuals)
 ```
 Se aprecia relativa normalidad en los residuales.
 
-###### Model 2
-
+**Modelo Arima**
 ```{r}
 arima_residuals<-arima$residuals
 Box.test(arima_residuals,lag=1,type="Ljung-Box")
@@ -265,9 +249,10 @@ Box.test(arima_residuals,lag=1,type="Ljung-Box")
 El valor de p obtenido en la prueba de Box-Ljung (0,8) es mayor que el valor de p máximo comúnmente utilizado que es 0,05. Esto significa que no se encontró evidencia significativa de autocorrelación en los residuos, ya que el valor p es mayor que 0,05, lo que respalda la validez del modelo en términos de autocorrelación.
 
 ```{r message=FALSE, warning=FALSE}
+residuals_ts <- arima$residuals
 
-residuals_clean <- na.omit(arima$residuals)
-
+# Interpolar los valores NA
+residuals_clean <- na.approx(residuals_ts)
 
 suppressWarnings({
   adf_test_result <- adf.test(residuals_clean)
@@ -275,7 +260,6 @@ suppressWarnings({
 
 # Ver el resultado
 print(adf_test_result)
-
 ```
 El valor de p de 0,01, inferior al umbral de 0,05, indica una fuerte evidencia contra la hipótesis nula de no estacionariedad. Esto significa que es poco probable que los residuos sean no estacionarios.
 
@@ -287,7 +271,7 @@ Se aprecia normalidad en los residuales del modelo 2.
 
 Debido a métricas como el AIC y a las pruebas de diagnóstico, el modelo 2 es elegido como el más apropiado.
 
-##### Forecast for the next 5 periods.
+#### Forecast de Nearshoring
 
 ```{r}
 suppressWarnings({
@@ -306,6 +290,7 @@ arima_forecast
 plot(arima_forecast)
 autoplot(arima_forecast)
 ```
+
 En el pronóstico realizado para la Inversión Extranjera Directa (IED) relacionada con el fenómeno del nearshoring, se observan tendencias y variaciones interesantes para los próximos cinco trimestres. La predicción se presenta con intervalos de confianza del 80% y del 95%, lo que nos permite entender la incertidumbre asociada con cada estimación de punto.
 
 Para el cuarto trimestre del año 24, el pronóstico de punto estima una IED de 3,036.064 millones de dólares. Los intervalos de confianza sugieren que, con un 80% de confianza, la IED podría variar entre 1,121.986 y 4,950.143 millones de dólares. Ampliando la certeza al 95%, el rango se extiende desde 108.734 hasta 5,963.394 millones de dólares, indicando una mayor incertidumbre en las estimaciones.
@@ -1110,7 +1095,26 @@ El análisis del sentimiento general revela una actitud positiva dentro de la em
 
 ### **e. Pronóstico de ventas (e.g., unidades de producción, ventas en \$)**
 
+```{r}
+ts_plot(Ventas)
+```
+
 ### **Interpretación** Interpretar los hallazgos identificados en el desarrollo de EDA para responder las preguntas de análisis.
+
+La interpretación comprensiva de los hallazgos revela una complejidad subyacente en la percepción y realidades del ambiente laboral en la empresa FORM. A pesar de la aparente actitud positiva general, se identifican desafíos específicos y oportunidades de mejora. Principales insights y recomendaciones incluyen:
+
+- **Insights Principales:**
+  - La metodología de recolección de datos puede influir en la percepción positiva general del ambiente laboral, sugiriendo la posibilidad de un sesgo en las respuestas obtenidas.
+  - Las altas tasas de baja entre el personal soltero y los departamentos específicos, como Producción de Cartón, apuntan a necesidades y preocupaciones únicas en estas poblaciones.
+  - Una desproporción significativa en las bajas de mujeres resalta problemas potenciales de género que necesitan ser abordados para mejorar la equidad en el lugar de trabajo.
+  - La correlación positiva entre la antigüedad y la satisfacción salarial enfatiza la importancia de las políticas de retención y recompensa basadas en la lealtad y el tiempo de servicio.
+
+- **Recomendaciones para la Empresa FORM:**
+  - **Mejorar las Condiciones de Trabajo:** Priorizar la regulación de la temperatura en áreas críticas y examinar otras condiciones laborales que pueden estar afectando negativamente la satisfacción del empleado.
+  - **Ajustar la Estructura Salarial:** Considerar revisiones en la estructura salarial para mejorar la satisfacción entre los empleados de menor antigüedad, potencialmente reduciendo la rotación.
+  - **Enfocarse en la Equidad de Género:** Implementar políticas específicas para abordar y mejorar las dinámicas de género, asegurando un entorno de trabajo inclusivo y equitativo para todos los empleados.
+
+Estas recomendaciones apuntan a fortalecer el ambiente laboral en FORM, abordando tanto los desafíos identificados como aprovechando las áreas de fortaleza para fomentar un entorno más positivo y productivo.
 
 ## Búsqueda de información y datos
 
