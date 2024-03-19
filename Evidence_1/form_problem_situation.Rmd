@@ -138,6 +138,11 @@ library(dplyr)
 library(ggplot2)
 library(psych)
 library(tidyr)
+library(readtext)
+library(syuzhet)
+library(RColorBrewer)
+library(wordcloud)
+library(tm)
 ```
 
 
@@ -191,6 +196,11 @@ ggplot(datos, aes(x = reorder(puesto, estres_bajo, FUN = median), y = estres_baj
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+En esta gráfica de barras podemos observar diferentes puestos de trabajo y su correspondiente nivel mediano de estrés.
+Los puestos con niveles más altos de estrés parecen ser soldador,otro, y operador.
+Un hallazgo importante es que estos puestos pueden tener condiciones de trabajo que generan un alto nivel de estrés, lo que podría estar contribuyendo a la rotación de personal. La empresa FORM podría enfocarse en mejorar las condiciones de trabajo en estos puestos, tal vez automatizando tareas estresantes o proporcionando más apoyo y descansos.
+Los puestos con menores niveles de estrés son asistente de producción,embarque, y mantenimiento, lo que podría indicar que estas áreas son menos propensas a experimentar rotación debido al estrés laboral.
+
 ## **Relación entre la Antigüedad y el Salario**
 
 ```{r message=FALSE, warning=FALSE}
@@ -217,6 +227,11 @@ ggplot(antiguedad_por_salario, aes(x = salario_bueno, y = antiguedad_promedio, f
        y = "Antigüedad Promedio (años)"
 ```
 
+En esta gráfica de barras verticales podemos ver la relación entre la antigüedad promedio en la empresa y la satisfacción que tiene con el salario.
+Parece ser que existe una correlación entre la antigüedad y la satisfacción salarial, siendo aquellos que están totalmente de acuerdo con su salario quienes tienen una antigüedad promedio más alta (alrededor de 15 a 20 años).
+
+Un hallazgo relevante es que la satisfacción salarial aumenta con la antigüedad. Esto podría indicar que los incrementos salariales o bonos basados en la antigüedad son efectivos, o que aquellos con mayor antigüedad están en puestos mejor remunerados debido a ascensos o aumentos basados en el desempeño a lo largo del tiempo.
+La empresa FORM podría considerar ajustar su estructura salarial para mejorar la satisfacción entre los empleados más nuevos o aquellos con menos antigüedad, lo que potencialmente podría reducir la rotación de personal.
 
 ## **Percepción de Molestia por la Temperatura por Puesto**
 
@@ -455,6 +470,30 @@ ggplot(bajas_por_estado_civil, aes(x = `Estado Civil`, y = Total_Bajas, fill = `
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+Se puede observar de una muy buena forma, que el estar soltero o soltera es la manera en la que las personas se dan más de baja. Esto puede ser derivado de que no tienen una familia o una persona que pueda llegar a depender de ellos.
+
+
+## **Análisis de Sentimiento**
+
+#Las 2 tendencias de las emociones son: Positiva o Negativa
+
+```{r}
+texto <- readtext("C:\\Users\\Eduardo\\Downloads\\cotizacion imss fecha pago comer 3pmcomodo contento.txt")
+str(texto)
+texto_sin_numeros <- gsub("\\d+", "", texto)
+texto_palabras <- get_tokens(texto)
+View(texto_palabras)
+emociones_df <- get_nrc_sentiment(texto_palabras, language = "spanish")
+```
+
+```{r}
+barplot(colSums(prop.table(emociones_df[, 1:8])))
+
+sentimientos <- (emociones_df$negative*-1) + emociones_df$positive
+simple_plot(sentimientos)
+```
+
+Este análisis de sentimiento general, nos muestra un sentimiento positivo dentro de la empresa. Esto se cree que es ya que se hizo con base en una pregunta abierta contestada por los colaboradores, en la cuál creemos ue es más complicado que realmente se expresen en 3 palabras de una manera negativa.
 
 
 ##Referencias 
@@ -470,3 +509,4 @@ ggplot(bajas_por_estado_civil, aes(x = `Estado Civil`, y = Total_Bajas, fill = `
 #5. *MexicoIndustry. (s. f.). *Incrementará 8% el sector automotriz en 2024*. MexicoIndustry. Recuperado 16 de marzo de 2024, de <https://mexicoindustry.com/noticia/incrementara-8-el-sector-automotriz-en-2024> 
 
 #6. *Newsroom Infobae. (2023, 12 abril). Industria automotriz en México espera más empleos por electromovilidad. *Infobae*. Recuperado 16 de marzo de 2024, de <https://www.infobae.com/america/agencias/2023/04/12/industria-automotriz-en-mexico-espera-mas-empleos-por-electromovilidad/>
+
