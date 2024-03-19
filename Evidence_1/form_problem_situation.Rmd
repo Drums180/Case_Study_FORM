@@ -73,6 +73,14 @@ library(heatmaply)
 
 Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que se puedan responder mediante el análisis de datos.
 
+Preguntas RRHH
+
+¿Qué está causando la rotación de personal tan alta?
+¿Existe algún momento del año donde se den más bajas dentro de la empresa?
+¿Cómo se siente la gente dentro de su trabajo actual?
+¿Qué factor ayuda a que el personal dure más tiempo dentro de la empresa?
+¿En qué parte de la empresa el trabajador se siente más inconforme y cuál es su perfil?
+
 ## Pronosticos y Nearshoring
 
 ¿Cómo es el posible impacto del Nearshoring sobre la Empresa FORM?
@@ -539,16 +547,383 @@ Para tener un análisis más detallado buscamos información en diferentes fuent
 
 **2.**  Impacto en la electromovilidad, ya que existe una transición hacia la electromovilidad y esto genera una oportunidad para la creación de empleos y la demanda de competencias especializadas, esto impacta e influye de manera significativa a la demanda de empaques para los autopartes y componentes electrónicos y sistemas avanzados en los automóviles.
 
+
+#Librerías
+```{r message=FALSE, warning=FALSE}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(psych)
+library(tidyr)
+library(readtext)
+library(syuzhet)
+library(RColorBrewer)
+library(wordcloud)
+library(tm)
+```
+
+
+## Importando base de datos
+```{r}
+datos <- read_excel("C:\\Users\\suare\\Downloads\\Encuesta_Datos_FORM_Fall2023.xlsx")
+```
+
+# **Análisis Exploratorio de los Datos**
+```{r message=FALSE, warning=FALSE}
+datos_num <- datos
+datos_num[sapply(datos_num, is.factor)] <- lapply(datos_num[sapply(datos_num, is.factor)], as.numeric)
+```
+
+## Estructura de la base de datos
+```{r message=FALSE, warning=FALSE}
+str(datos_num)
+```
+
+## Medidas Descriptivas
+```{r message=FALSE, warning=FALSE}
+summary(datos_num)
+```
+
+```{r message=FALSE, warning=FALSE}
+describe(datos_num)
+```
+
+# Medidas de Dispersión
+
+## Cálculo de medidas de dispersión para cada variable numérica relevante
+```{r message=FALSE, warning=FALSE}
+sapply(datos_num, var, na.rm = TRUE)  # Varianza
+sapply(datos_num, sd, na.rm = TRUE)   # Desviación estándar
+```
+
+## Cálculo del rango intercuartílico para cada variable numérica relevante
+```{r message=FALSE, warning=FALSE}
+sapply(datos_num, IQR, na.rm = TRUE)
+```
+
+## **Relación entre el Nivel de Estrés y Puesto de Trabajo**
+```{r message=FALSE, warning=FALSE}
+ggplot(datos, aes(x = reorder(puesto, estres_bajo, FUN = median), y = estres_bajo)) +
+  geom_bar(stat = "summary", fun = "median", fill = "orange", color = "black") +
+  coord_flip() +  # Invertir ejes para tener los puestos en el eje y y las barras extendiéndose horizontalmente
+  theme_minimal() +
+  labs(title = "Nivel de Estrés Mediano por Puesto de Trabajo",
+       y = "Nivel de Estrés Mediano",
+       x = "Puesto") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+En esta gráfica de barras podemos observar diferentes puestos de trabajo y su correspondiente nivel mediano de estrés.
+Los puestos con niveles más altos de estrés parecen ser soldador,otro, y operador.
+Un hallazgo importante es que estos puestos pueden tener condiciones de trabajo que generan un alto nivel de estrés, lo que podría estar contribuyendo a la rotación de personal. La empresa FORM podría enfocarse en mejorar las condiciones de trabajo en estos puestos, tal vez automatizando tareas estresantes o proporcionando más apoyo y descansos.
+Los puestos con menores niveles de estrés son asistente de producción,embarque, y mantenimiento, lo que podría indicar que estas áreas son menos propensas a experimentar rotación debido al estrés laboral.
+
+## **Relación entre la Antigüedad y el Salario**
+
+```{r message=FALSE, warning=FALSE}
+antiguedad_por_salario <- datos %>%
+  group_by(salario_bueno) %>%
+  summarise(antiguedad_promedio = mean(antiguedad, na.rm = TRUE)) %>%
+  arrange(desc(antiguedad_promedio))
+
+# Definir una paleta de colores personalizada
+colores_personalizados <- c('Totalmente de acuerdo' = '#AED6F1', # Claro
+                            'Medianamente de acuerdo' = '#5DADE2', # Intermedio claro
+                            'Ni de acuerdo ni en desacuerdo' = '#3498DB', # Neutro
+                            'Medianamente en desacuerdo' = '#2874A6', # Intermedio oscuro
+                            'Totalmente en desacuerdo' = '#1B4F72') # Oscuro
+
+# Gráfico de barras de la antigüedad promedio por satisfacción con el salario, usando colores personalizados
+ggplot(antiguedad_por_salario, aes(x = salario_bueno, y = antiguedad_promedio, fill = salario_bueno)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = colores_personalizados) + # Usa la paleta de colores personalizada
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Antigüedad Promedio por Satisfacción con el Salario",
+       x = "Satisfacción con el Salario",
+       y = "Antigüedad Promedio (años)"
+```
+
+En esta gráfica de barras verticales podemos ver la relación entre la antigüedad promedio en la empresa y la satisfacción que tiene con el salario.
+Parece ser que existe una correlación entre la antigüedad y la satisfacción salarial, siendo aquellos que están totalmente de acuerdo con su salario quienes tienen una antigüedad promedio más alta (alrededor de 15 a 20 años).
+
+Un hallazgo relevante es que la satisfacción salarial aumenta con la antigüedad. Esto podría indicar que los incrementos salariales o bonos basados en la antigüedad son efectivos, o que aquellos con mayor antigüedad están en puestos mejor remunerados debido a ascensos o aumentos basados en el desempeño a lo largo del tiempo.
+La empresa FORM podría considerar ajustar su estructura salarial para mejorar la satisfacción entre los empleados más nuevos o aquellos con menos antigüedad, lo que potencialmente podría reducir la rotación de personal.
+
+## **Percepción de Molestia por la Temperatura por Puesto**
+
+```{r message=FALSE, warning=FALSE}
+datos %>%
+  group_by(puesto, no_molestia_temperatura) %>%
+  summarise(count = n()) %>%
+  ggplot(aes(x = puesto, y = count, fill = no_molestia_temperatura)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Percepción de Molestia por la Temperatura por Puesto",
+       x = "Puesto",
+       y = "Cantidad",
+       fill = "No Molesta la Temperatura") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+vemsop una clara molestia con la temperatura de parte de los ayudantes generales, por lo que se tiene que hacer algo para regular la temperatura dentro del espacio donde se desenvuelven estos, pues no vemos una descontento tan grande dentro de las otras areas.
+
+## **Disconformidad por Puesto** 
+
+```{r message=FALSE, warning=FALSE}
+datos %>% 
+  group_by(puesto, permanencia_form_futuro) %>% 
+  summarise(count = n()) %>%
+  filter(permanencia_form_futuro != "Totalmente de acuerdo" & permanencia_form_futuro != "Medianamente de acuerdo") %>%
+  ggplot(aes(x = reorder(puesto, -count), y = count, fill = permanencia_form_futuro)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Disconformidad por Puesto",
+       x = "Puesto",
+       y = "Cantidad de Disconformidad") +
+  theme_minimal()
+```
+
+
+##  **Percepción del Estrés por Rangos de Antigüedad**
+
+```{r message=FALSE, warning=FALSE}
+datos$antiguedad_rango <- cut(datos$antiguedad, breaks = seq(0, max(datos$antiguedad, na.rm = TRUE) + 5, by = 5), right = FALSE, labels = paste(seq(0, max(datos$antiguedad, na.rm = TRUE), by = 5), seq(5, max(datos$antiguedad, na.rm = TRUE) + 5, by = 5) - 1, sep = "-"))
+```
+
+```{r message=FALSE, warning=FALSE}
+datos %>%
+  group_by(antiguedad_rango, estres_bajo) %>%
+  summarise(count = n()) %>%
+  ggplot(aes(x = antiguedad_rango, y = count, fill = estres_bajo)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Percepción del Estrés por Rangos de Antigüedad",
+       x = "Rango de Antigüedad",
+       y = "Cantidad",
+       fill = "Percepción de Bajo Estrés") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+Tenemos un buen indicar de que el estrés no es algo que esté afectando a los trabajadores, pues vemos que la mayoría, independientemente del rango de antiguedad con el que cuentan, considera tener un estrés bajo dentro de las actividades dentro de la empresa.
+
+##  **Percepción de Prestaciones por Puesto**
+
+```{r message=FALSE, warning=FALSE}
+datos %>%
+  group_by(puesto, prestaciones_bueno) %>%
+  summarise(count = n()) %>%
+  ggplot(aes(x = puesto, y = count, fill = prestaciones_bueno)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Percepción de Prestaciones por Puesto",
+       x = "Puesto",
+       y = "Cantidad",
+       fill = "Hay Buenas Prestaciones") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Podemos observar que dentro de los ayudantes genrales es donde existe una mayor cantidad de datos, pues es de donde hay mas gente, existen opiniones divididas para de si hay buenas prestaciones o no para la empresa. Esto sin duda nos hace entender que no se encuentran conformes con la sprestaciones que les está brindando la empresa, ya que si fuera así, no se tendría este comportamiento de los datos.
+
+Se puede concluir para esta base de datos que las principales áreas de mejora que podría tener la empresa con sus empleados son en la aprte de aydantes generales, que se encuentrán pircipalemnte inconformes con la temperatura y no creen tener buenas prestaciones. Esto puede estar haciendo que haya una rotación tan alta dentro de esta área de la empresa.
+
+# **Bajas FORM**
+
+```{r}
+#file.choose()
+```
+
+
+```{r message=FALSE, warning=FALSE}
+df= read_xlsx("C:\\Users\\Eduardo\\Downloads\\BDD_FORM_BAJAS_2023.xlsx")
+head(df)
+```
+
+```{r message=FALSE, warning=FALSE}
+summary(df)
+```
+
+```{r message=FALSE, warning=FALSE}
+df <- df %>% 
+  mutate(Dpto = if_else(Dpto == "Produccion Cartón MC", "Producción Cartón MC", Dpto))
+```
+
+## Bajas por Departamento
+
+```{r message=FALSE, warning=FALSE}
+bajas_por_departamento <- df %>%
+  group_by(Dpto) %>%
+  summarise(Total_Bajas = n())
+
+ggplot(bajas_por_departamento, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Dpto)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Bajas por Departamento", x = "Departamento", y = "Total de Bajas")
+```
+
+```{r message=FALSE, warning=FALSE} 
+bajas_por_departamento <- df %>%
+  group_by(Dpto) %>%
+  summarise(Total_Bajas = n()) %>%
+  filter(Total_Bajas > 1)
+
+# Ordenamos las bajas por departamento de mayor a menor en el gráfico
+ggplot(bajas_por_departamento, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Dpto)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Bajas por Departamento (Filtrado)", x = "Departamento", y = "Total de Bajas")
+
+```
+
+
+## **Bajas por Departamento y Género**
+
+```{r message=FALSE, warning=FALSE}
+bajas_por_departamento_genero <- df %>%
+  group_by(Dpto, Género) %>%
+  summarise(Total_Bajas = n())
+
+ggplot(bajas_por_departamento_genero, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Género)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "Bajas por Departamento y Género", x = "Departamento", y = "Total de Bajas")
+```
+
+```{r message=FALSE, warning=FALSE}
+bajas_por_departamento_genero <- df %>%
+  group_by(Dpto, Género) %>%
+  summarise(Total_Bajas = n()) %>%
+  filter(Total_Bajas > 1)
+
+ggplot(bajas_por_departamento_genero, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Género)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "Bajas por Departamento y Género (Filtrado)", x = "Departamento", y = "Total de Bajas")
+
+```
+
+## **Bajas por Motivo y Género**
+
+```{r message=FALSE, warning=FALSE}
+bajas_por_motivo_genero <- df %>%
+  group_by(`Motivo de Baja`, Género) %>%
+  summarise(Total_Bajas = n())
+
+ggplot(bajas_por_motivo_genero, aes(x = `Motivo de Baja`, y = Total_Bajas, fill = Género)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "Bajas por Motivo y Género", x = "Motivo de Baja", y = "Total de Bajas") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+Como podemos observar en estas gráficas, los dos departamentos donde vemos una mayor cantidad de bajas es en Producción de Cartón tanto MC como ML. Esto nos hace entender que ahí hay un problema grave y se tienen que tomar cartas en el asunto para detectarlo lo antes posible para generar alguna estrategia para abolirlo. De las 18 personas que fueron bajas de la empresa 17 fueron mujeres, algo que nos podría indicar un problema grave relacionado al tema de género.
+
+
+```{r message=FALSE, warning=FALSE}
+df$`Fecha de Baja` <- as.Date(df$`Fecha de Baja`, origin = "1899-12-30")
+
+df$AñoMes <- format(df$`Fecha de Baja`, "%Y-%m")
+```
+
+
+## **Tendencia de Bajas a lo Largo del Tiempo**
+
+```{r message=FALSE, warning=FALSE}
+bajas_por_fecha <- df %>%
+  group_by(AñoMes) %>%
+  summarise(Total_Bajas = n())
+
+ggplot(bajas_por_fecha, aes(x = AñoMes, y = Total_Bajas, group = 1)) +
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Tendencia de Bajas a lo Largo del Tiempo", x = "Año y Mes", y = "Total de Bajas") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+## *Bajas Totales por Mes**
+
+```{r message=FALSE, warning=FALSE}
+
+df$`Fecha de Baja` <- as.Date(df$`Fecha de Baja`, origin = "1899-12-30")
+
+bajas_por_mes <- df %>%
+  mutate(Mes = format(`Fecha de Baja`, "%B")) %>%
+  group_by(Mes) %>%
+  summarise(Total_Bajas = n())
+
+meses <- format(seq(as.Date("2000-01-01"), as.Date("2000-12-01"), by = "month"), "%B")
+bajas_por_mes$Mes <- factor(bajas_por_mes$Mes, levels = meses)
+
+# Ahora ordenamos los datos para el gráfico
+bajas_por_mes <- bajas_por_mes %>%
+  mutate(Mes = reorder(Mes, -Total_Bajas))
+
+# Gráfico de barras mostrando las bajas totales por mes, ordenadas de mayor a menor
+ggplot(bajas_por_mes, aes(x = Mes, y = Total_Bajas, fill = Mes)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Bajas Totales por Mes Ordenadas", x = "Mes", y = "Total de Bajas")
+
+```
+
+A falta datos de Marzo a Mayo, podemos inferir que no hubieron bajas en la empresa, sin embargo vemos un gran incremento en las bajas en el mes de junio, lo que hace mucho sentido. Esto que se observa puede ser por una razón legal en cuanto a temas de cotratos o puede tener cierta relación con un problema que pudo haber dentro de la parte de producción de cartón, pues la mayoría de estas bajas en el mes fueron de igual manera por esta razón. Se debe de realizar un análisis a mayor profundidad para entender de una mejor forma.
+
+
+```{r}
+bajas_por_estado_civil <- df %>%
+  group_by(`Estado Civil`) %>%
+  summarise(Total_Bajas = n()) %>%
+  mutate(`Estado Civil` = reorder(`Estado Civil`, -Total_Bajas))
+
+ggplot(bajas_por_estado_civil, aes(x = `Estado Civil`, y = Total_Bajas, fill = `Estado Civil`)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Bajas por Estado Civil", x = "Estado Civil", y = "Total de Bajas") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Se puede observar de una muy buena forma, que el estar soltero o soltera es la manera en la que las personas se dan más de baja. Esto puede ser derivado de que no tienen una familia o una persona que pueda llegar a depender de ellos.
+
+
+## **Análisis de Sentimiento**
+
+#Las 2 tendencias de las emociones son: Positiva o Negativa
+
+```{r}
+texto <- readtext("C:\\Users\\Eduardo\\Downloads\\cotizacion imss fecha pago comer 3pmcomodo contento.txt")
+str(texto)
+texto_sin_numeros <- gsub("\\d+", "", texto)
+texto_palabras <- get_tokens(texto)
+View(texto_palabras)
+emociones_df <- get_nrc_sentiment(texto_palabras, language = "spanish")
+```
+
+```{r}
+barplot(colSums(prop.table(emociones_df[, 1:8])))
+
+sentimientos <- (emociones_df$negative*-1) + emociones_df$positive
+simple_plot(sentimientos)
+```
+
+Este análisis de sentimiento general, nos muestra un sentimiento positivo dentro de la empresa. Esto se cree que es ya que se hizo con base en una pregunta abierta contestada por los colaboradores, en la cuál creemos ue es más complicado que realmente se expresen en 3 palabras de una manera negativa.
+
+
 ##Referencias 
 
-1. *D&B Hoovers is Your Sales Accelerator -- Dun & Bradstreet*. (s. f.). Recuperado 16 de marzo de 2024, de <https://www.dnb.com/products/dnb-hoovers.html> 
+#1. *D&B Hoovers is Your Sales Accelerator -- Dun & Bradstreet*. (s. f.). Recuperado 16 de marzo de 2024, de <https://www.dnb.com/products/dnb-hoovers.html> 
 
-2. *World Bank Group - International Development, Poverty, & Sustainability*. (s. f.). World Bank. Recuperado 16 de marzo de 2024, de <https://www.worldbank.org/en/home> 
+#2. *World Bank Group - International Development, Poverty, & Sustainability*. (s. f.). World Bank. Recuperado 16 de marzo de 2024, de <https://www.worldbank.org/en/home> 
 
-3. *Smithers - Innovate with confidence*. (s. f.). Smithers. Recuperado 16 de marzo de 2024, de <https://www.smithers.com/home> 
+#3. *Smithers - Innovate with confidence*. (s. f.). Smithers. Recuperado 16 de marzo de 2024, de <https://www.smithers.com/home> 
 
-4. Statista. (s. f.). *Statista - the statistics portal*. Recuperado 16 de marzo de 2024, de <https://www.statista.com/> 
+#4. *Statista. (s. f.). Statista - the statistics portal*. Recuperado 16 de marzo de 2024, de <https://www.statista.com/> 
 
-5. MexicoIndustry. (s. f.). *Incrementará 8% el sector automotriz en 2024*. MexicoIndustry. Recuperado 16 de marzo de 2024, de <https://mexicoindustry.com/noticia/incrementara-8-el-sector-automotriz-en-2024> 
+#5. *MexicoIndustry. (s. f.). *Incrementará 8% el sector automotriz en 2024*. MexicoIndustry. Recuperado 16 de marzo de 2024, de <https://mexicoindustry.com/noticia/incrementara-8-el-sector-automotriz-en-2024> 
 
-6. Newsroom Infobae. (2023, 12 abril). Industria automotriz en México espera más empleos por electromovilidad. *Infobae*. Recuperado 16 de marzo de 2024, de <https://www.infobae.com/america/agencias/2023/04/12/industria-automotriz-en-mexico-espera-mas-empleos-por-electromovilidad/>
+#6. *Newsroom Infobae. (2023, 12 abril). Industria automotriz en México espera más empleos por electromovilidad. *Infobae*. Recuperado 16 de marzo de 2024, de <https://www.infobae.com/america/agencias/2023/04/12/industria-automotriz-en-mexico-espera-mas-empleos-por-electromovilidad/>
+
