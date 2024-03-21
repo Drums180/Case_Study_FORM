@@ -98,16 +98,25 @@ library(purrr)
 Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que se puedan responder mediante el análisis de datos.
 
 **Situación Problema 1: Rotación de Personal**
+
 - ¿Qué está causando la rotación de personal tan alta?
+
 - ¿Existe algún momento del año donde se den más bajas dentro de la empresa?
+
 - ¿Cómo se siente la gente dentro de su trabajo actual?
+
 - ¿Qué factor ayuda a que el personal dure más tiempo dentro de la empresa?
+
 - ¿En qué parte de la empresa el trabajador se siente más inconforme y cuál es su perfil?
 
 **Situación Problema 2: Predicción de Demanda**
+
 - ¿Cuáles son los patrones históricos de demanda de empaques de cartón para autopartes en los mercados objetivo de la empresa FORM, y cómo varían estos patrones según la temporada, el tipo de autoparte, y las regiones geográficas?
+
 - ⁠¿Cómo impactan los lanzamientos de nuevos modelos de vehículos y las tendencias en la industria automotriz en la demanda de diferentes tipos de empaques de cartón para autopartes?
+
 - ⁠¿Cuál ha sido el efecto de las campañas de marketing y las actividades promocionales de la empresa FORM sobre la demanda de sus productos en el pasado?
+
 - ⁠¿Cómo impactan algunas variables externas de carácter macroeconómico a las ventas de la empresa?
 
 ## Pronosticos y Nearshoring
