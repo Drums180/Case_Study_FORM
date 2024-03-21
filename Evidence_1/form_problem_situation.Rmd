@@ -1038,6 +1038,10 @@ df <- df %>%
   mutate(Dpto = if_else(Dpto == "Produccion Cartón MC", "Producción Cartón MC", Dpto))
 ```
 
+```{r message=FALSE, warning=FALSE}
+df <- df %>% drop_na()
+```
+
 ##### **Bajas por Departamento**
 
 ```{r message=FALSE, warning=FALSE}
@@ -1061,7 +1065,7 @@ bajas_por_departamento <- df %>%
 ggplot(bajas_por_departamento, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Dpto)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
-  labs(title = "Bajas por Departamento (Filtrado)", x = "Departamento", y = "Total de Bajas")
+  labs(title = "Bajas por Departamento", x = "Departamento", y = "Total de Bajas")
 
 ```
 
@@ -1088,7 +1092,7 @@ bajas_por_departamento_genero <- df %>%
 ggplot(bajas_por_departamento_genero, aes(x = reorder(Dpto, -Total_Bajas), y = Total_Bajas, fill = Género)) +
   geom_bar(stat = "identity", position = "dodge") +
   theme_minimal() +
-  labs(title = "Bajas por Departamento y Género (Filtrado)", x = "Departamento", y = "Total de Bajas")
+  labs(title = "Bajas por Departamento y Género", x = "Departamento", y = "Total de Bajas")
 
 ```
 
@@ -1160,9 +1164,13 @@ ggplot(bajas_por_mes, aes(x = Mes, y = Total_Bajas, fill = Mes)) +
 
 ```
 
-A pesar de la ausencia de datos de marzo a mayo, la evidencia sugiere que no se registraron bajas en la empresa durante ese periodo. Sin embargo, se observa un notable aumento en las bajas en junio, lo cual es significativo y merece una exploración detallada. Este incremento podría estar vinculado a factores legales relacionados con contratos o, posiblemente, estar asociado a problemas específicos en el área de producción de cartón, dado que la mayoría de las bajas ese mes se atribuyen a esta última razón.
+La evidencia sugiere que no se registraron bajas en la empresa durante ese periodo. Sin embargo, se observa un notable aumento en las bajas en junio, lo cual es significativo y merece una exploración detallada. Este incremento podría estar vinculado a factores legales relacionados con contratos o, posiblemente, estar asociado a problemas específicos en el área de producción de cartón, dado que la mayoría de las bajas ese mes se atribuyen a esta última razón.
 
 Es imperativo llevar a cabo un análisis más profundo para comprender con mayor precisión las causas subyacentes de este fenómeno. Dicho análisis ayudará a identificar las áreas críticas de intervención y a desarrollar estrategias efectivas para prevenir futuras bajas en estos departamentos críticos.
+
+
+##### **Bajas por Estado Civil**
+
 
 ```{r}
 bajas_por_estado_civil <- df %>%
