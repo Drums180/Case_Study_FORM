@@ -1,0 +1,499 @@
+---
+title: "Problem Situation Analysis"
+author: "David Dominguez - A01570975"
+date: "2024-03-21"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
+---
+
+![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
+
+## Librerías necesarias
+```{r message=FALSE, warning=FALSE}
+library(imputeTS)
+library(lubridate)
+library(xts)
+library(zoo)
+library(tseries)
+library(stats)
+library(forecast)
+library(astsa)
+library(corrplot)
+library(wordcloud)
+library(tidytext)
+library(AER)
+library(vars)
+library(dynlm)
+library(mFilter)
+library(TSstudio)
+library(tidyverse)
+library(sarima)
+library(readr)
+library(readxl)
+library(patchwork)
+library(heatmaply)
+library(dplyr)
+library(ggplot2)
+library(psych)
+library(tidyr)
+library(readtext)
+library(syuzhet)
+library(RColorBrewer)
+library(tm)
+library(caret)
+library(MASS)
+library(rpart)
+library(rpart.plot)
+library(party)
+library(gmodels)
+library(knitr)
+library(cluster)    
+library(e1071)
+library(janeaustenr)
+library(pROC)
+library(ISLR)
+library(gridExtra)
+library(car)
+library(DataExplorer)
+library(randomForest)
+library(class)
+library(factoextra)
+library(purrr)
+library(reshape2)
+library(tmap)
+library(sf)
+library(zoo)
+```
+
+## Bases de Datos Necesarias
+```{r message=FALSE, warning=FALSE}
+setwd("../databases")
+
+form_satisfaccion <- read_excel("form/Encuesta_Datos_FORM_Fall2023.xlsx")
+form_bajas = read_xlsx("form/temporary/BDD_FORM_BAJAS-2023.xlsx")
+cp_nl <- st_read("geo_reference__nl/CP_NL")
+
+exp_vehiculos = read_csv("industry_autos_mx/exportacion_vehiculos_mx.csv")
+ventas_vehiculos = read_csv("industry_autos_mx/mx_venta_vehiculos.csv")
+exp_vehiculos_total = read_excel("industry_autos_mx/exportacion_vehiculos.xlsx")
+```
+
+## Transformaciones Necesarias
+
+### FORM Bajas
+```{r}
+# Limpieza de Fecha
+form_bajas$`Fecha de Nacimiento` <- as.Date(form_bajas$`Fecha de Nacimiento` - ifelse(form_bajas$`Fecha de Nacimiento` > 60, 1, 0), origin="1899-12-30")
+form_bajas$`Fecha de Alta` <- as.Date(form_bajas$`Fecha de Alta` - ifelse(form_bajas$`Fecha de Alta` > 60, 1, 0), origin="1899-12-30")
+form_bajas$`Primer Mes` <- as.Date(form_bajas$`Primer Mes` - ifelse(form_bajas$`Primer Mes` > 60, 1, 0), origin="1899-12-30")
+form_bajas$`Cuarto Mes` <- as.Date(form_bajas$`Cuarto Mes` - ifelse(form_bajas$`Cuarto Mes` > 60, 1, 0), origin="1899-12-30")
+form_bajas$`Fecha de Baja` <- as.Date(form_bajas$`Fecha de Baja` - ifelse(form_bajas$`Fecha de Baja` > 60, 1, 0), origin="1899-12-30")
+
+# Calcular la antigüedad como la diferencia entre Fecha de Baja y Fecha de Alta
+form_bajas$Antiguedad <- abs(as.numeric(form_bajas$`Fecha de Baja` - form_bajas$`Fecha de Alta`, units = "days"))
+
+head(form_bajas)
+```
+
+### FORM Bajas Espacial
+```{r}
+form_bajas$CP <- as.character(form_bajas$CP)
+cp_nl$d_codigo <- as.character(cp_nl$d_codigo)
+
+stats_por_cp <- form_bajas %>%
+  group_by(CP) %>%
+  summarize(
+    Conteo_Empleados = n(),
+    Mediana_Antiguedad = median(Antiguedad, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+form_bajas_espacial <- cp_nl %>%
+  left_join(stats_por_cp, by = c("d_codigo" = "CP"))
+
+# Reemplazar NA con 0 en las columnas de interés
+form_bajas_espacial$Conteo_Empleados[is.na(form_bajas_espacial$Conteo_Empleados)] <- 0
+form_bajas_espacial$Mediana_Antiguedad[is.na(form_bajas_espacial$Mediana_Antiguedad)] <- 0
+
+head(form_bajas_espacial)
+```
+
+### FORM Satisfacción
+```{r}
+# Lista de columnas específicas a transformar
+columnas_a_transformar <- c("salario_bueno", "prestaciones_bueno", "jornada_no_excesiva", 
+                            "ofrecimiento_herramientas", "no_molestia_temperatura", "estres_bajo", 
+                            "facilidad_transporte", "zona_trabajo_comoda", "permanencia_form_futuro")
+
+# Ajustar la función para manejar el typo y valores inesperados
+codificar_respuestas <- function(respuesta) {
+  # Corregir posibles typos
+  respuesta <- gsub("Totalmende en desacuerdo", "Totalmente en desacuerdo", respuesta)
+  
+  # Usar switch para asignar valores numéricos
+  switch(respuesta,
+         "Totalmente en desacuerdo" = 1,
+         "Medianamente en desacuerdo" = 2,
+         "Ni de acuerdo ni en desacuerdo" = 3,
+         "Medianamente de acuerdo" = 4,
+         "Totalmente de acuerdo" = 5,
+         NA) # Devolver NA para cualquier respuesta no reconocida
+}
+
+# Aplicar la codificación solo a las columnas seleccionadas, asegurando que todas las transformaciones son numéricas
+form_satisfaccion[columnas_a_transformar] <- lapply(form_satisfaccion[columnas_a_transformar], function(x) as.numeric(sapply(x, codificar_respuestas)))
+
+head(form_satisfaccion)
+```
+
+### Exportación de Vehículos México
+```{r}
+exp_vehiculos$Fecha <- as.yearqtr(exp_vehiculos$quarter, format = "%Y-Q%q")
+```
+
+### Venta de Vehículos México
+```{r}
+ventas_vehiculos$Fecha <- as.yearqtr(paste(ventas_vehiculos$ANIO, ventas_vehiculos$ID_MES, "1"), format = "%Y %m %d")
+```
+
+
+## Preguntas de Análisis
+
+### **Situación Problema 1: Rotación de Personal**
+
+#### ¿Qué está causando la rotación de personal tan alta?
+```{r}
+# Generar los datos para la variable 'no_molestia_temperatura'
+datos_temperatura <- form_satisfaccion %>%
+  group_by(no_molestia_temperatura) %>%
+  summarise(Count = n()) %>%
+  mutate(Percentage = Count / sum(Count) * 100)
+
+# Paleta de colores personalizada: rojo, dorado, verde
+colores_personalizados <- c("#d7191c", "#fdae61", "#ffffbf", "#a6d96a", "#1a9641")
+
+# Gráfico de barras para 'no_molestia_temperatura'
+ggplot(datos_temperatura, aes(x = factor(no_molestia_temperatura, levels = c(1, 2, 3, 4, 5)), y = Percentage, fill = as.factor(no_molestia_temperatura))) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = colores_personalizados) +
+  scale_x_discrete(labels = c("Totalmente\nen desacuerdo", "Medianamente\nen desacuerdo", "Ni de acuerdo\nni en desacuerdo", "Medianamente\nde acuerdo", "Totalmente\nde acuerdo")) +
+  xlab("Nivel de Acuerdo con la Temperatura") +
+  ylab("Porcentaje") +
+  ggtitle("Distribución de Respuestas para 'No Molestia por la Temperatura'") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 8), 
+        legend.title = element_blank(),
+        legend.position = "bottom")
+```
+
+```{r}
+variables_categoricas <- c("salario_bueno", "prestaciones_bueno", "jornada_no_excesiva", 
+                           "ofrecimiento_herramientas", "no_molestia_temperatura", "estres_bajo", 
+                           "facilidad_transporte", "zona_trabajo_comoda", "permanencia_form_futuro")
+
+# Calculamos los porcentajes por categoría para cada variable
+porcentajes_categorias <- form_satisfaccion %>%
+  select(all_of(variables_categoricas)) %>%
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Valor") %>%
+  group_by(Variable) %>%
+  count(Valor) %>%
+  mutate(Porcentaje = n / sum(n) * 100) %>%
+  ungroup() %>%
+  select(-n)  # Si no necesitas la columna de conteos, puedes omitirla.
+
+# Convertir a un formato ancho específico para cada variable y valor
+porcentajes_ancho <- porcentajes_categorias %>%
+  pivot_wider(names_from = Valor, values_from = Porcentaje, names_prefix = "Categoria_") %>%
+  select(Variable, starts_with("Categoria_")) %>%
+  arrange(Variable)
+
+# Modificamos 'porcentajes_ancho' para formatear los porcentajes
+porcentajes_ancho <- porcentajes_ancho %>%
+  mutate(across(starts_with("Categoria_"), ~sprintf("%.1f%%", .)))
+
+# Ver los resultados
+print(porcentajes_ancho)
+```
+
+
+#### ¿Existe algún momento del año donde se den más bajas dentro de la empresa?
+
+```{r}
+# Agregar una columna que indique el mes de la fecha de baja
+form_bajas$Mes <- month(form_bajas$`Fecha de Baja`)
+form_bajas$Año <- year(form_bajas$`Fecha de Baja`)
+
+# Agrupar por mes y género, luego contar las bajas
+bajas_por_mes_genero <- form_bajas %>%
+  group_by(Mes, Género) %>%
+  summarise(Conteo = n(), .groups = 'drop') %>%
+  arrange(Mes)
+
+# Graficar las bajas por mes para cada género
+ggplot(bajas_por_mes_genero, aes(x = Mes, y = Conteo, group = Género, color = Género)) +
+  geom_line() +
+  scale_x_continuous(breaks = 1:12, labels = month.name) +
+  theme_minimal() +
+  labs(title = "Bajas por Mes Dividido por Género",
+       x = "Mes",
+       y = "Número de Bajas",
+       color = "Género")
+```
+
+
+```{r message=FALSE, warning=FALSE}
+# Configurar tmap para que intente reparar automáticamente los polígonos inválidos
+tmap_options(check.and.fix = TRUE)
+
+# Calcular los breaks para Conteo de Empleados excluyendo los ceros
+conteo_empleados_values <- form_bajas_espacial$Conteo_Empleados[form_bajas_espacial$Conteo_Empleados > 0]
+breaks_conteo <- c(-Inf, quantile(conteo_empleados_values, probs = seq(0, 1, by = 0.25), na.rm = TRUE))
+
+# Calcular los breaks para Mediana de Antigüedad excluyendo los ceros
+antiguedad_values <- form_bajas_espacial$Mediana_Antiguedad[form_bajas_espacial$Mediana_Antiguedad > 0]
+breaks_antiguedad <- c(-Inf, quantile(antiguedad_values, probs = seq(0, 1, by = 0.25), na.rm = TRUE))
+
+# Mapa para Conteo de Empleados
+conteo_empleados_map <- tm_shape(form_bajas_espacial) + 
+  tm_fill("Conteo_Empleados", palette = "Blues", style = "fixed", breaks = breaks_conteo, 
+          title = "Conteo de Empleados", na.color = "white") +
+  tm_borders() +
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
+
+# Mapa para Mediana de Antigüedad
+mediana_antiguedad_map <- tm_shape(form_bajas_espacial) + 
+  tm_fill("Mediana_Antiguedad", palette = "BuPu", style = "fixed", breaks = breaks_antiguedad, 
+          title = "Mediana de Antigüedad", na.color = "white") +
+  tm_borders() +
+  tm_layout(frame = FALSE, legend.position = c("right", "bottom"))
+
+# Configurar opciones de tmap para la visualización de los mapas
+tmap_mode("view")
+
+# Mostrar mapas lado a lado
+tmap_arrange(conteo_empleados_map, mediana_antiguedad_map, nrow = 1)
+```
+
+
+#### ¿Cómo se siente la gente dentro de su trabajo actual?
+```{r}
+# Función ajustada para preprocesar texto
+preparar_texto <- function(datos, columna) {
+  datos %>%
+    select(!!sym(columna)) %>%
+    mutate(across(everything(), as.character)) %>%
+    mutate(across(everything(), ~ gsub("\\d+", "", .))) %>%
+    unnest_tokens(word, !!sym(columna))
+}
+
+# Función ajustada para análisis de sentimiento y wordcloud con colores personalizados
+analizar_y_wordcloud <- function(datos, columna) {
+  texto_preparado <- preparar_texto(datos, columna)
+  
+  # Obtener sentimiento
+  emociones_df <- texto_preparado %>%
+    inner_join(get_sentiments("nrc"), by = "word") %>%
+    count(sentiment, sort = TRUE) %>%
+    print()
+  
+  # Filtrar palabras para el wordcloud (aparición mínima: 3 veces)
+  palabras_frecuentes <- texto_preparado %>%
+    count(word, sort = TRUE) %>%
+    filter(n >= 3)
+  
+  # Definir paleta de colores de gris claro a naranja
+  colores_gris_naranja <- colorRampPalette(c("darkgrey", "orange"))(100)
+  
+  # Generar wordcloud con la paleta personalizada
+  set.seed(123)
+  wordcloud(words = palabras_frecuentes$word, freq = palabras_frecuentes$n, min.freq = 2,
+            max.words = 100, random.order = FALSE, rot.per = 0.35, 
+            colors = colores_gris_naranja)
+}
+
+analizar_y_wordcloud(form_satisfaccion, "molestias_puesto")
+```
+
+#### ¿Qué factor ayuda a que el personal dure más tiempo dentro de la empresa?
+
+```{r}
+# Sin Información Suficiente
+```
+
+#### ¿En qué parte de la empresa el trabajador se siente más inconforme y cuál es su perfil?
+
+```{r}
+# Generar los datos para la variable 'permanencia_form_futuro'
+datos_permanencia <- form_satisfaccion %>%
+  group_by(permanencia_form_futuro) %>%
+  summarise(Count = n()) %>%
+  mutate(Percentage = Count / sum(Count) * 100)
+
+# Paleta de colores personalizada: rojo, dorado, verde
+colores_personalizados <- c("#d7191c", "#fdae61", "#ffffbf", "#a6d96a", "#1a9641")
+
+# Gráfico de barras para 'permanencia_form_futuro'
+ggplot(datos_permanencia, aes(x = factor(permanencia_form_futuro, levels = c(1, 2, 3, 4, 5)), y = Percentage, fill = as.factor(permanencia_form_futuro))) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = colores_personalizados) +
+  scale_x_discrete(labels = c("Totalmente\nen desacuerdo", "Medianamente\nen desacuerdo", "Ni de acuerdo\nni en desacuerdo", "Medianamente\nde acuerdo", "Totalmente\nde acuerdo")) +
+  xlab("Nivel de Acuerdo con la Permanencia a Futuro") +
+  ylab("Porcentaje") +
+  ggtitle("Distribución de Respuestas para 'Permanencia a Futuro'") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 8), 
+        legend.title = element_blank(),
+        legend.position = "bottom")
+```
+
+```{r}
+# Filtrar para obtener solo aquellos en desacuerdo con la permanencia a futuro (valor 1 o 2)
+desacuerdo_permanencia <- form_satisfaccion %>% 
+  filter(permanencia_form_futuro %in% c(1, 2))
+
+# Selecciona solo las columnas de interés para el boxplot
+columnas_interes <- c("salario_bueno", "prestaciones_bueno", "jornada_no_excesiva", 
+                      "ofrecimiento_herramientas", "no_molestia_temperatura", "estres_bajo", 
+                      "facilidad_transporte", "zona_trabajo_comoda")
+
+# Convertir datos a formato largo para boxplots
+datos_largos <- desacuerdo_permanencia %>%
+  select(all_of(columnas_interes)) %>%
+  pivot_longer(
+    cols = everything(), 
+    names_to = "Variable", 
+    values_to = "Puntuacion"
+  )
+
+# Generar boxplot para cada variable seleccionada
+ggplot(datos_largos, aes(x = Variable, y = Puntuacion, fill = Variable)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_blank()) +
+  labs(title = "Distribución de Puntuaciones para Empleados en Desacuerdo con la Permanencia", 
+       y = "Puntuación") +
+  scale_fill_brewer(palette = "Set3")  # Usar una paleta de colores adecuada para distinguir variables
+```
+
+```{r message=FALSE, warning=FALSE}
+form_satisfaccion$edad <- as.numeric(as.character(form_satisfaccion$edad))
+desacuerdo_permanencia <- form_satisfaccion %>%
+  filter(permanencia_form_futuro %in% c(1, 2))
+
+# Diagrama de dispersión para ver la relación entre 'edad' y 'personas_dependientes'
+ggplot(form_satisfaccion, aes(x = edad, y = personas_dependientes)) +
+  geom_point(color = "lightgrey") +
+  geom_point(data = desacuerdo_permanencia, aes(x = edad, y = personas_dependientes), alpha = 0.6, color = "blue") +
+  theme_minimal() +
+  scale_x_continuous() + # Asumimos que la edad es numérica y ya no hay etiquetas específicas
+  ggtitle("Comparación de Edad y Personas Dependientes (Filtrado por Poca Permanencia)") +
+  xlab("Edad") +
+  ylab("Personas Dependientes")
+```
+
+```{r}
+# Filtrar para obtener solo aquellos en desacuerdo con la permanencia a futuro (valor 1 o 2)
+desacuerdo_permanencia <- form_satisfaccion %>% 
+  filter(permanencia_form_futuro %in% c(1, 2))
+
+# Obtener el conteo de cada razón de entrada y ordenarlo de mayor a menor
+conteo_razon <- desacuerdo_permanencia %>%
+  count(razon_entrada) %>%
+  arrange(desc(n))
+
+# Crear el gráfico de barras horizontal con barra más grande arriba
+ggplot(conteo_razon, aes(x = reorder(razon_entrada, n), y = n, fill = n)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(y = "Razón de Entrada", x = "Conteo", title = "Conteo de Razón de Entrada para Desacuerdo con Permanencia") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(hjust = 1),
+        legend.position = "none") +
+  coord_flip()  # Girar el gráfico para orientación horizontal
+```
+
+
+### **Situación Problema 2: Predicción de Demanda**
+
+#### ¿Cuáles son los patrones históricos de demanda de empaques de cartón para autopartes en los mercados objetivo de la empresa FORM, y cómo varían estos patrones según la temporada, el tipo de autoparte, y las regiones geográficas?
+
+```{r}
+# Agrupar las ventas por cuarto
+ventas_por_quarter <- ventas_vehiculos %>%
+  group_by(Fecha) %>%
+  summarise(VEH_HIBRIDAS = sum(VEH_HIBRIDAS), .groups = 'drop')
+
+# Gráfico para exportaciones
+p1 <- ggplot(exp_vehiculos, aes(x = Fecha, y = trade_value)) +
+  geom_line(color = "blue") +
+  labs(title = "Exportaciones por Cuarto", y = "Valor de Exportaciones") +
+  theme_minimal()
+
+# Gráfico para ventas de vehículos híbridos
+p2 <- ggplot(ventas_por_quarter, aes(x = Fecha, y = VEH_HIBRIDAS)) +
+  geom_line(color = "green") +
+  labs(title = "Ventas de Vehículos", y = "Número de Vehículos") +
+  theme_minimal()
+
+# Arreglar los gráficos lado a lado para comparar visualmente
+p1 + p2 + plot_layout(guides = 'collect') & theme(legend.position = "bottom")
+```
+
+```{r}
+# Preparar los datos para descomposición
+exp_ts <- ts(exp_vehiculos$trade_value, frequency = 4) # Frecuencia trimestral
+ventas_ts <- ts(ventas_por_quarter$VEH_HIBRIDAS, frequency = 4) # Frecuencia trimestral
+
+# Descomposición STL de las exportaciones
+exp_decomp <- stl(exp_ts, s.window = "periodic")
+plot(exp_decomp)
+
+# Descomposición STL de las ventas de vehículos híbridos
+ventas_decomp <- stl(ventas_ts, s.window = "periodic")
+plot(ventas_decomp)
+```
+
+#### ⁠¿Cómo impactan los lanzamientos de nuevos modelos de vehículos y las tendencias en la industria automotriz en la demanda de diferentes tipos de empaques de cartón para autopartes?
+
+```{r message=FALSE, warning=FALSE}
+mx_vehicle_exports_summary <- exp_vehiculos_total %>%
+  group_by(Año, Segmento) %>%
+  summarise(Cantidad_Total = sum(Cantidad, na.rm = TRUE))
+
+# Definir la paleta de colores personalizada
+colores <- c("#2D3250", "#435585", "#7077A1", "#F6B17A", "#9EC8B9", "#BE3144")
+
+# Asegurarse de que hay suficientes colores para los segmentos
+# Repetir la paleta si hay más segmentos que colores
+n_segmentos <- length(unique(mx_vehicle_exports_summary$Segmento))
+if (n_segmentos > length(colores)) {
+  colores <- rep(colores, length.out = n_segmentos)
+}
+
+# Gráfico de líneas con la paleta de colores personalizada
+ggplot(mx_vehicle_exports_summary, aes(x = Año, y = Cantidad_Total, color = Segmento, group = Segmento)) + 
+  geom_line() + # Dibuja líneas
+  geom_point() + # Añade puntos en cada dato
+  scale_color_manual(values = colores) + # Usa la paleta de colores definida
+  theme_minimal() + # Usa un tema minimalista
+  labs(title = "Evolución de la Exportación de Segmento de Vehículo a lo Largo de los Años",
+       x = "Año",
+       y = "Cantidad Total") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+#### ⁠¿Cuál ha sido el efecto de las campañas de marketing y las actividades promocionales de la empresa FORM sobre la demanda de sus productos en el pasado?
+
+```{r}
+# Sin Información Suficiente
+```
+
+#### ⁠¿Cómo impactan algunas variables externas de carácter macroeconómico a las ventas de la empresa?
+
+```{r}
+# Sin Información Suficiente
+```
+
