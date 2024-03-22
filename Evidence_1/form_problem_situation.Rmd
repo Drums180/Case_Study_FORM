@@ -1220,6 +1220,7 @@ analizar_y_wordcloud <- function(datos, columna) {
 ```{r message=FALSE, warning=FALSE}
 analizar_y_wordcloud(datos, "razon_entrada")
 ```
+
 ```{r}
 analizar_y_wordcloud(datos, "molestias_puesto")
 ```

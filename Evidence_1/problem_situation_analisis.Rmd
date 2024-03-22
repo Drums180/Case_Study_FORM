@@ -2,8 +2,15 @@
 title: "Problem Situation Analysis"
 author: "David Dominguez - A01570975"
 date: "2024-03-21"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
 ---
+
+![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
 
 ## Librerías necesarias
 ```{r message=FALSE, warning=FALSE}
@@ -46,6 +53,7 @@ library(gmodels)
 library(knitr)
 library(cluster)    
 library(e1071)
+library(janeaustenr)
 library(pROC)
 library(ISLR)
 library(gridExtra)
@@ -57,6 +65,7 @@ library(factoextra)
 library(purrr)
 library(reshape2)
 library(tmap)
+library(sf)
 library(zoo)
 ```
 
@@ -70,6 +79,7 @@ cp_nl <- st_read("geo_reference__nl/CP_NL")
 
 exp_vehiculos = read_csv("industry_autos_mx/exportacion_vehiculos_mx.csv")
 ventas_vehiculos = read_csv("industry_autos_mx/mx_venta_vehiculos.csv")
+exp_vehiculos_total = read_excel("industry_autos_mx/exportacion_vehiculos.xlsx")
 ```
 
 ## Transformaciones Necesarias
@@ -140,11 +150,22 @@ form_satisfaccion[columnas_a_transformar] <- lapply(form_satisfaccion[columnas_a
 head(form_satisfaccion)
 ```
 
+### Exportación de Vehículos México
+```{r}
+exp_vehiculos$Fecha <- as.yearqtr(exp_vehiculos$quarter, format = "%Y-Q%q")
+```
+
+### Venta de Vehículos México
+```{r}
+ventas_vehiculos$Fecha <- as.yearqtr(paste(ventas_vehiculos$ANIO, ventas_vehiculos$ID_MES, "1"), format = "%Y %m %d")
+```
+
+
 ## Preguntas de Análisis
 
-**Situación Problema 1: Rotación de Personal**
+### **Situación Problema 1: Rotación de Personal**
 
-- ¿Qué está causando la rotación de personal tan alta?
+#### ¿Qué está causando la rotación de personal tan alta?
 ```{r}
 # Generar los datos para la variable 'no_molestia_temperatura'
 datos_temperatura <- form_satisfaccion %>%
@@ -199,7 +220,7 @@ print(porcentajes_ancho)
 ```
 
 
-- ¿Existe algún momento del año donde se den más bajas dentro de la empresa?
+#### ¿Existe algún momento del año donde se den más bajas dentro de la empresa?
 
 ```{r}
 # Agregar una columna que indique el mes de la fecha de baja
@@ -225,6 +246,9 @@ ggplot(bajas_por_mes_genero, aes(x = Mes, y = Conteo, group = Género, color = G
 
 
 ```{r message=FALSE, warning=FALSE}
+# Configurar tmap para que intente reparar automáticamente los polígonos inválidos
+tmap_options(check.and.fix = TRUE)
+
 # Calcular los breaks para Conteo de Empleados excluyendo los ceros
 conteo_empleados_values <- form_bajas_espacial$Conteo_Empleados[form_bajas_espacial$Conteo_Empleados > 0]
 breaks_conteo <- c(-Inf, quantile(conteo_empleados_values, probs = seq(0, 1, by = 0.25), na.rm = TRUE))
@@ -255,13 +279,52 @@ tmap_arrange(conteo_empleados_map, mediana_antiguedad_map, nrow = 1)
 ```
 
 
-- ¿Cómo se siente la gente dentro de su trabajo actual?
+#### ¿Cómo se siente la gente dentro de su trabajo actual?
+```{r}
+# Función ajustada para preprocesar texto
+preparar_texto <- function(datos, columna) {
+  datos %>%
+    select(!!sym(columna)) %>%
+    mutate(across(everything(), as.character)) %>%
+    mutate(across(everything(), ~ gsub("\\d+", "", .))) %>%
+    unnest_tokens(word, !!sym(columna))
+}
 
+# Función ajustada para análisis de sentimiento y wordcloud con colores personalizados
+analizar_y_wordcloud <- function(datos, columna) {
+  texto_preparado <- preparar_texto(datos, columna)
+  
+  # Obtener sentimiento
+  emociones_df <- texto_preparado %>%
+    inner_join(get_sentiments("nrc"), by = "word") %>%
+    count(sentiment, sort = TRUE) %>%
+    print()
+  
+  # Filtrar palabras para el wordcloud (aparición mínima: 3 veces)
+  palabras_frecuentes <- texto_preparado %>%
+    count(word, sort = TRUE) %>%
+    filter(n >= 3)
+  
+  # Definir paleta de colores de gris claro a naranja
+  colores_gris_naranja <- colorRampPalette(c("darkgrey", "orange"))(100)
+  
+  # Generar wordcloud con la paleta personalizada
+  set.seed(123)
+  wordcloud(words = palabras_frecuentes$word, freq = palabras_frecuentes$n, min.freq = 2,
+            max.words = 100, random.order = FALSE, rot.per = 0.35, 
+            colors = colores_gris_naranja)
+}
 
-- ¿Qué factor ayuda a que el personal dure más tiempo dentro de la empresa?
+analizar_y_wordcloud(form_satisfaccion, "molestias_puesto")
+```
 
+#### ¿Qué factor ayuda a que el personal dure más tiempo dentro de la empresa?
 
-- ¿En qué parte de la empresa el trabajador se siente más inconforme y cuál es su perfil?
+```{r}
+# Sin Información Suficiente
+```
+
+#### ¿En qué parte de la empresa el trabajador se siente más inconforme y cuál es su perfil?
 
 ```{r}
 # Generar los datos para la variable 'permanencia_form_futuro'
@@ -353,15 +416,11 @@ ggplot(conteo_razon, aes(x = reorder(razon_entrada, n), y = n, fill = n)) +
 ```
 
 
-**Situación Problema 2: Predicción de Demanda**
+### **Situación Problema 2: Predicción de Demanda**
 
-- ¿Cuáles son los patrones históricos de demanda de empaques de cartón para autopartes en los mercados objetivo de la empresa FORM, y cómo varían estos patrones según la temporada, el tipo de autoparte, y las regiones geográficas?
+#### ¿Cuáles son los patrones históricos de demanda de empaques de cartón para autopartes en los mercados objetivo de la empresa FORM, y cómo varían estos patrones según la temporada, el tipo de autoparte, y las regiones geográficas?
 
 ```{r}
-# Asumiendo que el formato de las fechas es correcto y coherente
-exp_vehiculos$Fecha <- as.yearqtr(exp_vehiculos$quarter, format = "%Y-Q%q")
-ventas_vehiculos$Fecha <- as.yearqtr(paste(ventas_vehiculos$ANIO, ventas_vehiculos$ID_MES, "1"), format = "%Y %m %d")
-
 # Agrupar las ventas por cuarto
 ventas_por_quarter <- ventas_vehiculos %>%
   group_by(Fecha) %>%
@@ -397,10 +456,44 @@ ventas_decomp <- stl(ventas_ts, s.window = "periodic")
 plot(ventas_decomp)
 ```
 
+#### ⁠¿Cómo impactan los lanzamientos de nuevos modelos de vehículos y las tendencias en la industria automotriz en la demanda de diferentes tipos de empaques de cartón para autopartes?
 
-- ⁠¿Cómo impactan los lanzamientos de nuevos modelos de vehículos y las tendencias en la industria automotriz en la demanda de diferentes tipos de empaques de cartón para autopartes?
+```{r message=FALSE, warning=FALSE}
+mx_vehicle_exports_summary <- exp_vehiculos_total %>%
+  group_by(Año, Segmento) %>%
+  summarise(Cantidad_Total = sum(Cantidad, na.rm = TRUE))
 
-- ⁠¿Cuál ha sido el efecto de las campañas de marketing y las actividades promocionales de la empresa FORM sobre la demanda de sus productos en el pasado?
+# Definir la paleta de colores personalizada
+colores <- c("#2D3250", "#435585", "#7077A1", "#F6B17A", "#9EC8B9", "#BE3144")
 
-- ⁠¿Cómo impactan algunas variables externas de carácter macroeconómico a las ventas de la empresa?
+# Asegurarse de que hay suficientes colores para los segmentos
+# Repetir la paleta si hay más segmentos que colores
+n_segmentos <- length(unique(mx_vehicle_exports_summary$Segmento))
+if (n_segmentos > length(colores)) {
+  colores <- rep(colores, length.out = n_segmentos)
+}
+
+# Gráfico de líneas con la paleta de colores personalizada
+ggplot(mx_vehicle_exports_summary, aes(x = Año, y = Cantidad_Total, color = Segmento, group = Segmento)) + 
+  geom_line() + # Dibuja líneas
+  geom_point() + # Añade puntos en cada dato
+  scale_color_manual(values = colores) + # Usa la paleta de colores definida
+  theme_minimal() + # Usa un tema minimalista
+  labs(title = "Evolución de la Exportación de Segmento de Vehículo a lo Largo de los Años",
+       x = "Año",
+       y = "Cantidad Total") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+#### ⁠¿Cuál ha sido el efecto de las campañas de marketing y las actividades promocionales de la empresa FORM sobre la demanda de sus productos en el pasado?
+
+```{r}
+# Sin Información Suficiente
+```
+
+#### ⁠¿Cómo impactan algunas variables externas de carácter macroeconómico a las ventas de la empresa?
+
+```{r}
+# Sin Información Suficiente
+```
 
