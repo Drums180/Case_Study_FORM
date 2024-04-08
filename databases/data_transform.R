@@ -308,3 +308,104 @@ form_encuesta$razon_entrada <- sapply(form_encuesta$razon_entrada, function(fras
 
 library(writexl)
 write_xlsx(form_encuesta, "/Users/daviddrums180/Tec/Case_Study_Form/databases/form/Encuesta_Datos_FORM_Fall2023.xlsx")
+
+###################################
+# RH 2024
+###################################
+
+# Cargar las librerías necesarias
+library(readxl)
+library(dplyr)
+library(stringr) 
+
+# Leer el archivo Excel
+# Asegúrate de cambiar la ruta del archivo a la ubicación correcta donde tienes tu archivo Excel
+datos <- read_excel("/Users/daviddrums180/Tec/Case_Study_Form/databases/form/Datos_FORM_RH_FJ2024.xlsx")
+
+datos$SD <- as.numeric(datos$SD)
+
+# Función para limpiar texto: convertir a minúsculas, quitar puntuación, acentos y espacios extras
+clean_text <- function(text) {
+  text %>% 
+    str_to_lower() %>% # Convertir a minúsculas
+    str_remove_all("[[:punct:]]") %>% # Quitar puntuación
+    # Reemplazar letras acentuadas sin quitar la ñ
+    str_replace_all(c("á" = "a", "é" = "e", "í" = "i", "ó" = "o", "ú" = "u", "ü" = "u"))
+}
+
+# Aplicar la función de limpieza a las columnas de texto
+datos <- datos %>%
+  mutate(across(where(is.character), clean_text, .names = "{.col}")) %>%
+  mutate(`Correo Electronico` = datos$`Correo Electronico`)
+
+datos$Estado <- gsub("nuevo le'on", "nuevo leon", datos$Estado, fixed = TRUE)
+
+datos$Municipio <- gsub("^san nicolas.*$", "san nicolas de los garza", datos$Municipio, perl = TRUE)
+datos$Municipio <- gsub("ramoz arizpe", "ramos arizpe", datos$Municipio, fixed = TRUE)
+datos$Municipio <- gsub("^cadereyta.*$", "cadereyta jimenez", datos$Municipio, perl = TRUE)
+
+datos$Puesto <- ifelse(grepl("^ay", datos$Puesto, ignore.case = TRUE), "ayudante", datos$Puesto)
+datos$Puesto <- gsub("innovaci[oó]n \\+ dise[nñ]o", "innovacion + diseno", datos$Puesto, ignore.case = TRUE)
+datos$Puesto <- gsub("producci[oó]n", "produccion", datos$Puesto, ignore.case = TRUE)
+datos$Puesto <- gsub("cordinadora", "coordinadora", datos$Puesto, ignore.case = TRUE)
+datos$Puesto <- gsub("asistente de direcci[oó]n", "asistente de direccion", datos$Puesto, ignore.case = TRUE)
+datos$Puesto <- gsub("contrataci[oó]n y n[oó]minas", "contratacion y nominas", datos$Puesto, ignore.case = TRUE)
+datos$Puesto <- gsub("chofer gestor", "chofer", datos$Puesto, ignore.case = TRUE)
+datos$Puesto <- gsub("operador de sierra", "operador sierra", datos$Puesto, ignore.case = TRUE)
+datos$Puesto <- gsub("costurera", "costurero", datos$Puesto, ignore.case = TRUE) # Unificar costurera y costurero
+
+datos$Dpto <- gsub("producci[oó]'?n cart'?on mdl", "produccion carton mdl", datos$Dpto, ignore.case = TRUE)
+datos$Dpto <- gsub("producci[oó]'?n cart'?on mc", "produccion carton mc", datos$Dpto, ignore.case = TRUE)
+datos$Dpto <- gsub("producci[oó]'?n retorn", "produccion retornable", datos$Dpto, ignore.case = TRUE)
+datos$Dpto <- gsub("paileria y pintura", "paileria", datos$Dpto, fixed = TRUE)
+datos$Dpto <- gsub("producci[oó]n", "produccion", datos$Dpto, ignore.case = TRUE)
+datos$Dpto <- gsub("produccion cart[oó]n mc", "produccion carton mc", datos$Dpto, ignore.case = TRUE)
+datos$Dpto <- gsub("produccion retorn.*", "produccion retornable", datos$Dpto, ignore.case = TRUE)
+datos$Dpto <- ifelse(grepl("producci[oó]n", datos$Dpto, ignore.case = TRUE), "produccion", datos$Dpto)
+datos$Puesto <- ifelse(grepl("^coordinadora", datos$Puesto, ignore.case = TRUE), "coordinadora", datos$Puesto)
+datos$Puesto <- ifelse(grepl("^ingenieria", datos$Puesto, ignore.case = TRUE), "ingeniero", datos$Puesto)
+datos$Puesto <- ifelse(grepl("^op", datos$Puesto, ignore.case = TRUE), "operador", datos$Puesto)
+datos$Puesto <- ifelse(grepl("^auxiliar", datos$Puesto, ignore.case = TRUE), "auxiliar", datos$Puesto)
+datos$Puesto <- ifelse(grepl("^residente", datos$Puesto, ignore.case = TRUE), "residente", datos$Puesto)
+datos$Puesto <- ifelse(grepl("^inspectora", datos$Puesto, ignore.case = TRUE), "inspector", datos$Puesto) # Asumiendo que queremos normalizar el género
+datos$Puesto <- ifelse(grepl("^asistente", datos$Puesto, ignore.case = TRUE), "asistente", datos$Puesto)
+datos$Puesto <- ifelse(grepl("^costurero", datos$Puesto, ignore.case = TRUE), "costurero", datos$Puesto) # Incluye costurera
+datos$Puesto <- ifelse(grepl("^guardia", datos$Puesto, ignore.case = TRUE), "guardia", datos$Puesto)
+
+datos$`Estado Civil` <- ifelse(datos$`Estado Civil` == "soltera", "soltero", datos$`Estado Civil`)
+datos$`Estado Civil` <- ifelse(datos$`Estado Civil` == "casada", "casado", datos$`Estado Civil`)
+datos$`Estado Civil` <- ifelse(datos$`Estado Civil` == "divorciada", "divorciado", datos$`Estado Civil`)
+datos$`Estado Civil` <- ifelse(datos$`Estado Civil` == "viuda", "viudo", datos$`Estado Civil`)
+
+datos$Banco <- ifelse(datos$Banco == "santader", "santander", datos$Banco)
+
+
+# Obtener valores únicos para las columnas especificadas
+genero_unicos <- unique(datos$Género)
+puesto_unicos <- unique(datos$Puesto)
+dpto_unicos <- unique(datos$Dpto)
+municipio_unicos <- unique(datos$Municipio)
+estado_unicos <- unique(datos$Estado)
+estado_civil_unicos <- unique(datos$`Estado Civil`)
+bancos_unicos <- unique(datos$Banco)
+
+# Imprimir los valores únicos
+list(genero_unicos = genero_unicos,
+     puesto_unicos = puesto_unicos,
+     dpto_unicos = dpto_unicos,
+     municipio_unicos = municipio_unicos,
+     estado_unicos = estado_unicos,
+     estado_civil_unicos = estado_civil_unicos,
+     bancos_unicos = bancos_unicos)
+
+# Utilizar summary() para obtener un resumen estadístico de los datos
+summary(datos)
+
+# Nombre del archivo original
+nombre_archivo_original <- "Datos_FORM_RH_FJ2024.xlsx"
+
+# Construir el nombre del archivo de salida reemplazando la extensión
+nombre_archivo_salida <- sub("\\.xlsx$", ".csv", nombre_archivo_original)
+
+# Exportar `datos` a CSV
+write.csv(datos, nombre_archivo_salida, row.names = FALSE)

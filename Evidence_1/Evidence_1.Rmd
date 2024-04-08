@@ -1,0 +1,1386 @@
+---
+title: 'Evidence 1 : FORM Study Case'
+author: "David Dominguez - A01570975"
+date: "2024-04-05"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
+---
+
+![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
+
+#
+
+## Lecturas Sugeridas
+#### What is Exploratory Data Analysis?
+https://www.ibm.com/topics/exploratory-data-analysis
+
+#### What is Exploratory Data Analysis?
+https://towardsdatascience.com/exploratory-data-analysis-8fc1cb20fd15
+
+#### What is Descriptive Analytics? 5 Examples
+https://online.hbs.edu/blog/post/descriptive-analytics
+
+#### Nearshoring will Make Mexico ‘The Motor” of US Electric Vehicle
+Industry
+https://www.bloomberglinea.com/english/nearshoring-will-make-mexico-the-motor-of-us-electric-vehicle-industry/
+
+#### Nearshoring: Los Retos y Oportunidades que tiene para México en
+2024.
+https://conecta.tec.mx/es/noticias/nacional/emprendedores/nearshoring-los-retos-y-oportunidades-que-tiene-para-mexico-en-2024#:~:text=El%20nearshoring%20es%20una%20estrategia,en%20un%20pa%C3%ADs%20cercano%20geogr%C3%A1ficamente
+
+## Librerías necesarias
+
+```{r message=FALSE, warning=FALSE}
+library(imputeTS) # Rellenar datos faltantes
+library(xts) # Manipulación de series temporales
+library(zoo) # Sistemas de series temporales
+library(tseries) # Análisis de series temporales
+library(stats) # Funciones estadísticas básicas
+library(forecast) # Predicción de series temporales
+library(astsa) # Análisis de series temporales aplicado
+library(corrplot) # Visualización de matrices de correlación
+library(wordcloud) # Crear nubes de palabras
+library(tidytext) # Análisis de texto con tidy data
+library(AER) # Análisis econométrico con R
+library(vars) # Modelos VAR y SVAR
+library(dynlm) # Modelos lineales dinámicos
+library(mFilter) # Filtros para series temporales
+library(TSstudio) # Herramientas interactivas series temporales
+library(tidyverse) # Colección de paquetes de datos tidy
+library(sarima) # Modelos SARIMA
+library(readr) # Leer archivos planos
+library(readxl) # Leer archivos Excel
+library(heatmaply) # Heatmaps interactivos
+library(dplyr) # Manipulación de datos
+library(ggplot2) # Sistema de gráficos
+library(psych) # Procedimientos psicométricos
+library(tidyr) # Reorganización de datos
+library(readtext) # Leer archivos de texto
+library(syuzhet) # Análisis de sentimientos
+library(RColorBrewer) # Paletas de colores
+library(tm) # Minería de texto
+library(caret) # Entrenamiento de modelos predictivos
+library(MASS) # Métodos estadísticos adicionales
+library(rpart) # Modelos de partición recursiva
+library(rpart.plot) # Gráficos para rpart
+library(party) # Modelos basados en árboles
+library(gmodels) # Herramientas de modelado
+library(knitr) # Reportes dinámicos
+library(cluster) # Métodos de agrupamiento
+library(e1071) # Misc funciones SVM
+library(pROC) # Curvas ROC
+library(ISLR) # Data sets para aprendizaje estadístico
+library(gridExtra) # Disposición de múltiples gráficos
+library(car) # Regresión y Anova con R
+library(DataExplorer) # Automatizar análisis exploratorio
+library(randomForest) # Clasificación con random forest
+library(class) # k-vecinos más cercanos
+library(factoextra) # Visualización de resultados de clustering
+library(purrr) # Programación funcional
+library(viridis) # Paletas de colores para gráficos
+library(scales) # Escalado de gráficos
+library(lubridate) # Manipulación de fechas y horas
+library(patchwork) # Combinar ggplot2 plots
+library(janeaustenr) # Textos de Jane Austen
+library(reshape2) # Reestructurar datos
+library(tmap) # Crear mapas
+library(sf) # Manipulación de datos geoespaciales
+```
+
+## Bases de Datos 
+```{r message=FALSE, warning=FALSE}
+setwd("../databases")
+
+form_satisfaccion <- read_excel("form/Encuesta_Datos_FORM_Fall2023.xlsx")
+form_bajas = read_xlsx("form/temporary/BDD_FORM_BAJAS-2023.xlsx")
+cp_nl <- st_read("geo_reference__nl/CP_NL")
+
+exp_vehiculos = read_csv("industry_autos_mx/exportacion_vehiculos_mx.csv")
+ventas_vehiculos = read_csv("industry_autos_mx/mx_venta_vehiculos.csv")
+exp_vehiculos_total = read_excel("industry_autos_mx/exportacion_vehiculos.xlsx")
+
+form_rh = read_csv("form/Datos_FORM_RH_FJ2024.csv")
+form_ventas_detalle = read_excel("form/Datos_FORM_Ventas_FJ2024.xlsx")
+```
+
+## Introducción
+
+### Preguntas de Reflexión
+
+#### ¿Qué es un análisis exploratorio de los datos?
+El análisis exploratorio de los datos o EDA es un proceso analitico inicial en el analisis de conjuntos de datos que permite obtener una comprensión de las características fundamentales de los datos. 
+
+Esto se puede hacer mediante resúmenes estadísticos, medidas descriptivas, visualización de datos, y la identificación de patrones o anomalías dentro del conjunto de datos con matrices de correlación o scatter plots. Su objetivo principal es explorar y entender la naturaleza de los datos para informar las etapas posteriores del análisis.
+
+#### ¿Cómo contribuye el análisis exploratorio de los datos a mejorar el proceso y los resultados de analítica descriptiva?
+El análisis exploratorio de los datos contribuye significativamente a mejorar el proceso y los resultados de la analítica descriptiva de varias maneras. Primero, ayuda a identificar las tendencias, correlaciones y patrones ocultos que pueden ser importantes para la comprensión de los datos. Esto permite formular hipótesis más precisas y dirigir el análisis descriptivo y posterior (predictivo o prescriptivo) de manera más efectiva. 
+
+Segundo, al descubrir datos atípicos o anomalías, el EDA asegura la calidad y la precisión de los datos antes de proceder con análisis más complejos, así como identificar la necesidad de transformaciónes necesarias previas a realizar el análisis Finalmente, facilita la selección de las técnicas estadísticas o modelos de datos más adecuados al revelar la estructura y distribución de los datos, lo que conduce a insights más relevantes y a la toma de decisiones basada en datos.
+
+### Antecedentes de la Empresa FORM
+La empresa FORM, con sede en México, se ha destacado en el desarrollo de innovaciones en el empaque de autopartes, enfocándose en soluciones que permiten reducir el espacio necesario para almacenamiento y generando ahorros en logística. Han introducido un producto patentado globalmente que aumenta la capacidad de empaque y reduce significativamente el uso de materia prima, lo cual también tiene un impacto positivo en el medio ambiente.
+
+Desde su fundación en 2011, FORM ha crecido significativamente, comenzando con un solo cliente y seis empleados, y expandiéndose a más de 150 colaboradores y atendiendo a más de 15 clientes automotrices. Entre sus clientes se encuentran nombres prominentes como Denso, Magna, International Automotive Components y Varroc Lighting Systems.
+
+La especialización de FORM en empaques para autopartes delicadas y costosas la ha llevado a ser proveedor de armadoras de prestigio como Tesla, BMW y Mercedes Benz. Ofrecen soluciones personalizadas que aseguran la protección y la integridad de las autopartes durante su transporte, lo que es crucial para piezas de acabado delicado o espejo.
+
+Con una planta en Apodaca, Nuevo León, la empresa ha establecido un área especializada para empaques termoformados, esenciales para el transporte de piezas electrónicas y otras autopartes sensibles que requieren cuidado especial para evitar daños durante el tránsito.
+
+La filosofía de FORM de reducir el espacio de almacenamiento, la mano de obra para la administración y el armado de empaques, junto con la protección del producto, se alinea con la demanda creciente de la industria automotriz por eficiencia y sostenibilidad en las cadenas de suministro.
+
+Las innovaciones de FORM y su enfoque en la sostenibilidad y eficiencia reflejan un compromiso con la mejora continua y la adaptación a las necesidades cambiantes del mercado automotriz, lo que les ha permitido mantenerse competitivos y relevantes en un sector en constante evolución. 
+
+#### Misión 
+
+Transformar nuestro entorno y resolver retos industriales de nuestros clientes a través de la colaboración, provocando nuevas oportunidades que potencian nuestro modelo de negocio, para alcanzar nuestros ideales.
+
+#### Visión
+
+En 2033 seremos una de las cinco mejores compañías de México que generan valor dentro de la cadena de suministro de las industrias que más valoran la forma en la que se protegen y trasladan las cosas.
+
+#### Objetivo Estratégico
+
+“Ahora estamos volteando a los Estados Unidos, y ahora con la posibilidad de que Tesla llegue a Nuevo León, con mayor sentido volteamos hacia allá. Si todos nuestros clientes son automotrices e internacionales por qué no proveerlos en Estados Unidos, estamos trabajando fuerte para lograrlo”. - Felipe Flores García
+
+### Contexto de la Industria
+
+#### Análisis de la Industria (cartón, autopartes, automotriz)
+
+Para el caso de México y E.U.A. (incluir 3-5 gráficos usando R\*) usando
+fuentes de datos secundarias
+
+El mercado automotriz en México constituye un sector vital para la economía del país, no solo por su significativa contribución al Producto Interno Bruto (PIB) sino también por su papel en la creación de empleos y en el fomento de la innovación tecnológica. Una faceta crucial de esta industria es el mercado de autopartes, que se erige como un pilar fundamental para la operatividad y el desarrollo de la industria automotriz en su conjunto. Este segmento incluye desde la fabricación de componentes esenciales del vehículo hasta sistemas avanzados que mejoran la seguridad, el rendimiento y la comodidad.
+
+La interacción entre los fabricantes de automóviles y los proveedores de autopartes es intrínseca al ciclo de vida del producto automotriz, afectando directamente la cadena de suministro, la innovación en el diseño de productos y, en última instancia, la competitividad en el mercado global. Además, el mercado de autopartes en México se ve influenciado por factores como las regulaciones gubernamentales, los tratados de libre comercio, las tendencias de consumo y los avances tecnológicos, lo que lo convierte en un campo de estudio dinámico y complejo.
+
+#### Exploración de Exportación de Vehículos
+
+Para profundizar en el entendimiento de esta industria, se realizará un análisis exhaustivo utilizando diversas bases de datos recopiladas de múltiples fuentes. Este análisis buscará identificar tendencias, desafíos y oportunidades dentro del mercado de autopartes, así como su interconexión con la industria automotriz en general. Se examinarán aspectos como la evolución de la demanda de autopartes, la cadena de valor, el impacto de la tecnología en la producción y el diseño de autopartes, así como las estrategias adoptadas por las empresas para navegar en un entorno económico y regulatorio en constante cambio.
+
+**Analisis de Exportación de Vehiculos**
+```{r message=FALSE, warning=FALSE}
+mx_vehicle_exports <- read_excel("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_mx/exportacion_vehiculos.xlsx")
+
+mx_vehicle_exports_summary <- mx_vehicle_exports %>%
+  group_by(Año, Segmento) %>%
+  summarise(Cantidad_Total = sum(Cantidad, na.rm = TRUE))
+
+# Definir la paleta de colores personalizada
+colores <- c("#2D3250", "#435585", "#7077A1", "#F6B17A", "#9EC8B9", "#BE3144")
+
+# Asegurarse de que hay suficientes colores para los segmentos
+# Repetir la paleta si hay más segmentos que colores
+n_segmentos <- length(unique(mx_vehicle_exports_summary$Segmento))
+if (n_segmentos > length(colores)) {
+  colores <- rep(colores, length.out = n_segmentos)
+}
+
+# Gráfico de líneas con la paleta de colores personalizada
+ggplot(mx_vehicle_exports_summary, aes(x = Año, y = Cantidad_Total, color = Segmento, group = Segmento)) + 
+  geom_line() + # Dibuja líneas
+  geom_point() + # Añade puntos en cada dato
+  scale_color_manual(values = colores) + # Usa la paleta de colores definida
+  theme_minimal() + # Usa un tema minimalista
+  labs(title = "Evolución de la Exportación de Segmento de Vehículo a lo Largo de los Años",
+       x = "Año",
+       y = "Cantidad Total") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**1. Crecimiento de SUVs:**
+     - La exportación de SUVs ha visto un crecimiento significativo hasta 2018, seguido de una disminución. Esto podría indicar cambios en la preferencia del consumidor o en la dinámica del mercado. FORM puede aprovechar esta tendencia ofreciendo soluciones de empaque personalizadas para este segmento, que parece tener una alta variabilidad en la demanda.
+
+**2. Volatilidad en Segmento de Lujo:**
+     - El segmento de lujo muestra volatilidad con un pico marcado alrededor de 2018. Esto puede abrir oportunidades para FORM en términos de proporcionar empaques de alta calidad que coincidan con las expectativas de los fabricantes de vehículos de lujo y sus consumidores.
+
+**3. Caída General Post-2018:**
+     - Después de 2018, todos los segmentos excepto los subcompactos muestran una caída, lo que podría deberse a factores económicos globales, políticas comerciales o la pandemia. FORM debe estar atento a estos factores externos que afectan la demanda de sus productos.
+
+**4. Beneficios Potenciales para FORM:**
+     - El análisis de estas tendencias es vital para FORM, ya que proporciona información sobre qué segmentos podrían requerir más empaques en el futuro. Esto puede guiar sus decisiones de inversión y estrategias de producción para los próximos años.
+
+**5. Modelo Predictivo para la Demanda:**
+     - Utilizar estos datos para desarrollar un modelo predictivo podría ayudar a FORM a anticiparse a las necesidades del mercado. Herramientas de análisis predictivo, como el Machine Learning, podrían usarse para prever la demanda futura basándose en las tendencias históricas y factores externos.
+
+```{r message=FALSE, warning=FALSE}
+# Sumarizar la cantidad total por País destino y obtener los top 5
+top_paises_destino <- mx_vehicle_exports %>%
+  group_by(`País destino`) %>%
+  summarise(Cantidad_Total = sum(Cantidad, na.rm = TRUE)) %>%
+  arrange(desc(Cantidad_Total)) %>%
+  slice_head(n = 5)
+
+# Filtrar el dataframe original para tener solo los top 5 País destino
+mx_vehicle_exports_top5 <- mx_vehicle_exports %>%
+  filter(`País destino` %in% top_paises_destino$`País destino`)
+
+# Código para un box plot de la variable Cantidad por los top 5 País destino
+ggplot(mx_vehicle_exports_top5, aes(x = `País destino`, y = Cantidad)) + 
+  geom_boxplot() +  
+  theme_minimal() + 
+  labs(title = "Box Plot de Cantidad por Top 5 País Destino",
+       x = "País Destino",
+       y = "Cantidad") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5))
+```
+**1. Dominancia de Estados Unidos:**
+     - Estados Unidos muestra una mediana y un rango intercuartílico superior a otros destinos, lo cual indica que es el principal mercado para la exportación. FORM puede centrarse en aumentar la capacidad de producción y mejorar las soluciones logísticas para satisfacer la alta demanda de empaques en este mercado.
+
+**2. Variabilidad en 'No Especificado':**
+     - La categoría 'No Especificado' tiene una alta variabilidad y valores atípicos, lo que podría indicar oportunidades no exploradas o datos incompletos. FORM podría investigar estos casos para identificar posibles nuevos mercados o mejorar la precisión en la recopilación de datos.
+
+**3. Consistencia en Alemania y Brasil:**
+     - Alemania y Brasil muestran una menor dispersión y consistencia en los envíos, lo que podría reflejar mercados establecidos con demandas predecibles. FORM puede utilizar esta información para optimizar inventarios y prever recursos de producción.
+
+**4. Beneficios del Análisis para FORM:**
+     - Analizar esta distribución de exportaciones podría ayudar a FORM a entender mejor la variabilidad y la consistencia en la demanda entre diferentes mercados. Esta información puede ser crítica para optimizar la cadena de suministro y poder desarrollar un modelo que ayude a predecir y controlar los niveles de inventario necesarios.
+
+**5. Modelo Predictivo para la Demanda:**
+     - Desarrollar un modelo predictivo basado en estos datos permitiría a FORM anticipar la demanda y ajustar la producción de forma proactiva. La utilización de técnicas estadísticas como la regresión, conjuntamente con algoritmos de machine learning, podría proporcionar estimaciones precisas de la demanda futura basándose en patrones históricos y tendencias actuales.
+
+
+#### Exploración a Mercado de Autopartes
+
+A través de este enfoque analítico, se espera obtener insights valiosos que contribuyan a una mejor comprensión del mercado de autopartes en México y su rol crítico dentro de la industria automotriz. Estos hallazgos podrían ofrecer directrices para la toma de decisiones estratégicas por parte de los actores de la industria, así como para el diseño de políticas públicas que promuevan el crecimiento y la sostenibilidad del sector. La metodología y los resultados de este análisis estarán fundamentados en la información detallada proporcionada en las bases de datos, cuyas fuentes se encuentran meticulosamente documentadas en el README adjunto a las bases de datos, asegurando así la transparencia y la fiabilidad de la investigación realizada.
+
+**Importaciónes, Exportaciónes y Producción de Autopartes**
+```{r message=FALSE, warning=FALSE}
+mx_autoparts_market <- read_csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_mx/mx_autoparts_market.csv")
+
+# Colores
+colors <- c("Producción local total" = "#00BFC4",
+            "Exportaciones totales" = "#F8766D",
+            "Importaciones totales" = "#7CAE00",
+            "Importaciones de EE.UU." = "#C77CFF")
+
+
+# Usar ggplot2 para graficar directamente los datos
+ggplot(data = mx_autoparts_market) +
+  geom_line(aes(x = year, y = total_local_production, group = 1, colour = "Producción local total"), size = 1) +
+  geom_line(aes(x = year, y = total_exports, group = 1, colour = "Exportaciones totales"), size = 1) +
+  geom_line(aes(x = year, y = total_imports, group = 1, colour = "Importaciones totales"), size = 1) +
+  geom_line(aes(x = year, y = imports_from_US, group = 1, colour = "Importaciones de EE.UU."), size = 1) +
+  geom_point(aes(x = year, y = total_local_production, colour = "Producción local total"), size = 3) +
+  geom_point(aes(x = year, y = total_exports, colour = "Exportaciones totales"), size = 3) +
+  geom_point(aes(x = year, y = total_imports, colour = "Importaciones totales"), size = 3) +
+  geom_point(aes(x = year, y = imports_from_US, colour = "Importaciones de EE.UU."), size = 3) +
+  scale_colour_manual(values = colors) +
+  labs(title = "Mercado de Autopartes en México (2018-2022)",
+       x = "Año",
+       y = "Valor (en miles de millones de USD)",
+       colour = "Variable") +
+  theme_minimal() 
+
+```
+
+**1. Producción Local Total:**
+     - La línea que representa la producción local total muestra una tendencia decreciente de 2018 a 2019.
+     - Hay una leve recuperación en 2020, seguida de una caída en 2021, y un ligero aumento en 2022.
+     - Esta tendencia puede indicar desafíos en el sector de la producción o cambios en la demanda interna.
+
+**2. Exportaciones Totales:**
+     - Las exportaciones muestran una reducción significativa en 2020, posiblemente debido al impacto de la pandemia de COVID-19 en el comercio global.
+     - Se observa una recuperación fuerte en 2021 y 2022, indicando una posible resiliencia o adaptación del mercado de exportación.
+
+**3. Importaciones Totales:**
+     - Las importaciones presentan un incremento constante a lo largo de los años, con una pequeña disminución en 2021.
+     - La tendencia ascendente podría reflejar una creciente dependencia de componentes externos o un aumento en la demanda de autopartes no producidas localmente.
+
+**4. Importaciones de EE.UU.:**
+     - Las importaciones desde EE.UU. han disminuido significativamente desde 2018 hasta 2020.
+     - Hay un aumento notable en 2021, que se revierte en 2022, sugiriendo fluctuaciones en las dinámicas comerciales con EE.UU.
+
+
+**Mercado de Autopartes Mx**
+```{r}
+mx_autoparts_market <- na.omit(mx_autoparts_market)
+
+turquoise_palette <- c("#8ae0db", "#5dc1b9", "#42a8a1", "#239089")
+
+# Crear la gráfica de barras con escala de color personalizada
+ggplot(mx_autoparts_market, aes(x = factor(year), y = total_market_size, fill = total_market_size)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradientn(colors = turquoise_palette) +
+  labs(x = "Año", y = "Tamaño Total del Mercado (en miles de millones de USD)",
+       title = "Tamaño Total del Mercado de Autopartes en México (2018-2022)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**1. Impacto de la Pandemia en 2020:**
+     - La marcada caída en 2020 puede correlacionarse con la pandemia de COVID-19, que afectó globalmente la producción y venta de automóviles. Para una empresa como FORM, especializada en empaques para autopartes, esto podría haber representado un reto significativo, posiblemente llevando a una reducción en la demanda de sus productos de empaquetado.
+
+**2. Recuperación Post-Pandemia:**
+     - El rebote en 2021 sugiere una recuperación post-pandemia que habría podido generar un aumento en la demanda de vehículos y, consecuentemente, de autopartes. Esto puede haber sido una oportunidad para FORM de expandir o diversificar su línea de productos de empaque, aprovechando la reactivación del mercado.
+
+**3. Innovación como Factor de Crecimiento:**
+     - La innovación de productos de empaque que permiten ahorros significativos en espacio y costos de logística por parte de FORM podría haber sido un factor determinante en su potencial de crecimiento durante el periodo de recuperación económica, especialmente considerando la tendencia creciente hacia la eficiencia y sostenibilidad en la industria automotriz.
+
+**4. Potencial para el Futuro:**
+     - Dada la tendencia de recuperación del mercado en 2022, empresas como FORM están bien posicionadas para capitalizar el crecimiento continuo de la industria automotriz. La adaptación a las nuevas normativas ambientales y la mejora en la eficiencia de la cadena de suministro serán claves para su éxito futuro.
+
+#### Industria del cartón
+
+```{r}
+carton_exp = read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_carton/temporary/Exporters of Carton boxes cases of corrugated paper or board 2020-2021.csv")
+carton_imp = read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_carton/temporary/Importers of Cartons boxes cases of corrugated paper or board 2020-2021.csv")
+electric_2016=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2016.csv")
+electric_2017=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2017.csv")
+electric_2018=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2018.csv")
+electric_2019=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2019.csv")
+electric_2020=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibiridos_electricos_2020.csv")
+electric_2021=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2021.csv")
+electric_2022=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2022.csv")
+electric_2023=read.csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/industry_autos_usa/temporary/mx_venta_vehiculos_hibridos_electricos_2023.csv")
+```
+
+*Exportaciones*
+
+```{r}
+# Filtrar los 15 países con mayores valores de comercio de exportación
+top_countries <- carton_exp %>%
+  group_by(Country) %>%
+  summarize(TotalTradeValue = sum(Trade.Value)) %>%
+  top_n(15, TotalTradeValue) %>%
+  arrange(desc(TotalTradeValue))
+
+# Unir los datos filtrados con el data.frame original para obtener los datos completos de esos países
+top_countries_data <- carton_exp %>%
+  filter(Country %in% top_countries$Country)
+
+# Crear el gráfico
+ggplot(top_countries_data, aes(x = reorder(Country, Trade.Value), y = Trade.Value)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() + # Hacer que el gráfico sea horizontal para mejor lectura
+  labs(title = "Top 15 Países en Valor de Exportación de Cartón",
+       x = "País",
+       y = "Valor de Comercio (USD)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10))
+```
+
+El análisis de las exportaciones globales de cartón revela que México se posiciona como uno de los líderes en este sector, destacándose por sus significativos valores de exportación. Esta fortaleza en el mercado del cartón refleja no solo la alta competitividad de la industria mexicana, sino también su capacidad para producir materiales de calidad superior. Para una empresa emergente especializada en cartón para autopartes, esto representa una oportunidad única para aprovechar la infraestructura existente, las economías de escala y las redes de suministro eficientes dentro de México. 
+
+```{r warning=FALSE}
+ggplot(carton_exp, aes(x = Continent, y = Trade.Value.Growth * 100, fill = Continent)) +
+  geom_boxplot() +
+  scale_y_continuous(limits = c(0, 50), breaks = seq(0, 50, 10), labels = paste0(seq(0, 50, 10), "%")) +
+  labs(title = "Crecimiento del Valor de Comercio de Exportaciones de Cartón por Continente",
+       x = "Continente",
+       y = "Crecimiento del Valor de Comercio (%)") +
+  theme_minimal()
+```
+
+En cuanto al crecimiento de la industria del cartón por continente, podemos ver que Oceanía es el continente con el mayor porcentaje de crecimiento, sin embargo, la mediana del continente norteamericano es de poco menos del 20%, lo que indica que hay una tendencia positiva de esta industria en nuestro continente.
+
+*Importaciones*
+
+```{r}
+# Filtrar los 15 países con mayores valores de comercio de importación
+
+top_countries_2 <- carton_imp %>%
+  group_by(Country) %>%
+  summarize(TotalTradeValue = sum(Trade.Value)) %>%
+  top_n(15, TotalTradeValue) %>%
+  arrange(desc(TotalTradeValue))
+
+# Unir los datos filtrados con el data.frame original para obtener los datos completos de esos países
+top_countries_data_2 <- carton_imp %>%
+  filter(Country %in% top_countries_2$Country)
+
+# Crear el gráfico
+ggplot(top_countries_data_2, aes(x = reorder(Country, Trade.Value), y = Trade.Value)) +
+  geom_col(fill = "blue") +
+  coord_flip() + 
+  labs(title = "Top 15 Países en Valor de Importación de Cartón",
+       x = "País",
+       y = "Valor de Comercio (USD)") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10))
+```
+En cuanto a las importaciones, México se consolida como el cuarto mayor importador mundial de cartón, destacando su rol clave en la industria global. Justo delante, Estados Unidos ocupa la segunda posición, reflejando la intensa actividad comercial y la demanda de materiales de calidad entre estos países vecinos. Esta situación subraya la importancia estratégica de México en el mercado de cartón y su cercanía con uno de los mayores importadores, Estados Unidos, potenciando las oportunidades de sinergia y cooperación transfronteriza en la cadena de suministro.
+
+#### Industria de vehículos eléctricos
+
+```{r}
+
+# Crear una lista de dataframes para iterar 
+electric_dfs <- list(electric_2016 = electric_2016, electric_2017 = electric_2017,
+                     electric_2018 = electric_2018, electric_2019 = electric_2019,
+                     electric_2020 = electric_2020, electric_2021 = electric_2021,
+                     electric_2022 = electric_2022, electric_2023 = electric_2023)
+
+# Inicializar un vector para almacenar los totales de ventas de vehículos eléctricos por año
+total_sales_by_year <- numeric(length(electric_dfs))
+names(total_sales_by_year) <- names(electric_dfs)
+
+# Sumar las ventas de vehículos eléctricos por año
+for (year in names(electric_dfs)) {
+  total_sales_by_year[year] <- sum(electric_dfs[[year]]$VEH_ELECTR, na.rm = TRUE)
+}
+
+# Convertir a data.frame
+sales_df <- data.frame(Year = names(total_sales_by_year), 
+                       ElectricVehicleSales = total_sales_by_year)
+
+# Ver el resultado
+print(sales_df)
+
+# Asumiendo que sales_df ya está creado y contiene las columnas 'Year' y 'ElectricVehicleSales'
+ggplot(sales_df, aes(x = Year, y = ElectricVehicleSales)) +
+  geom_col(fill = "steelblue", color = "black") + # Usamos barras con colores personalizados
+  geom_text(aes(label = ElectricVehicleSales), vjust = -0.5, size = 3.5) + # Añadir etiquetas de texto sobre las barras
+  labs(title = "Ventas de Vehículos Eléctricos en México por Año",
+       subtitle = "Datos de ventas desde 2016 hasta 2023",
+       x = "Año",
+       y = "Ventas de Vehículos Eléctricos") +
+  theme_minimal() + # Tema minimalista
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"), # Centrar y dar formato al título
+        plot.subtitle = element_text(hjust = 0.5, size = 12), # Centrar el subtítulo
+        axis.title.x = element_text(size = 14, face = "bold"), # Formato para el título del eje X
+        axis.title.y = element_text(size = 14, face = "bold"), # Formato para el título del eje Y
+        axis.text.x = element_text(angle = 45, hjust = 1)) # Rotar las etiquetas del eje X para mejorar la legibilidad
+
+
+```
+
+Como se puede apreciar en la gráfica, las ventas en México de los vehículos eléctricos tienen una clara tendencia positiva desde hace varios años, esto refleja la oportunidad y la necesidad de que empresas como FORM adapten su oferta de soluciones a las nuevas autopartes que requieren este nuevo tipo de vehículos. 
+
+```{r}
+#Se detectó un error en ID_ENTIDAD, existiendo el ID=99. 
+# Filtrar para eliminar ID_ENTIDAD = 99
+datos_filtrados <- electric_2023 %>%
+  filter(ID_ENTIDAD != 99)
+
+
+
+# Agrupar datos por ID_ENTIDAD y sumar las ventas de vehículos eléctricos
+ventas_por_estado <- datos_filtrados %>%
+  group_by(ID_ENTIDAD) %>%
+  summarise(Total_VEH_ELECTR = sum(VEH_ELECTR, na.rm = TRUE))
+
+estados_mexico <- c("Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas",
+                    "Chihuahua", "Ciudad de México", "Coahuila", "Colima", "Durango", "Guanajuato",
+                    "Guerrero", "Hidalgo", "Jalisco", "México", "Michoacán", "Morelos", "Nayarit",
+                    "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí",
+                    "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas")
+
+datos_filtrados$ID_ENTIDAD <- as.numeric(datos_filtrados$ID_ENTIDAD)
+
+# Agregar una nueva columna con los nombres de los estados
+datos_filtrados <- datos_filtrados %>%
+  mutate(Estado = estados_mexico[ID_ENTIDAD])
+
+# Crear la gráfica
+ggplot(ventas_por_estado, aes(x = factor(ID_ENTIDAD), y = Total_VEH_ELECTR, fill = factor(ID_ENTIDAD))) +
+  geom_bar(stat = "identity", color = "black", show.legend = FALSE) +
+  scale_fill_viridis_d() +
+  labs(title = "Ventas de Vehículos Eléctricos de México por Estado en 2023",
+       x = "ID del Estado",
+       y = "Total de Ventas de Vehículos Eléctricos",
+       caption = "Nota: ID del Estado: 1 = Aguascalientes, etc. ID_ENTIDAD = 99 excluido.") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+En cuanto a los estados con mayores ventas de vehículos eléctricos en el último año, destacan los estados con las capitales más importantes del país como Nuevo León, CDMX, Jalisco, Querétaro y Puebla. Esto puede representar para FORM oportunidades en cuanto a cómo enfocar su cadena de suministro para las mayores ventas de sus clientes. 
+
+### FODA Cruzado
+Apartir de los antecedentes de la empresa y el contexto de la industrias
+de México y E.U.A. elaborar FODA cruzado que identifique y describa 2-3
+estrategias a seguir por parte de la empresa en el corto plazo.
+
+#### Fortalezas:
+1.	Expertos en desarrollar soluciones de empaque sostenibles e innovadoras con un enfoque en la industria automotriz, optimizando el espacio de almacenamiento, así como los costos logísticos lo que indica un profundo entendimiento de las necesidades del sector automotriz.
+2.	Asociaciones con marcas de alto prestigio, la empresa de Form ha establecido relaciones comerciales como lo es Tesla, lo que nos indica la alta calidad y confiabilidad de sus soluciones de empaque.
+3.	Compromiso con la sostenibilidad, la empresa integra prácticas sostenibles en su modelo de negocio, desde reducciones de uso de materiales hasta la optimización de logística, que se alinean con la demanda actual de la industria hacia prácticas más ecológicas.
+
+#### Oportunidades:
+1.	Crecimiento del mercado en la industria con empaques sostenibles. La conciencia ambiental y regulaciones de la sostenibilidad, presentan una gran oportunidad para la empresa en liderar el desarrollo y oferta de soluciones en los empaques sostenibles.
+2.	Demanda creciente de empaques personalizados para los clientes debido a cambios en los consumidores. La tendencia hacia servicios y productos personalizados para sus clientes, requiere una mayor demanda de empaques que se ajusten a las necesidades individuales de sus clientes.
+3.	Oportunidad de expansión en industrias fuera de la industria automotriz que requieren de soluciones innovadoras de empaque. Otras industrias también requieren de soluciones de empaque innovadoras lo que presenta una oportunidad para la empresa de expandir su mercado a otros sectores.
+
+#### Debilidades: 
+1.	Actualmente se encuentran en potencial dependencia de la industria automotriz. Esto podría representar un alto riesgo si el sector llegará a enfrentar disminuciones en la demanda o desafíos económicos.
+2.	Necesidad en estar actualizados continuamente frente a tecnologías en desarrollo de empaque. Mantenerse en constante innovación requiere inversión en investigaciones y desarrollo, lo que puede ser un reto en recursos y capital.
+3.	Limitaciones en la diversificación de productos. La especialización que tienen sobre los empaques de autopartes podría limitar la capacidad de la empresa para capitalizar y explorar oportunidades en otros mercados y productos.
+
+#### Amenazas: 
+1.	Constante cambio en las regulaciones ambientales que pueden afectar los materiales para realizar los empaques. Puede haber un gran impacto al usar ciertos procesos y materiales que requieren de adaptaciones costosas.
+2.	Gran competencia creciente en el sector de empaques sostenibles. El crecimiento de la industria y su demanda de soluciones de empaques sostenibles atrae a nuevos competidores, esto incrementa la presión para la empresa por diferenciarse y continuar innovando. 
+3.	Volatilidad en los costos de materiales debido a fluctuaciones del mercado. Esto puede afectar los márgenes de beneficio y la competitividad de precios de las soluciones de FORM.
+
+#### Estrategias:
+Estrategias FODA Cruzado para FORM
+
+##### Fortalezas-Oportunidades (FO)
+- **Sostenibilidad e Innovación:** Utilizar la experiencia y el compromiso de la empresa con la sostenibilidad para poder liderar en la industria y en el mercado con empaques renovables y ecológicos para seguir creciendo ante la demanda.
+- **Expansión en Servicios Personalizados:** Desarrollar soluciones personalizadas a los clientes y mejorar su relación con marcas de prestigio.
+
+##### Debilidades-Oportunidades (DO)
+- **Mitigar dependencias en el mercado:** Ampliar el mercado hacia nuevas industrias, para reducir la dependencia del sector automotriz, creciendo a nuevos mercados con demanda creciente a soluciones innovadoras.
+- **Colaboraciones con Innovación:** Realizar colaboraciones estratégicas para dividir el costo de riesgo de innovación y desarrollo, dándole a la empresa un gran alcance para ser el líder en la industria.
+
+##### Fortalezas-Amenazas (FA)
+- **Liderazgo ante Cambios regulatorios:** Emplear compromiso con la innovación y sostenibilidad para que la empresa se adapte ante los cambios en regulaciones ecológicas, posicionando a FORM como un referente en cumplimiento y adaptabilidad.
+- **Valor agregado frente a la Competencia:** Fortalecer a la empresa a través de su confiabilidad con sus clientes, aprovechando su calidad para destacarse en el mercado competitivo, así mismo aprovechando sus colaboraciones con marcas de alto prestigio.
+
+##### Debilidades-Amenazas (DA)
+- **Cobertura de riesgo en Costos:** Realizar estrategias para tomar medidas de prevención para protegerse contra la volatilidad de los precios de los materiales, como lo es la diversificación de los proveedores y los contratos de la empresa a largo plazo.
+- **Programas de Lealtad con Clientes:** Implementar programas de colaboración y lealtad con los clientes actuales, para poder mejorar la relación a largo plazo y mitigar el impacto de la competencia y las fluctuaciones del mercado.
+
+### PESTLE
+
+Con base en el análisis de las industrias de México y E.U.A. identificar
+variables / factores relevantes para la elaboración de PESTLE y
+describir 2-3 estrategias a seguir por parte de la empresa en el corto
+plazo.
+
+#### Políticos.
+
+EE.UU. advierte terminar tratado de comercio con México por fábricas de
+carros chinos. Las futuras elecciones pueden ser un factor muy
+importante en la industria automotriz, ya que según BBC News, Trump se
+muestra de manera muy hostil ante los fabricantes de automóviles. Por lo
+que, puede que imponga alguna ley que afecte negativamente la industria.
+El Tratado entre México, Estados Unidos y Canadá (T-MEC) establece
+reglas para el comercio entre los tres países, incluyendo la industria
+automotriz. El T-MEC ha sido positivo para la industria automotriz
+mexicana, ya que ha aumentado la producción y las exportaciones. El
+gobierno mexicano ha implementado una serie de políticas para promover
+la industria automotriz, como la creación de un fondo de apoyo a la
+industria y la reducción de impuestos a la importación de autopartes.
+
+#### Económicos.
+
+Sector automotriz, con la mayor demanda de espacios industriales por
+Nearshoring. Industria automotriz aumenta 7.8% la producción en febrero.
+México recibirá 2 mil 300 mdd de inversión extranjera en autopartes en
+2024: INA. El nearshoring puede reducir los costos de producción al
+aprovechar la mano de obra más barata en países cercanos. Esto puede
+mejorar la competitividad de FORM en el mercado. La tasa de interés en
+Estados Unidos ha aumentado en los últimos años. Esto ha encarecido el
+crédito para los consumidores, lo que podría afectar la demanda de
+vehículos.
+
+#### Sociales.
+
+La clase media en México está creciendo. Esto ha aumentado la demanda de
+vehículos, ya que las personas de la clase media tienen más dinero para
+gastar. Las preocupaciones ambientales están aumentando en Estados
+Unidos. Esto podría afectar la demanda de vehículos, ya que los
+consumidores podrían optar por comprar vehículos más eficientes en
+combustible o vehículos eléctricos.
+
+#### Tecnológicos.
+
+Se busca que en México solo se vendan autos eléctricos. Protagonistas de
+la industria automotriz en México han unido fuerzas para crear la
+Electro Movilidad Asociación (EMA), alianza que nace con el objetivo de
+alcanzar el 100 por ciento de ventas de vehículos eléctricos para el año
+2035.
+
+#### Legales.
+
+Exportación de autos made in México crece 22.6% en febrero y acelera a
+máximo histórico. Stellantis anuncia importante plan de inversiones para
+América Latina. Las regulaciones de seguridad para los vehículos están
+aumentando en todo el mundo. Esto está obligando a las empresas
+automotrices a invertir en nuevas tecnologías de seguridad.
+
+#### Ecológicos.
+
+La Industria Nacional de Autopartes aseguró que la producción de
+baterías para autos eléctricos en Norteamérica es fundamental para
+cumplir con las reglas de origen del T-MEC. El cambio climático es una
+preocupación importante para la industria automotriz. Las empresas
+automotrices están desarrollando vehículos más eficientes en combustible
+y vehículos eléctricos para reducir su impacto ambiental.
+
+## Definición de Problemáticas
+
+### Situación Problema 1: Rotación de Personal
+
+Explorar, definir, y describir cuáles son los principales factores del clima organizacional de FORM que propician la satisfacción y/o no satisfacción de trabajar en dicha empresa.
+
+La rotación de personal se ha identificado como el desafío más crítico que enfrenta FORM en el presente. A pesar de nuestros esfuerzos continuos para crear un ambiente laboral atractivo y retener a nuestros valiosos empleados, nos encontramos con una tasa de rotación especialmente alta entre los operadores. Este fenómeno no solo afecta la continuidad y la eficiencia de nuestras operaciones, sino que también incrementa los costos asociados con el reclutamiento y la capacitación de nuevo personal.
+
+-   **Principales Puntos:**
+    -   La estabilidad familiar y las condiciones laborales son factores significativos que influyen en la decisión de los empleados de permanecer en la empresa.
+    -   Los jóvenes, especialmente aquellos sin compromisos familiares, tienden a buscar oportunidades de desarrollo profesional fuera de FORM.
+    -   Es crucial mejorar nuestras estrategias de reclutamiento y retención para abordar las causas subyacentes de la rotación de personal.
+
+### Situación Problema 2: Predicción de Demanda
+
+Explorar, desarrollar, y describir la(s) posible(s) estrategia(s) de predicción de la demanada de productos fabricados por la empresa FORM.
+
+La predicción precisa de la demanda representa un desafío igualmente significativo para FORM, dada la variabilidad inherente en la producción y venta de autopartes. La habilidad para anticipar con exactitud cuántas unidades de un determinado componente serán necesarias es crucial para optimizar nuestros procesos de producción y empaque, y para asegurar que se maximice la eficiencia en el uso de recursos.
+
+-   **Principales Puntos:**
+    -   La naturaleza fluctuante de la demanda automotriz complica la planificación y gestión de inventarios.
+    -   Es esencial desarrollar herramientas y procesos más sofisticados para mejorar la precisión en nuestras predicciones de demanda.
+    -   La adaptabilidad y la capacidad de responder rápidamente a los cambios en el mercado son fundamentales para mantener nuestra competitividad.
+
+## Preguntas de Analisis
+
+Elaborar 4-6 preguntas relacionadas con la situación problema seleccionada que se puedan responder mediante el análisis de datos.
+
+**Situación Problema 1: Rotación de Personal**
+
+- ¿Qué está causando la rotación de personal tan alta?
+
+- ¿Existe algún momento del año donde se den más bajas dentro de la empresa?
+
+- ¿Cómo se siente la gente dentro de su trabajo actual?
+
+- ¿Qué factor ayuda a que el personal dure más tiempo dentro de la empresa?
+
+- ¿En qué parte de la empresa el trabajador se siente más inconforme y cuál es su perfil?
+
+## Analisis de Exploración de Datos
+
+### Transformaciones Necesarias
+
+**FORM Bajas**
+```{r}
+# Limpieza de Fecha
+form_bajas$`Fecha de Nacimiento` <- as.Date(form_bajas$`Fecha de Nacimiento` - ifelse(form_bajas$`Fecha de Nacimiento` > 60, 1, 0), origin="1899-12-30")
+form_bajas$`Fecha de Alta` <- as.Date(form_bajas$`Fecha de Alta` - ifelse(form_bajas$`Fecha de Alta` > 60, 1, 0), origin="1899-12-30")
+form_bajas$`Primer Mes` <- as.Date(form_bajas$`Primer Mes` - ifelse(form_bajas$`Primer Mes` > 60, 1, 0), origin="1899-12-30")
+form_bajas$`Cuarto Mes` <- as.Date(form_bajas$`Cuarto Mes` - ifelse(form_bajas$`Cuarto Mes` > 60, 1, 0), origin="1899-12-30")
+form_bajas$`Fecha de Baja` <- as.Date(form_bajas$`Fecha de Baja` - ifelse(form_bajas$`Fecha de Baja` > 60, 1, 0), origin="1899-12-30")
+
+# Calcular la antigüedad como la diferencia entre Fecha de Baja y Fecha de Alta
+form_bajas$Antiguedad <- abs(as.numeric(form_bajas$`Fecha de Baja` - form_bajas$`Fecha de Alta`, units = "days"))
+
+head(form_bajas)
+```
+
+**FORM RH**
+```{r}
+# Asegurándonos de que las fechas estén en formato adecuado
+form_rh$`Fecha de nacimiento` <- as.Date(form_rh$`Fecha de nacimiento`, origin = "1899-12-30")
+form_rh$`Fecha de Alta` <- as.Date(form_rh$`Fecha de Alta`)
+form_rh$`Fecha de Baja` <- as.Date(form_rh$`Fecha de Baja`)
+
+# Calcular la Edad y la Duración en el trabajo
+form_rh <- form_rh %>%
+  mutate(
+    Edad = interval(start = `Fecha de nacimiento`, end = Sys.Date()) %/% years(1),
+    Duracion = case_when(
+      is.na(`Fecha de Baja`) ~ interval(start = `Fecha de Alta`, end = Sys.Date()) %/% days(1),
+      TRUE ~ interval(start = `Fecha de Alta`, end = `Fecha de Baja`) %/% days(1)
+    )
+  )
+
+# Verificar los resultados
+head(form_rh)
+```
+
+
+**FORM Bajas Espacial**
+```{r}
+form_bajas$CP <- as.character(form_bajas$CP)
+cp_nl$d_codigo <- as.character(cp_nl$d_codigo)
+
+stats_por_cp <- form_bajas %>%
+  group_by(CP) %>%
+  summarize(
+    Conteo_Empleados = n(),
+    Mediana_Antiguedad = median(Antiguedad, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+form_bajas_espacial <- cp_nl %>%
+  left_join(stats_por_cp, by = c("d_codigo" = "CP"))
+
+# Reemplazar NA con 0 en las columnas de interés
+form_bajas_espacial$Conteo_Empleados[is.na(form_bajas_espacial$Conteo_Empleados)] <- 0
+form_bajas_espacial$Mediana_Antiguedad[is.na(form_bajas_espacial$Mediana_Antiguedad)] <- 0
+
+head(form_bajas_espacial)
+```
+
+**FORM Satisfacción**
+```{r}
+# Lista de columnas específicas a transformar
+columnas_a_transformar <- c("salario_bueno", "prestaciones_bueno", "jornada_no_excesiva", 
+                            "ofrecimiento_herramientas", "no_molestia_temperatura", "estres_bajo", 
+                            "facilidad_transporte", "zona_trabajo_comoda", "permanencia_form_futuro")
+
+# Ajustar la función para manejar el typo y valores inesperados
+codificar_respuestas <- function(respuesta) {
+  # Corregir posibles typos
+  respuesta <- gsub("Totalmende en desacuerdo", "Totalmente en desacuerdo", respuesta)
+  
+  # Usar switch para asignar valores numéricos
+  switch(respuesta,
+         "Totalmente en desacuerdo" = 1,
+         "Medianamente en desacuerdo" = 2,
+         "Ni de acuerdo ni en desacuerdo" = 3,
+         "Medianamente de acuerdo" = 4,
+         "Totalmente de acuerdo" = 5,
+         NA) # Devolver NA para cualquier respuesta no reconocida
+}
+
+# Aplicar la codificación solo a las columnas seleccionadas, asegurando que todas las transformaciones son numéricas
+form_satisfaccion[columnas_a_transformar] <- lapply(form_satisfaccion[columnas_a_transformar], function(x) as.numeric(sapply(x, codificar_respuestas)))
+
+head(form_satisfaccion)
+```
+
+**Exportación de Vehículos México**
+```{r}
+exp_vehiculos$Fecha <- as.yearqtr(exp_vehiculos$quarter, format = "%Y-Q%q")
+```
+
+**Venta de Vehículos México**
+```{r}
+ventas_vehiculos$Fecha <- as.yearqtr(paste(ventas_vehiculos$ANIO, ventas_vehiculos$ID_MES, "1"), format = "%Y %m %d")
+```
+
+### Preguntas de Análisis
+
+#### **Situación Problema 1: Rotación de Personal**
+
+**¿Qué está causando la rotación de personal tan alta?**
+```{r}
+# Reunir todas las columnas de interés en dos columnas: 'pregunta' y 'respuesta'
+datos_largos <- form_satisfaccion %>%
+  pivot_longer(cols = c(salario_bueno, prestaciones_bueno, jornada_no_excesiva,
+                        ofrecimiento_herramientas, no_molestia_temperatura,
+                        estres_bajo, facilidad_transporte, zona_trabajo_comoda,
+                        permanencia_form_futuro),
+               names_to = "pregunta", values_to = "respuesta") %>%
+  group_by(pregunta, respuesta) %>%
+  summarise(n = n(), .groups = 'drop') %>%
+  mutate(Percentage = n / sum(n))
+
+# Ordenar las preguntas por el porcentaje de 'Muy en contra' que corresponde a la respuesta '1'
+orden_preguntas <- datos_largos %>%
+  filter(respuesta == 1) %>%
+  arrange((Percentage)) %>%
+  pull(pregunta)
+
+# Convertir 'respuesta' a un factor con etiquetas para la leyenda
+datos_largos$respuesta <- factor(datos_largos$respuesta, levels = 1:5,
+                                 labels = c("Muy en contra", "En contra", 
+                                            "Neutral", "A favor", 
+                                            "Muy a favor"))
+
+# Paleta de colores personalizada para los niveles de acuerdo
+colores_personalizados <- c("#d7191c", "#fdae61", "#c8c6c4", "#bbbcb8", "#8d8c86")
+
+# Generar el gráfico
+g <- ggplot(datos_largos, aes(x = factor(pregunta, levels = orden_preguntas), y = Percentage, fill = respuesta)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_fill_manual(values = colores_personalizados, labels = levels(datos_largos$respuesta)) +
+  coord_flip() +
+  labs(y = "Porcentaje", x = "", fill = "") +
+  scale_y_continuous(labels = percent_format()) +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.5, 'lines'))
+
+# Para guardar el gráfico en un archivo
+g
+```
+
+```{r}
+summary(form_satisfaccion)
+```
+
+
+```{r}
+variables_categoricas <- c("salario_bueno", "prestaciones_bueno", "jornada_no_excesiva", 
+                           "ofrecimiento_herramientas", "no_molestia_temperatura", "estres_bajo", 
+                           "facilidad_transporte", "zona_trabajo_comoda", "permanencia_form_futuro")
+
+# Calculamos los porcentajes por categoría para cada variable
+porcentajes_categorias <- form_satisfaccion %>%
+  select(all_of(variables_categoricas)) %>%
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Valor") %>%
+  group_by(Variable) %>%
+  count(Valor) %>%
+  mutate(Porcentaje = n / sum(n) * 100) %>%
+  ungroup() %>%
+  select(-n)  # Si no necesitas la columna de conteos, puedes omitirla.
+
+# Convertir a un formato ancho específico para cada variable y valor
+porcentajes_ancho <- porcentajes_categorias %>%
+  pivot_wider(names_from = Valor, values_from = Porcentaje, names_prefix = "Categoria_") %>%
+  select(Variable, starts_with("Categoria_")) %>%
+  arrange(Variable)
+
+# Modificamos 'porcentajes_ancho' para formatear los porcentajes
+porcentajes_ancho <- porcentajes_ancho %>%
+  mutate(across(starts_with("Categoria_"), ~sprintf("%.1f%%", .)))
+
+# Ver los resultados
+print(porcentajes_ancho)
+```
+
+
+**¿Existe algún momento del año donde se den más bajas dentro de la empresa?**
+
+```{r}
+# Agregar una columna que indique el mes de la fecha de baja
+form_bajas$Mes <- month(form_bajas$`Fecha de Baja`)
+form_bajas$Año <- year(form_bajas$`Fecha de Baja`)
+
+# Agrupar por mes y género, luego contar las bajas
+bajas_por_mes_genero <- form_bajas %>%
+  group_by(Mes, Género) %>%
+  summarise(Conteo = n(), .groups = 'drop') %>%
+  arrange(Mes)
+
+# Graficar las bajas por mes para cada género
+ggplot(bajas_por_mes_genero, aes(x = Mes, y = Conteo, group = Género, color = Género)) +
+  geom_line() +
+  scale_x_continuous(breaks = 1:12, labels = month.name) +
+  theme_minimal() +
+  labs(title = "Bajas por Mes Dividido por Género",
+       x = "Mes",
+       y = "Número de Bajas",
+       color = "Género")
+```
+
+
+```{r message=FALSE, warning=FALSE}
+# Configurar tmap para que intente reparar automáticamente los polígonos inválidos
+tmap_options(check.and.fix = TRUE)
+
+# Calcular los breaks para Conteo de Empleados excluyendo los ceros
+conteo_empleados_values <- form_bajas_espacial$Conteo_Empleados[form_bajas_espacial$Conteo_Empleados > 0]
+breaks_conteo <- c(-Inf, quantile(conteo_empleados_values, probs = seq(0, 1, by = 0.25), na.rm = TRUE))
+
+# Calcular los breaks para Mediana de Antigüedad excluyendo los ceros
+antiguedad_values <- form_bajas_espacial$Mediana_Antiguedad[form_bajas_espacial$Mediana_Antiguedad > 0]
+breaks_antiguedad <- c(-Inf, quantile(antiguedad_values, probs = seq(0, 1, by = 0.25), na.rm = TRUE))
+
+# Mapa para Conteo de Empleados
+conteo_empleados_map <- tm_shape(form_bajas_espacial) + 
+  tm_fill("Conteo_Empleados", palette = "Blues", style = "fixed", breaks = breaks_conteo, 
+          title = "Conteo de Empleados", na.color = "white") +
+  tm_borders() +
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
+
+# Mapa para Mediana de Antigüedad
+mediana_antiguedad_map <- tm_shape(form_bajas_espacial) + 
+  tm_fill("Mediana_Antiguedad", palette = "BuPu", style = "fixed", breaks = breaks_antiguedad, 
+          title = "Mediana de Antigüedad", na.color = "white") +
+  tm_borders() +
+  tm_layout(frame = FALSE, legend.position = c("right", "bottom"))
+
+# Configurar opciones de tmap para la visualización de los mapas
+tmap_mode("view")
+
+# Mostrar mapas lado a lado
+tmap_arrange(conteo_empleados_map, mediana_antiguedad_map, nrow = 1)
+```
+
+
+**¿Cómo se siente la gente dentro de su trabajo actual?**
+```{r}
+# Función ajustada para preprocesar texto
+preparar_texto <- function(datos, columna) {
+  datos %>%
+    select(!!sym(columna)) %>%
+    mutate(across(everything(), as.character)) %>%
+    mutate(across(everything(), ~ gsub("\\d+", "", .))) %>%
+    unnest_tokens(word, !!sym(columna))
+}
+
+# Función ajustada para análisis de sentimiento y wordcloud con colores personalizados
+analizar_y_wordcloud <- function(datos, columna) {
+  texto_preparado <- preparar_texto(datos, columna)
+  
+  # Obtener sentimiento
+  emociones_df <- texto_preparado %>%
+    inner_join(get_sentiments("nrc"), by = "word") %>%
+    count(sentiment, sort = TRUE) %>%
+    print()
+  
+  # Filtrar palabras para el wordcloud (aparición mínima: 3 veces)
+  palabras_frecuentes <- texto_preparado %>%
+    count(word, sort = TRUE) %>%
+    filter(n >= 3)
+  
+  # Definir paleta de colores de gris claro a naranja
+  colores_gris_naranja <- colorRampPalette(c("darkgrey", "orange"))(100)
+  
+  # Generar wordcloud con la paleta personalizada
+  set.seed(123)
+  wordcloud(words = palabras_frecuentes$word, freq = palabras_frecuentes$n, min.freq = 2,
+            max.words = 100, random.order = FALSE, rot.per = 0.35, 
+            colors = colores_gris_naranja)
+}
+
+analizar_y_wordcloud(form_satisfaccion, "molestias_puesto")
+```
+
+**¿Qué factor ayuda a que el personal dure más tiempo dentro de la empresa?**
+
+```{r}
+ggplot(form_rh, aes(x = Estatus, y = Edad, fill = Estatus)) + 
+  geom_boxplot(color = "black") +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.75), size = 2, alpha = 0.6) +
+  labs(title = "Edad por Estatus",
+       x = "Estatus",
+       y = "Edad") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Pastel1") + 
+  theme(plot.title = element_text(hjust = 0.5), 
+        legend.position = "none", 
+        axis.text = element_text(size = 12), 
+        axis.title = element_text(size = 14), 
+        panel.grid.major = element_line(colour = "grey", linetype = "dotted"), 
+        panel.grid.minor = element_blank(), 
+        panel.background = element_rect(fill = "white"))
+```
+
+```{r}
+conteos_genero <- form_rh %>%
+  group_by(Género, Estatus) %>%
+  summarise(Count = n(), .groups = 'drop')
+
+# Ahora creamos el gráfico de barras apiladas con los colores especificados
+ggplot(conteos_genero, aes(x = Género, y = Count, fill = Estatus)) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_fill_manual(values = c("activo" = "#00CDAC", "baja" = "darkgrey")) + 
+  labs(title = "Proporción de Estatus por Género",
+       x = "Género",
+       y = "Proporción") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(hjust = 1))
+```
+
+```{r}
+conteos_estado_civil <- form_rh %>%
+  group_by(`Estado Civil`, Estatus) %>%
+  summarise(Count = n(), .groups = 'drop')
+
+# Ahora creamos el gráfico de barras apiladas con los colores especificados
+ggplot(conteos_estado_civil, aes(x = `Estado Civil`, y = Count, fill = Estatus)) + 
+  geom_bar(stat = "identity", position = "stack") + # Conteos absolutos
+  scale_fill_manual(values = c("activo" = "lightgreen", "baja" = "lightcoral")) + # Colores personalizados
+  labs(title = "Total de Personas por Estado Civil y Estatus",
+       x = "Estado Civil",
+       y = "Total de Personas") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1))  
+```
+
+
+**¿En qué parte de la empresa el trabajador se siente más inconforme y cuál es su perfil?**
+
+```{r}
+# Generar los datos para la variable 'permanencia_form_futuro'
+datos_permanencia <- form_satisfaccion %>%
+  group_by(permanencia_form_futuro) %>%
+  summarise(Count = n()) %>%
+  mutate(Percentage = Count / sum(Count) * 100)
+
+# Paleta de colores personalizada: rojo, dorado, verde
+colores_personalizados <- c("#d7191c", "#fdae61", "#ffffbf", "#a6d96a", "#1a9641")
+
+# Gráfico de barras para 'permanencia_form_futuro'
+ggplot(datos_permanencia, aes(x = factor(permanencia_form_futuro, levels = c(1, 2, 3, 4, 5)), y = Percentage, fill = as.factor(permanencia_form_futuro))) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = colores_personalizados) +
+  scale_x_discrete(labels = c("Totalmente\nen desacuerdo", "Medianamente\nen desacuerdo", "Ni de acuerdo\nni en desacuerdo", "Medianamente\nde acuerdo", "Totalmente\nde acuerdo")) +
+  xlab("Nivel de Acuerdo con la Permanencia a Futuro") +
+  ylab("Porcentaje") +
+  ggtitle("Distribución de Respuestas para 'Permanencia a Futuro'") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 8), 
+        legend.title = element_blank(),
+        legend.position = "bottom")
+```
+
+```{r}
+# Filtrar para obtener solo aquellos en desacuerdo con la permanencia a futuro (valor 1 o 2)
+desacuerdo_permanencia <- form_satisfaccion %>% 
+  filter(permanencia_form_futuro %in% c(1, 2))
+
+# Selecciona solo las columnas de interés para el boxplot
+columnas_interes <- c("salario_bueno", "prestaciones_bueno", "jornada_no_excesiva", 
+                      "ofrecimiento_herramientas", "no_molestia_temperatura", "estres_bajo", 
+                      "facilidad_transporte", "zona_trabajo_comoda")
+
+# Convertir datos a formato largo para boxplots
+datos_largos <- desacuerdo_permanencia %>%
+  select(all_of(columnas_interes)) %>%
+  pivot_longer(
+    cols = everything(), 
+    names_to = "Variable", 
+    values_to = "Puntuacion"
+  )
+
+# Generar boxplot para cada variable seleccionada
+ggplot(datos_largos, aes(x = Variable, y = Puntuacion, fill = Variable)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_blank()) +
+  labs(title = "Distribución de Puntuaciones para Empleados en Desacuerdo con la Permanencia", 
+       y = "Puntuación") +
+  scale_fill_brewer(palette = "Set3")  # Usar una paleta de colores adecuada para distinguir variables
+```
+
+```{r message=FALSE, warning=FALSE}
+form_satisfaccion$edad <- as.numeric(as.character(form_satisfaccion$edad))
+desacuerdo_permanencia <- form_satisfaccion %>%
+  filter(permanencia_form_futuro %in% c(1, 2))
+
+# Diagrama de dispersión para ver la relación entre 'edad' y 'personas_dependientes'
+ggplot(form_satisfaccion, aes(x = edad, y = personas_dependientes)) +
+  geom_point(color = "lightgrey") +
+  geom_point(data = desacuerdo_permanencia, aes(x = edad, y = personas_dependientes), alpha = 0.6, color = "blue") +
+  theme_minimal() +
+  scale_x_continuous() + # Asumimos que la edad es numérica y ya no hay etiquetas específicas
+  ggtitle("Comparación de Edad y Personas Dependientes (Filtrado por Poca Permanencia)") +
+  xlab("Edad") +
+  ylab("Personas Dependientes")
+```
+
+```{r}
+# Filtrar para obtener solo aquellos en desacuerdo con la permanencia a futuro (valor 1 o 2)
+desacuerdo_permanencia <- form_satisfaccion %>% 
+  filter(permanencia_form_futuro %in% c(1, 2))
+
+# Obtener el conteo de cada razón de entrada y ordenarlo de mayor a menor
+conteo_razon <- desacuerdo_permanencia %>%
+  count(razon_entrada) %>%
+  arrange(desc(n))
+
+# Crear el gráfico de barras horizontal con barra más grande arriba
+ggplot(conteo_razon, aes(x = reorder(razon_entrada, n), y = n, fill = n)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(y = "Razón de Entrada", x = "Conteo", title = "Conteo de Razón de Entrada para Desacuerdo con Permanencia") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(hjust = 1),
+        legend.position = "none") +
+  coord_flip()  # Girar el gráfico para orientación horizontal
+```
+
+
+#### **Situación Problema 2: Predicción de Demanda**
+
+**¿Cuáles son los patrones históricos de demanda de empaques de cartón para autopartes en los mercados objetivo de la empresa FORM, y cómo varían estos patrones según la temporada, el tipo de autoparte, y las regiones geográficas?**
+
+```{r}
+# Agrupar las ventas por cuarto
+ventas_por_quarter <- ventas_vehiculos %>%
+  group_by(Fecha) %>%
+  summarise(VEH_HIBRIDAS = sum(VEH_HIBRIDAS), .groups = 'drop')
+
+# Gráfico para exportaciones
+p1 <- ggplot(exp_vehiculos, aes(x = Fecha, y = trade_value)) +
+  geom_line(color = "blue") +
+  labs(title = "Exportaciones por Cuarto", y = "Valor de Exportaciones") +
+  theme_minimal()
+
+# Gráfico para ventas de vehículos híbridos
+p2 <- ggplot(ventas_por_quarter, aes(x = Fecha, y = VEH_HIBRIDAS)) +
+  geom_line(color = "green") +
+  labs(title = "Ventas de Vehículos", y = "Número de Vehículos") +
+  theme_minimal()
+
+# Arreglar los gráficos lado a lado para comparar visualmente
+p1 + p2 + plot_layout(guides = 'collect') & theme(legend.position = "bottom")
+```
+
+```{r}
+# Preparar los datos para descomposición
+exp_ts <- ts(exp_vehiculos$trade_value, frequency = 4) # Frecuencia trimestral
+ventas_ts <- ts(ventas_por_quarter$VEH_HIBRIDAS, frequency = 4) # Frecuencia trimestral
+
+# Descomposición STL de las exportaciones
+exp_decomp <- stl(exp_ts, s.window = "periodic")
+plot(exp_decomp)
+
+# Descomposición STL de las ventas de vehículos híbridos
+ventas_decomp <- stl(ventas_ts, s.window = "periodic")
+plot(ventas_decomp)
+```
+
+**⁠¿Cómo impactan los lanzamientos de nuevos modelos de vehículos y las tendencias en la industria automotriz en la demanda de diferentes tipos de empaques de cartón para autopartes?**
+
+```{r message=FALSE, warning=FALSE}
+mx_vehicle_exports_summary <- exp_vehiculos_total %>%
+  group_by(Año, Segmento) %>%
+  summarise(Cantidad_Total = sum(Cantidad, na.rm = TRUE))
+
+# Definir la paleta de colores personalizada
+colores <- c("#2D3250", "#435585", "#7077A1", "#F6B17A", "#9EC8B9", "#BE3144")
+
+# Asegurarse de que hay suficientes colores para los segmentos
+# Repetir la paleta si hay más segmentos que colores
+n_segmentos <- length(unique(mx_vehicle_exports_summary$Segmento))
+if (n_segmentos > length(colores)) {
+  colores <- rep(colores, length.out = n_segmentos)
+}
+
+# Gráfico de líneas con la paleta de colores personalizada
+ggplot(mx_vehicle_exports_summary, aes(x = Año, y = Cantidad_Total, color = Segmento, group = Segmento)) + 
+  geom_line() + # Dibuja líneas
+  geom_point() + # Añade puntos en cada dato
+  scale_color_manual(values = colores) + # Usa la paleta de colores definida
+  theme_minimal() + # Usa un tema minimalista
+  labs(title = "Evolución de la Exportación de Segmento de Vehículo a lo Largo de los Años",
+       x = "Año",
+       y = "Cantidad Total") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**⁠¿Cuál ha sido el efecto de las campañas de marketing y las actividades promocionales de la empresa FORM sobre la demanda de sus productos en el pasado?**
+
+```{r}
+# Sin Información Suficiente
+```
+
+**⁠¿Cómo impactan algunas variables externas de carácter macroeconómico a las ventas de la empresa?**
+
+```{r}
+# Sin Información Suficiente
+```
+
+### Pronosticar el evento de Nearshoring.
+
+#### Bases de Datos de Nearshoring
+```{r message=FALSE, warning=FALSE}
+setwd("../databases/nearshoring")
+df=read.csv("quarter_economic_data.csv")
+
+summary(df)
+```
+
+```{r}
+str(df)
+```
+
+```{r}
+# Calculamos el número de NA por columna
+nas_por_columna <- sapply(df, function(x) sum(is.na(x)))
+
+# Filtramos las columnas que tienen 7 o más NA para eliminarlas
+columnas_para_eliminar <- names(nas_por_columna[nas_por_columna >= 7])
+df <- df %>% select(-one_of(columnas_para_eliminar))
+
+# Para las columnas restantes, imputamos los NA con la mediana
+df <- df %>% mutate(across(.cols = where(~ sum(is.na(.)) < 7), 
+                           .fns = ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
+```
+
+Se realizó una imputación de las variables y se eliminaron aquellas con demasiados valores NAS faltantes. 
+
+**Analisis de la Base de Nearshoring**
+
+```{r}
+summary(df)
+```
+
+```{r}
+dataf=df
+
+data2 <- df %>% select(Year, Quarter, New_FDI_Inflows)
+data2$Fecha <- as.Date(paste(data2$Year, data2$Quarter), format = "%Y %B")
+
+time_serie <- ts(data2$New_FDI_Inflows, start = c(2006, 1), frequency = 4)
+
+print(time_serie)
+```
+
+Se convirtió la variable de Año en el formato adecuado de fecha.
+
+```{r}
+plot(time_serie, main = "IED quarter", xlab = "Year quarter", ylab = "IED")
+```
+Podemos ver que el gráfico presenta un claro componente de estacionalidad y puede haber cierta estacionariedad, sin embargo, se ve una tendencia ascendente a lo largo de toda la serie de tiempo, por lo que es necesario aplicar diversas pruebas para comprender mejor nuestra serie de tiempo.
+
+```{r}
+descompose<-decompose(time_serie)
+plot(descompose)
+```
+
+En el gráfico anterior podemos observar una ligera tendencia en toda la serie temporal como se describió anteriormente, esto podría afectar la presencia de estacionariedad. Por otro lado, se evidencia el componente estacional, que aumenta en algunos trimestres de cada período. Esto se puede explicar en el contexto de la variable dependiente con estacionalidades en la demanda de bienes y servicios, eventos económicos como ferias comerciales o temporadas de impuestos. , o incluso patrones estacionales en la disponibilidad de recursos naturales. 
+
+Todo esto hace que en algunas partes de cada año la IED aumente y disminuya periódicamente. Respecto al componente aleatorio residual, se observa cierto ruido en las series temporales, especialmente en el período 2013-2015 y 2020 a 2022. Esto se debe a variaciones en la serie temporal que no pueden explicarse con componentes de estacionalidad o tendencias en la serie temporal. Esto, en un contexto real, se puede explicar con fenómenos con las reformas constitucionales del presidente Enrique Peña Nieto en 2013 y la pandemia de COVID-19 a partir de 2020.
+
+```{r warning=FALSE}
+# The stationarity of the series is checked with the following ADF test.
+adf.test(time_serie)
+```
+El resultado de la Prueba Aumentada de Dickey-Fuller (ADF) con un valor p de 0.01 (menor a 0.05) indica que la serie temporal “time_series” es estacionaria, lo que significa que no muestra tendencias en el tiempo.
+
+```{r}
+acf(time_serie,main="Significant Autocorrelations") 
+```
+
+Podemos observar que la serie no muestra de autocorrelación serial, ya que en los periodos la función de autocorrelación no excede las líneas de significancia.
+
+#### Modelo Arma Calculado
+
+```{r warning=FALSE}
+summary(arma<-arma(diff(time_serie)),order=c(1,1))
+plot(arma)
+```
+Estos coeficientes indican una correlación positiva débil con el valor anterior y una correlación negativa fuerte con el error en el período anterior, respectivamente. Además, se ha incluido un término de interceptación con un valor estimado de 109.8050
+
+Los residuos del modelo tienen una varianza estimada (sigma^2) de 4774485 y los resultados del ajuste muestran un AIC muy alto.
+
+#### Modelo Arima con Log y Diff Calculado
+
+```{r warning=FALSE}
+summary(arima<-Arima(diff(log((time_serie))),order=c(1,1,1))) 
+plot(arima)
+```
+
+El coeficiente autorregresivo (AR1) es -0,6977 y el coeficiente de media móvil (MA1) es -1,0000. Estos coeficientes indican que el valor actual de la serie temporal logarítmicamente diferenciada está correlacionado negativamente con su valor anterior y con el error en el período anterior.
+
+La varianza estimada del modelo (sigma^2) es 0,0.5655. El valor logarítmico de verosimilitud es -73.89, y los criterios de información, como el AIC (Akaike Information Criterion), el AIC corregido (AICc) y el BIC (Bayesian Information Criterion), indican que este modelo podría ser apropiado para la serie temporal.
+
+#### Pruebas de Diagnostico en la Data
+
+**Modelo Arma**
+```{r}
+arma_residuals<-arma$residuals
+Box.test(arma_residuals,lag=1,type="Ljung-Box")
+```
+
+El valor de p obtenido en la prueba de Box-Ljung (0,07) es mayor que el valor de p máximo comúnmente utilizado que es 0,05. Esto significa que no se encontró evidencia significativa de autocorrelación en los residuos, ya que el valor p es mayor que 0,05, lo que respalda la validez del modelo en términos de autocorrelación.
+
+```{r}
+#Testing residuals
+suppressWarnings({
+arma$residuals <- na.omit(arma$residuals)
+adf.test(arma$residuals)
+})
+```
+El valor de p de 0,01, inferior al umbral de 0,05, indica una fuerte evidencia contra la hipótesis nula de no estacionariedad. Esto significa que es poco probable que los residuos sean no estacionarios.
+
+
+```{r}
+hist(arma$residuals)
+```
+Se aprecia relativa normalidad en los residuales.
+
+**Modelo Arima**
+```{r}
+arima_residuals<-arima$residuals
+Box.test(arima_residuals,lag=1,type="Ljung-Box")
+```
+
+El valor de p obtenido en la prueba de Box-Ljung (0,8) es mayor que el valor de p máximo comúnmente utilizado que es 0,05. Esto significa que no se encontró evidencia significativa de autocorrelación en los residuos, ya que el valor p es mayor que 0,05, lo que respalda la validez del modelo en términos de autocorrelación.
+
+```{r message=FALSE, warning=FALSE}
+residuals_ts <- arima$residuals
+
+# Interpolar los valores NA
+residuals_clean <- na.approx(residuals_ts)
+
+suppressWarnings({
+  adf_test_result <- adf.test(residuals_clean)
+})
+
+# Ver el resultado
+print(adf_test_result)
+```
+El valor de p de 0,01, inferior al umbral de 0,05, indica una fuerte evidencia contra la hipótesis nula de no estacionariedad. Esto significa que es poco probable que los residuos sean no estacionarios.
+
+```{r}
+hist(arima$residuals)
+```
+
+Se aprecia normalidad en los residuales del modelo 2.
+
+Debido a métricas como el AIC y a las pruebas de diagnóstico, el modelo 2 es elegido como el más apropiado.
+
+#### Forecast de Nearshoring
+
+```{r}
+suppressWarnings({
+arima_restauracion<-exp(arima$fitted) # The variables are transformed back to the originals (if log is applied, the exponential must be applied (it is the opposite))
+vector2 =c(arima_restauracion) #reverting "log" operation using "exp"
+original2 <-c(time_serie) #Converting into a vector.
+restauracion2 = vector2+original2 #reverting "diff" operation summing the original values to the differences.
+ts2 <- ts(restauracion2, start = 1, end = length(restauracion2), frequency = 4) #Make time series
+})
+```
+
+```{r warning=FALSE}
+# Forecast (ARIMA)
+arima_forecast<-forecast(ts2,h=5)
+arima_forecast
+plot(arima_forecast)
+autoplot(arima_forecast)
+```
+
+En el pronóstico realizado para la Inversión Extranjera Directa (IED) relacionada con el fenómeno del nearshoring, se observan tendencias y variaciones interesantes para los próximos cinco trimestres. La predicción se presenta con intervalos de confianza del 80% y del 95%, lo que nos permite entender la incertidumbre asociada con cada estimación de punto.
+
+Para el cuarto trimestre del año 24, el pronóstico de punto estima una IED de 3,036.064 millones de dólares. Los intervalos de confianza sugieren que, con un 80% de confianza, la IED podría variar entre 1,121.986 y 4,950.143 millones de dólares. Ampliando la certeza al 95%, el rango se extiende desde 108.734 hasta 5,963.394 millones de dólares, indicando una mayor incertidumbre en las estimaciones.
+
+En el primer trimestre del año 25, se espera un aumento en la IED hasta los 3,742.547 millones de dólares. El intervalo de confianza del 80% se sitúa entre 1,383.068 y 6,102.026 millones de dólares, mientras que el intervalo al 95% se amplía desde 134.036 hasta 7,351.058 millones de dólares, reflejando nuevamente la incertidumbre en el pronóstico.
+
+Para el segundo trimestre del año 25, el pronóstico muestra una disminución en la IED a 2,318.412 millones de dólares. Los intervalos de confianza para este trimestre son más estrechos, con el intervalo del 80% variando entre 856.775 y 3,780.049 millones de dólares, y el del 95% entre 83.032 y 4,553.793 millones de dólares.
+
+En el tercer trimestre del año 25, se prevé un repunte en la IED a 3,128.604 millones de dólares, con intervalos de confianza similares a los observados en el cuarto trimestre del año 24.
+
+Finalmente, para el cuarto trimestre del año 25, el pronóstico vuelve a estimar una IED de 3,036.064 millones de dólares, con intervalos de confianza prácticamente idénticos a los del cuarto trimestre del año 24.
+
+Este análisis de pronóstico muestra una variabilidad significativa en la IED esperada relacionada con el nearshoring a lo largo de los próximos cinco trimestres. 
+
+## Principales Hallazgos
+
+### Incremento de Nearshoring
+- **Previsión positiva**: La tendencia creciente del nearshoring es esperada para impulsar favorablemente las ventas de FORM, según el modelo ARIMA que pronostica la Inversión Extranjera Directa.
+
+### Tendencias en Industrias Clave
+- **Automotriz y Cartón**: Ambas industrias muestran tendencias positivas. Las ventas y exportaciones nacionales reflejan un incremento constante, con la industria automotriz exhibiendo estacionalidad con picos en el tercer trimestre, lo que sugiere una correlación directa entre ventas y exportaciones. Esto presenta una perspectiva optimista para la demanda de productos de FORM.
+
+### Factores de Rotación de Personal
+- **Principales causantes de baja**: La ubicación de la empresa, altas temperaturas y la insuficiencia de herramientas son identificados como factores críticos detrás de la baja de colaboradores. Específicamente, las molestias por temperatura afectan al 33% de los encuestados, seguido de un 20% en desacuerdo con las prestaciones y un 19% que señala la falta de herramientas adecuadas.
+- **Análisis de Permanencia**: La determinación de factores relacionados con la baja intención de permanencia en FORM muestra que el ofrecimiento de herramientas adecuadas y condiciones de trabajo óptimas son áreas clave de mejora.
+- **Perfil del trabajador insatisfecho**: Menores de 30 años con hasta dos personas dependientes, citando la ubicación de la empresa como la razón principal de entrada.
+
+### Demanda de Autopartes y Empaques
+- **Vehículos Eléctricos**: La tendencia al alza en la venta de vehículos eléctricos sugiere la necesidad de adaptar los tipos de empaques para estas autopartes, representando una oportunidad de innovación para FORM.
+
+### Tendencias de Bajas de Personal
+- **Incremento y género**: Hay un incremento notable en las bajas en comparación con el año anterior, con una mayor incidencia en mujeres. Además, se observa un aumento en las bajas conforme avanza el año, especialmente en abril y febrero.
+
+### Insights Adicionales
+- La realización de encuestas por parte de FORM ha permitido identificar con precisión los factores de satisfacción e insatisfacción laboral, subrayando la importancia de atender estas áreas para mejorar la retención del personal.
+
+## Referencias 
+
+1. *D&B Hoovers is Your Sales Accelerator -- Dun & Bradstreet*. (s. f.). Recuperado 16 de marzo de 2024, de <https://www.dnb.com/products/dnb-hoovers.html> 
+
+2. *World Bank Group - International Development, Poverty, & Sustainability*. (s. f.). World Bank. Recuperado 16 de marzo de 2024, de <https://www.worldbank.org/en/home> 
+
+3. *Smithers - Innovate with confidence*. (s. f.). Smithers. Recuperado 16 de marzo de 2024, de <https://www.smithers.com/home> 
+
+4. *Statista. (s. f.). Statista - the statistics portal*. Recuperado 16 de marzo de 2024, de <https://www.statista.com/> 
+
+5. *MexicoIndustry. (s. f.). *Incrementará 8% el sector automotriz en 2024*. MexicoIndustry. Recuperado 16 de marzo de 2024, de <https://mexicoindustry.com/noticia/incrementara-8-el-sector-automotriz-en-2024> 
+
+6. *Newsroom Infobae. (2023, 12 abril). Industria automotriz en México espera más empleos por electromovilidad. *Infobae*. Recuperado 16 de marzo de 2024, de <https://www.infobae.com/america/agencias/2023/04/12/industria-automotriz-en-mexico-espera-mas-empleos-por-electromovilidad/>
+
