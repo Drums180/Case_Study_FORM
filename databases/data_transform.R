@@ -317,6 +317,7 @@ write_xlsx(form_encuesta, "/Users/daviddrums180/Tec/Case_Study_Form/databases/fo
 library(readxl)
 library(dplyr)
 library(stringr) 
+library(readr)
 
 # Leer el archivo Excel
 # Asegúrate de cambiar la ruta del archivo a la ubicación correcta donde tienes tu archivo Excel
@@ -388,6 +389,7 @@ municipio_unicos <- unique(datos$Municipio)
 estado_unicos <- unique(datos$Estado)
 estado_civil_unicos <- unique(datos$`Estado Civil`)
 bancos_unicos <- unique(datos$Banco)
+lugar_nacimiento <- unique(datos$Lugar.de.Nacimiento)
 
 # Imprimir los valores únicos
 list(genero_unicos = genero_unicos,
@@ -403,6 +405,76 @@ summary(datos)
 
 # Nombre del archivo original
 nombre_archivo_original <- "Datos_FORM_RH_FJ2024.xlsx"
+
+# Construir el nombre del archivo de salida reemplazando la extensión
+nombre_archivo_salida <- sub("\\.xlsx$", ".csv", nombre_archivo_original)
+
+# Exportar `datos` a CSV
+write.csv(datos, nombre_archivo_salida, row.names = FALSE)
+
+# Cargar las librerías necesarias
+library(readxl)
+library(dplyr)
+library(stringr)
+library(knitr)
+
+# Leer el archivo Excel
+# Asegúrate de cambiar la ruta del archivo a la ubicación correcta donde tienes tu archivo Excel
+datos <- read_excel("/Users/daviddrums180/Tec/Case_Study_Form/databases/form/Datos_FORM_Ventas_FJ2024.xlsx")
+
+# Función para limpiar texto: convertir a minúsculas, quitar puntuación, acentos y espacios extras
+clean_text <- function(text) {
+  text %>%
+    str_to_lower() %>% # Convertir a minúsculas
+    str_remove_all("[[:punct:]]") %>% # Quitar puntuación
+    # Reemplazar letras acentuadas sin quitar la ñ
+    str_replace_all(c("á" = "a", "é" = "e", "í" = "i", "ó" = "o", "ú" = "u", "ü" = "u")) %>%
+    str_remove_all("s de rl de cv|sa de cv|sapi de cv|llc|gmbh") %>% # Eliminar frases comunes de nombres de empresas
+    str_squish() # Eliminar espacios extras al principio y al final, y reducir espacios duplicados a uno solo
+}
+
+# Ajuste de la función de clasificación para trabajar directamente en dplyr
+clasificar_producto <- function(nombre_producto) {
+  case_when(
+    str_detect(nombre_producto, "tarima|pallet|contenedor") ~ "Contenedores y Tarimas",
+    str_detect(nombre_producto, "charola|tray") ~ "Componentes de Empaque",
+    str_detect(nombre_producto, "caja|box|tote") ~ "Empaques Primarios",
+    str_detect(nombre_producto, "dunnage|foam|protector|esquinero|pad") ~ "Materiales de Protección",
+    str_detect(nombre_producto, "kit") ~ "Kits de Empaque",
+    str_detect(nombre_producto, "tapa|celdado|separador|inserto") ~ "Accesorios de Empaque",
+    str_detect(nombre_producto, "glove box|mirror|motor|lens|bezel|assy") ~ "Componentes Específicos",
+    TRUE ~ "Otros"
+  )
+}
+
+# Aplicar la función de limpieza a las columnas de texto
+datos <- datos %>%
+  mutate(across(where(is.character), clean_text, .names = "{.col}")) 
+
+# Obtener valores únicos para las columnas especificadas
+no.clientes <- unique(datos$`No. OC Cliente`)
+clientes <- unique(datos$Cliente)
+categoria <- unique(datos$`Categoría de producto`)
+estado <- unique(datos$Estado)
+producto <- unique(datos$Producto)
+
+# Imprimir los valores únicos
+print(producto)
+
+# Aplicar la función de clasificación
+datos <- datos %>%
+  mutate(Tipo = clasificar_producto(Producto))
+
+# Contar productos por categoría
+conteo_categorias <- datos %>%
+  group_by(Tipo) %>%
+  summarise(Conteo = n())
+
+# Imprimir el conteo por categoría
+print(conteo_categorias)
+
+# Nombre del archivo original
+nombre_archivo_original <- "Datos_FORM_Ventas_FJ2024.xlsx"
 
 # Construir el nombre del archivo de salida reemplazando la extensión
 nombre_archivo_salida <- sub("\\.xlsx$", ".csv", nombre_archivo_original)

@@ -1,0 +1,117 @@
+---
+title: "Data Unification"
+author: "David Dominguez - A01570975"
+date: "2024-04-10"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
+---
+
+# Creating the Necessary Databases
+
+## Libraries Necessary
+```{r message=FALSE, warning=FALSE}
+library(imputeTS) # Rellenar datos faltantes
+library(xts) # Manipulación de series temporales
+library(zoo) # Sistemas de series temporales
+library(tseries) # Análisis de series temporales
+library(stats) # Funciones estadísticas básicas
+library(forecast) # Predicción de series temporales
+library(astsa) # Análisis de series temporales aplicado
+library(corrplot) # Visualización de matrices de correlación
+library(wordcloud) # Crear nubes de palabras
+library(tidytext) # Análisis de texto con tidy data
+library(AER) # Análisis econométrico con R
+library(vars) # Modelos VAR y SVAR
+library(dynlm) # Modelos lineales dinámicos
+library(mFilter) # Filtros para series temporales
+library(TSstudio) # Herramientas interactivas series temporales
+library(tidyverse) # Colección de paquetes de datos tidy
+library(sarima) # Modelos SARIMA
+library(readr) # Leer archivos planos
+library(readxl) # Leer archivos Excel
+library(heatmaply) # Heatmaps interactivos
+library(dplyr) # Manipulación de datos
+library(ggplot2) # Sistema de gráficos
+library(psych) # Procedimientos psicométricos
+library(tidyr) # Reorganización de datos
+library(readtext) # Leer archivos de texto
+library(syuzhet) # Análisis de sentimientos
+library(RColorBrewer) # Paletas de colores
+library(tm) # Minería de texto
+library(caret) # Entrenamiento de modelos predictivos
+library(MASS) # Métodos estadísticos adicionales
+library(rpart) # Modelos de partición recursiva
+library(rpart.plot) # Gráficos para rpart
+library(party) # Modelos basados en árboles
+library(gmodels) # Herramientas de modelado
+library(knitr) # Reportes dinámicos
+library(cluster) # Métodos de agrupamiento
+library(e1071) # Misc funciones SVM
+library(pROC) # Curvas ROC
+library(ISLR) # Data sets para aprendizaje estadístico
+library(gridExtra) # Disposición de múltiples gráficos
+library(car) # Regresión y Anova con R
+library(DataExplorer) # Automatizar análisis exploratorio
+library(randomForest) # Clasificación con random forest
+library(class) # k-vecinos más cercanos
+library(factoextra) # Visualización de resultados de clustering
+library(purrr) # Programación funcional
+library(viridis) # Paletas de colores para gráficos
+library(scales) # Escalado de gráficos
+library(lubridate) # Manipulación de fechas y horas
+library(patchwork) # Combinar ggplot2 plots
+library(janeaustenr) # Textos de Jane Austen
+library(reshape2) # Reestructurar datos
+library(tmap) # Crear mapas
+library(sf) # Manipulación de datos geoespaciales
+```
+
+## Bases de Datos Necesarias
+```{r message=FALSE, warning=FALSE}
+setwd("../databases")
+
+# Datos para Base Maestra Recursos Humanos
+form_satisfaccion <- read_excel("form/Encuesta_Datos_FORM_Fall2023.xlsx")
+form_bajas = read_csv("form/Datos_FORM_RH_FJ2024.csv")
+cp_nl <- st_read("geo_reference__nl/CP_NL")
+
+# Datos para Base Maestra Ventas
+form_ventas = read_csv("form/Datos_FORM_Ventas_FJ2024.csv")
+exp_vehiculos = read_csv("industry_autos_mx/exportacion_vehiculos_mx.csv")
+ventas_vehiculos = read_csv("industry_autos_mx/mx_venta_vehiculos.csv")
+exp_vehiculos_total = read_excel("industry_autos_mx/exportacion_vehiculos.xlsx")
+```
+
+## Transformaciones Necesarias
+
+### FORM Bajas
+```{r}
+# Convertir correctamente todas las fechas desde formato numérico de Excel
+form_bajas$`Fecha de Nacimiento` <- as.Date(form_bajas$`Fecha de nacimiento`, origin="1899-12-30")
+form_bajas$`Fecha de Alta` <- as.Date(form_bajas$`Fecha de Alta`, origin="1899-12-30")
+form_bajas$`Primer Mes` <- as.Date(form_bajas$`Primer Mes`, origin="1899-12-30")
+form_bajas$`Cuarto Mes` <- as.Date(form_bajas$`Cuarto Mes`, origin="1899-12-30")
+form_bajas$`Fecha de Baja` <- as.Date(form_bajas$`Fecha de Baja`, origin="1899-12-30")
+
+# Calcular la antigüedad en días y en años
+form_bajas$Antiguedad_Dias <- sapply(1:nrow(form_bajas), function(i) {
+  fecha_baja <- form_bajas$`Fecha de Baja`[i]
+  if (is.na(fecha_baja)) {
+    # Calcula la diferencia desde la fecha de alta hasta hoy si 'Fecha de Baja' es NA
+    as.integer(difftime(Sys.Date(), form_bajas$`Fecha de Alta`[i], units = "days"))
+  } else {
+    # Calcula la diferencia entre las fechas de baja y de alta
+    as.integer(difftime(fecha_baja, form_bajas$`Fecha de Alta`[i], units = "days"))
+  }
+})
+
+# Calcular la antigüedad en años, usando 365.25 para incluir años bisiestos
+form_bajas$Antiguedad_Años <- form_bajas$Antiguedad_Dias / 365.25
+
+# Mostrar las primeras filas del dataframe modificado
+head(form_bajas)
+```
