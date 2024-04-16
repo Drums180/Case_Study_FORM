@@ -12,7 +12,7 @@ output:
 
 ![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
 
-#
+# **Fase I : Contexto**
 
 ## Lecturas Sugeridas
 #### What is Exploratory Data Analysis?

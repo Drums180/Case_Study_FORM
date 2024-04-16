@@ -481,3 +481,33 @@ nombre_archivo_salida <- sub("\\.xlsx$", ".csv", nombre_archivo_original)
 
 # Exportar `datos` a CSV
 write.csv(datos, nombre_archivo_salida, row.names = FALSE)
+
+######################################
+library(lubridate)
+
+# Leer el archivo Excel
+# Asegúrate de cambiar la ruta del archivo a la ubicación correcta donde tienes tu archivo Excel
+datos <- read_csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/form/Datos_FORM_RH_FJ2024.csv")
+
+# Primero, asegúrate de que las fechas están en formato de fecha si no es así
+datos$`Fecha de Alta` <- as.Date(datos$`Fecha de Alta`, format = "%Y-%m-%d")
+datos$`Primer Mes` <- as.Date(datos$`Primer Mes`, format = "%Y-%m-%d")
+
+# Imputando los NAs en 'Primer Mes' con los valores de 'Fecha de Alta'
+datos$`Primer Mes`[is.na(datos$`Primer Mes`)] <- datos$`Fecha de Alta`[is.na(datos$`Primer Mes`)]
+
+# Asegurar que 'Cuarto Mes' está en formato de fecha
+datos$`Cuarto Mes` <- as.Date(datos$`Cuarto Mes`, format = "%Y-%m-%d")
+
+# Sumar 4 meses a 'Primer Mes' donde 'Cuarto Mes' es NA
+datos$`Cuarto Mes`[is.na(datos$`Cuarto Mes`)] <- datos$`Primer Mes`[is.na(datos$`Cuarto Mes`)] + months(4)
+
+# Utilizar summary() para obtener un resumen estadístico de los datos
+summary(datos)
+
+# Nombre del archivo original
+nombre_archivo_original <- "Datos_FORM_RH_FJ2024.xlsx"
+
+# Construir el nombre del archivo de salida reemplazando la extensión
+nombre_archivo_salida <- sub("\\.xlsx$", ".csv", nombre_archivo_original)
+
