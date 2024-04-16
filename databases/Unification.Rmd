@@ -91,7 +91,7 @@ exp_vehiculos_total = read_excel("industry_autos_mx/exportacion_vehiculos.xlsx")
 ### FORM Bajas
 ```{r}
 # Convertir correctamente todas las fechas desde formato numérico de Excel
-form_bajas$`Fecha de Nacimiento` <- as.Date(form_bajas$`Fecha de nacimiento`, origin="1899-12-30")
+form_bajas$`Fecha de nacimiento` <- as.Date(form_bajas$`Fecha de nacimiento`, origin="1899-12-30")
 form_bajas$`Fecha de Alta` <- as.Date(form_bajas$`Fecha de Alta`, origin="1899-12-30")
 form_bajas$`Primer Mes` <- as.Date(form_bajas$`Primer Mes`, origin="1899-12-30")
 form_bajas$`Cuarto Mes` <- as.Date(form_bajas$`Cuarto Mes`, origin="1899-12-30")
@@ -130,6 +130,7 @@ stats_por_cp <- form_bajas %>%
   summarize(
     Conteo_Empleados = n(),
     Mediana_Antiguedad = median(Antiguedad_Dias, na.rm = TRUE),
+    Mediana_Salario_Diario = median(SD, na.rm = TRUE),
     .groups = 'drop'
   )
 
@@ -139,8 +140,11 @@ form_bajas_espacial <- cp_nl %>%
 # Reemplazar NA con 0 en las columnas de interés
 form_bajas_espacial$Conteo_Empleados[is.na(form_bajas_espacial$Conteo_Empleados)] <- 0
 form_bajas_espacial$Mediana_Antiguedad[is.na(form_bajas_espacial$Mediana_Antiguedad)] <- 0
+form_bajas_espacial$Mediana_Salario_Diario[is.na(form_bajas_espacial$Mediana_Salario_Diario)] <- 0
 
 head(form_bajas_espacial)
+
+write_sf(form_bajas_espacial, "form_bajas_espacial.shp")
 ```
 
 ### FORM Satisfacción
