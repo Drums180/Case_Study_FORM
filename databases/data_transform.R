@@ -176,11 +176,15 @@ print(names(form_encuesta))
 
 # Transformar el texto de las columnas especificadas
 form_encuesta <- form_encuesta %>%
-  mutate(across(c(puesto, puesto_otro, molestias_puesto, sentimiento_form),
+  mutate(across(c(puesto, molestias_puesto, sentimiento_form, genero, estado_civil, municipio, nivel_escolar),
                 ~ str_to_lower(.) %>% 
                   iconv(to = 'ASCII//TRANSLIT') %>% 
                   str_replace_all("[^a-z0-9 ]", "") %>% # Conservar solo letras minúsculas, números y espacios
                   str_trim())) # Elimina espacios al inicio y al final
+
+# Suponiendo que tu dataframe se llama form_encuesta
+form_encuesta <- form_encuesta %>%
+  mutate(sufrido_situaciones_conflicto = ifelse(sufrido_situaciones_conflicto == "Si", 1, 0))
 
 # Obtener valores únicos para cada una de las columnas transformadas
 valores_unicos_puesto <- unique(form_encuesta$puesto)
@@ -306,8 +310,92 @@ form_encuesta$razon_entrada <- sapply(form_encuesta$razon_entrada, function(fras
   return(frase_final)
 })
 
+
+# Identificar las columnas que son de tipo caracter
+cols_texto <- sapply(form_encuesta, is.character)
+
+# Aplicar la función unique a cada columna de texto y almacenar los resultados en una lista
+valores_unicos <- sapply(form_encuesta[, cols_texto, drop = FALSE], unique)
+
+print(valores_unicos)
+
+# Función para categorizar los textos basados en palabras clave
+categorizar_molestias <- function(texto) {
+  if (str_detect(texto, regex("salario|prestaciones|bonos|dias|sueldo", ignore_case = TRUE))) {
+    return("Salario y Prestaciones")
+  } else if (str_detect(texto, regex("calor|comedor|micro|espacio|condiciones|equipamiento", ignore_case = TRUE))) {
+    return("Condiciones Laborales")
+  } else if (str_detect(texto, regex("ambiente|compañeros|trato|comucicacion", ignore_case = TRUE))) {
+    return("Ambiente Laboral")
+  } else if (str_detect(texto, regex("estres|carga|sobrecarga|urgente", ignore_case = TRUE))) {
+    return("Estrés y Carga de Trabajo")
+  } else if (str_detect(texto, regex("horario|jornada", ignore_case = TRUE))) {
+    return("Horario")
+  } else if (str_detect(texto, regex("herramientas|equipos|computadora|transporte", ignore_case = TRUE))) {
+    return("Equipamiento y Herramientas")
+  } else if (str_detect(texto, regex("transporte", ignore_case = TRUE))) {
+    return("Transporte")
+  } else {
+    return("Otros")
+  }
+}
+
+# Aplicar la función al dataframe
+form_encuesta <- form_encuesta %>%
+  mutate(categoria_molestias = sapply(molestias_puesto, categorizar_molestias))
+
+# Función para categorizar los sentimientos
+categorizar_sentimientos <- function(texto) {
+  if (str_detect(texto, regex("contento|comodo|agradecida|crecimiento|optimista|capaz|realizada", ignore_case = TRUE))) {
+    return("Positivo")
+  } else if (str_detect(texto, regex("normal|regular|equis|estable", ignore_case = TRUE))) {
+    return("Neutro")
+  } else if (str_detect(texto, regex("insegura|falta|complicado|pequenos desacuerdos|difícil|problema", ignore_case = TRUE))) {
+    return("Negativo")
+  } else {
+    return("Indefinido")
+  }
+}
+
+# Aplicar la función al dataframe
+form_encuesta <- form_encuesta %>%
+  mutate(categoria_sentimiento = sapply(sentimiento_form, categorizar_sentimientos))
+
+# Supongamos que tu dataframe se llama form_encuesta y la columna que quieres transformar es edad
+form_encuesta <- form_encuesta %>%
+  mutate(edad = as.numeric(gsub("[^0-9]", "", edad)))
+
+# Función genérica para categorizar las respuestas en texto
+categorizar_respuestas_texto <- function(x) {
+  case_when(
+    x %in% c("Totalmente de acuerdo", "Medianamente de acuerdo") ~ "De Acuerdo",
+    x == "Ni de acuerdo ni en desacuerdo" ~ "Neutro",
+    x %in% c("Medianamente en desacuerdo", "Totalmente en desacuerdo") ~ "Desacuerdo"
+  )
+}
+
+# Aplicar la función a todas las columnas excepto permanencia_form_futuro
+form_encuesta <- form_encuesta %>%
+  mutate(across(
+    .cols = c(salario_bueno, prestaciones_bueno, jornada_no_excesiva, ofrecimiento_herramientas, 
+              no_molestia_temperatura, estres_bajo, facilidad_transporte, zona_trabajo_comoda),
+    .fns = categorizar_respuestas_texto
+  ))
+
+# Especificación especial para permanencia_form_futuro
+form_encuesta$permanencia_form_futuro <- ifelse(
+  form_encuesta$permanencia_form_futuro %in% c("Totalmente en desacuerdo", "Medianamente en desacuerdo"),
+  1,
+  0
+)
+
+# Reemplazar NA con "Neutro" en la columna facilidad_transporte
+form_encuesta <- form_encuesta %>%
+  mutate(facilidad_transporte = ifelse(is.na(facilidad_transporte), "Neutro", facilidad_transporte))
+
+
 library(writexl)
-write_xlsx(form_encuesta, "/Users/daviddrums180/Tec/Case_Study_Form/databases/form/Encuesta_Datos_FORM_Fall2023.xlsx")
+write_csv(form_encuesta, "/Users/daviddrums180/Tec/Case_Study_Form/databases/form/Encuesta_Datos_FORM_Fall2023.csv")
 
 ###################################
 # RH 2024
@@ -511,3 +599,165 @@ nombre_archivo_original <- "Datos_FORM_RH_FJ2024.xlsx"
 # Construir el nombre del archivo de salida reemplazando la extensión
 nombre_archivo_salida <- sub("\\.xlsx$", ".csv", nombre_archivo_original)
 
+############# PREPARACIÓN MODELADO
+# Asegúrate de cambiar la ruta del archivo a la ubicación correcta donde tienes tu archivo Excel
+datos <- read_csv("/Users/daviddrums180/Tec/Case_Study_Form/databases/classification/Datos_FORM_RH_FJ2024.csv")
+
+
+# Convertir la columna 'Fecha de nacimiento' asumiendo que el origen es '1970-01-01'
+datos <- datos %>%
+  mutate(`Fecha de nacimiento` = as.Date(`Fecha de nacimiento`, origin = "1899-12-30"))
+
+# Obtener valores únicos para las columnas especificadas
+genero <- unique(datos$Género)
+puestos <- unique(datos$Puesto)
+dpto <- unique(datos$Dpto)
+municipio <- unique(datos$Municipio)
+estado_civil <- unique(datos$`Estado Civil`)
+
+# Imprimir los valores únicos
+print(estado_civil)
+
+# Suponiendo que tu data frame se llama datos
+datos <- datos %>%
+  mutate(municipio = ifelse(municipio == "nuevo leon", "monterrey", municipio))
+
+# Contar NA en las columnas específicas del data frame 'datos'
+na_count <- datos %>%
+  select(`Fecha de nacimiento`, Género, Puesto, Dpto, SD, Municipio, Estado, `Estado Civil`, Dirección) %>%
+  summarise(across(everything(), ~ sum(is.na(.))))
+
+# Imprimir el resultado
+print(na_count)
+
+# Lista para almacenar los data frames con registros NA para cada columna
+na_records_list <- list()
+
+# Filtrar y almacenar los registros con NA para cada columna
+na_records_list$`Fecha de nacimiento` <- datos %>% filter(is.na(`Fecha de nacimiento`))
+na_records_list$Género <- datos %>% filter(is.na(Género))
+na_records_list$Puesto <- datos %>% filter(is.na(Puesto))
+na_records_list$Dpto <- datos %>% filter(is.na(Dpto))
+na_records_list$SD <- datos %>% filter(is.na(SD))
+na_records_list$Municipio <- datos %>% filter(is.na(Municipio))
+na_records_list$Estado <- datos %>% filter(is.na(Estado))
+na_records_list$`Estado Civil` <- datos %>% filter(is.na(`Estado Civil`))
+na_records_list$Dirección <- datos %>% filter(is.na(Dirección))
+
+# Para ver los registros con NA en una columna específica, por ejemplo, 'Género'
+print(na_records_list$Puesto)
+
+
+# Imputar NA y cambiar valores específicos en la columna 'Puesto'
+datos <- datos %>%
+  mutate(Puesto = ifelse(is.na(Puesto), "servicio al cliente", Puesto), # Imputar NA con "servicio al cliente"
+         Puesto = ifelse(Puesto == "especialista de servicio al cliente", "servicio al cliente", Puesto)) %>%
+  mutate(Puesto = case_when(
+    Puesto %in% c("inspector de calidad", "calidad") ~ "calidad", # Homologar calidad
+    Puesto %in% c("almacenista", "materialista", "materiales") ~ "almacenista", # Homologar roles de almacen
+    Puesto %in% c("operador", "montacarguista") ~ "operador", # Homologar operadores
+    Puesto %in% c("gestor", "inspector") ~ "gestor", # Homologar gestión y supervisión
+    Puesto %in% c("asistente", "auxiliar", "secretario", "mozo", "chofer") ~ "asistente", # Homologar asistentes
+    Puesto %in% c("guardia", "seguridad") ~ "seguridad", # Homologar seguridad
+    Puesto %in% c("enfermera", "medico") ~ "personal de salud", # Homologar salud
+    TRUE ~ Puesto # Mantener los demás puestos como están
+  ))
+
+# Función para calcular la moda que maneja empates seleccionando el primero que aparece
+get_mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+# Suponiendo que tu data frame se llama datos
+# Calcular la moda de Dpto para cada Puesto
+moda_dpto_por_puesto <- datos %>%
+  group_by(Puesto) %>%
+  summarise(ModaDpto = {
+    filtered <- na.omit(Dpto)
+    if (length(filtered) > 0) {
+      vals <- sort(table(filtered), decreasing = TRUE)
+      as.character(names(vals[vals == max(vals)])[1])  # Devuelve el primero en caso de empate
+    } else {
+      NA_character_
+    }
+  }, .groups = 'drop')
+
+# Imputar NA en Dpto usando la moda calculada para cada grupo de Puesto
+datos <- datos %>%
+  left_join(moda_dpto_por_puesto, by = "Puesto") %>%
+  mutate(Dpto = ifelse(is.na(Dpto), ModaDpto, Dpto)) %>%
+  select(-ModaDpto)  # Eliminar la columna de moda después de imputar
+
+datos <- datos %>%
+  mutate(Dpto = ifelse(is.na(Dpto), "calidad", Dpto))
+
+# Contar registros que todavía tienen NA en Dpto
+na_count <- sum(is.na(datos$Dpto))
+
+# Imprimir cuántos registros todavía tienen NA en Dpto
+print(na_count)
+
+# Función para calcular la moda
+get_mode <- function(x) {
+  filtered <- na.omit(x)
+  if (length(filtered) > 0) {
+    vals <- sort(table(filtered), decreasing = TRUE)
+    as.character(names(vals[vals == max(vals)])[1])  # Devuelve el primero en caso de empate
+  } else {
+    NA_character_
+  }
+}
+
+# Suponiendo que tu data frame se llama datos
+# Calcular la moda de Estado para cada Municipio
+moda_estado_por_municipio <- datos %>%
+  group_by(Municipio) %>%
+  summarise(ModaEstado = get_mode(Estado), .groups = 'drop')
+
+# Imputar NA en Estado usando la moda calculada para cada grupo de Municipio
+datos <- datos %>%
+  left_join(moda_estado_por_municipio, by = "Municipio") %>%
+  mutate(Estado = ifelse(is.na(Estado), ModaEstado, Estado)) %>%
+  select(-ModaEstado)  # Eliminar la columna de moda después de imputar
+
+# Contar registros que todavía tienen NA en Dpto
+na_count <- sum(is.na(datos$Estado))
+
+datos <- datos %>%
+  mutate(Municipio = ifelse(is.na(Estado), "guadalupe", Municipio),
+         Estado = ifelse(is.na(Estado), "nuevo leon", Estado))
+
+datos <- datos %>%
+  mutate(SD = ifelse(is.na(SD), 
+                     case_when(
+                       Puesto == "servicio al cliente" ~ 8323 / 30,
+                       Puesto == "coordinadora" ~ 28528 / 30,
+                       Puesto == "ingeniero" ~ 27000 / 30,
+                       Puesto == "innovacion + diseno" ~ 52050 / 30,
+                       Puesto == "produccion" ~ 76773 / 30,
+                       Puesto == "ehs" ~ 16000 / 30,
+                       Puesto == "cuentas por pagar" ~ 10000 / 30,
+                       Puesto == "asistente" ~ 15053 / 30,
+                       Puesto == "contratacion y nominas" ~ 19387 / 30,
+                       Puesto == "embarques" ~ 393.84,
+                       TRUE ~ SD
+                     ), SD))
+
+
+# Contar NA en las columnas específicas del data frame 'datos'
+na_count <- datos %>%
+  select(`Fecha de nacimiento`, Género, Puesto, Dpto, SD, Municipio, Estado, `Estado Civil`, Dirección) %>%
+  summarise(across(everything(), ~ sum(is.na(.))))
+
+# Imprimir el resultado
+print(na_count)
+
+# Ruta del archivo donde se guardará el data frame
+file_path <- "/Users/daviddrums180/Tec/Case_Study_Form/databases/classification/Datos_FORM_RH_FJ2024.csv"
+
+# Guardar el data frame 'datos' en la carpeta 'classification' con el nombre especificado
+write_csv(datos, file_path)
+
+# Mensaje de confirmación
+cat("El archivo ha sido guardado en:", file_path)

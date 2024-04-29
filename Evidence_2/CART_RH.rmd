@@ -1,0 +1,560 @@
+---
+title: "CART - Analisis de Classificación de Renuncia"
+author: "David Dominguez - A01570975"
+date: "2024-03-21"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
+---
+
+# RH - CART Model Tree
+
+![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
+
+Este documento está dedicado al análisis de diferentes modelos CART (árboles de clasificación y regresión), aplicados a la **Situación Problema 1: Rotación de Personal**. Utiliza tanto la encuesta de satisfacción realizada a los empleados de FORM como los datos de bajas integrados con la base de datos completa de empleados.
+
+Los modelos CART son una técnica valiosa en el análisis de datos, ofreciendo la ventaja de la interpretabilidad y la relevancia de los factores en comparación con otros métodos más opacos, como las redes neuronales. Esto los hace especialmente útiles para identificar las variables más influyentes en la rotación de personal.
+
+## Librerías Requeridas
+
+A continuación, se enumeran las librerías necesarias para la transformación y limpieza de datos. Aunque la mayoría de la limpieza de datos se ha completado previamente, se incluye también el proceso de creación de columnas adicionales para facilitar una mejor interpretación de los resultados. Junto a cada librería, se proporciona una breve descripción de su propósito:
+
+```{r message=FALSE, warning=FALSE}
+library(imputeTS)
+library(lubridate)
+library(xts)
+library(zoo)
+library(tseries)
+library(stats)
+library(forecast)
+library(astsa)
+library(corrplot)
+library(wordcloud)
+library(tidytext)
+library(AER)
+library(vars)
+library(dynlm)
+library(mFilter)
+library(TSstudio)
+library(tidyverse)
+library(sarima)
+library(readr)
+library(readxl)
+library(patchwork)
+library(heatmaply)
+library(dplyr)
+library(ggplot2)
+library(psych)
+library(tidyr)
+library(readtext)
+library(syuzhet)
+library(RColorBrewer)
+library(tm)
+library(caret)
+library(MASS)
+library(rpart)
+library(rpart.plot)
+library(party)
+library(gmodels)
+library(knitr)
+library(cluster)    
+library(e1071)
+library(janeaustenr)
+library(pROC)
+library(ISLR)
+library(gridExtra)
+library(car)
+library(DataExplorer)
+library(randomForest)
+library(class)
+library(factoextra)
+library(purrr)
+library(reshape2)
+library(tmap)
+library(sf)
+library(zoo)
+library(pdp)
+library(vip)
+library(xgboost)
+library(forcats)
+```
+
+## Bases de Datos Necesarias
+
+Como se mencionó anteriormente, el análisis para abordar la **Situación Problema 1** involucra dos conjuntos de datos principales:
+
+1. **Base de Datos de Satisfacción de Empleados**: Esta base proporciona insights sobre aspectos emocionales y percepciones de los empleados, más allá de los meros datos demográficos. Aunque las respuestas pueden estar sujetas a sesgos, esta información es crucial para entender los factores que influyen en la decisión de los empleados de permanecer a largo plazo en FORM.
+
+2. **Base de Datos de Bajas - Capital Humano**: Este conjunto de datos ofrece un análisis detallado de los factores demográficos de los empleados. Permite identificar las características personales que pueden influir en la decisión de un empleado de continuar en la empresa o darse de baja.
+
+Estos dos conjuntos de datos juntos nos permiten tener una visión completa y multifacética de las dinámicas internas de la empresa, facilitando así la identificación de patrones y tendencias relacionadas con la rotación de personal.
+
+```{r message=FALSE, warning=FALSE}
+setwd("../databases")
+
+form_satisfaccion <- read_csv("classification/Encuesta_Datos_FORM_Fall2023.csv")
+form_rh = read_csv("classification/Datos_FORM_RH_FJ2024.csv")
+form_geo <- st_read("classification/form_bajas_espacial.shp")
+```
+
+## Transformaciones Necesarias
+
+Las transformaciones aplicadas a la base de datos de Capital Humano tienen como objetivo mejorar la interpretabilidad y utilidad de las variables para el análisis. Estas modificaciones son esenciales para adaptar los datos demográficos y de empleo a formatos que faciliten la exploración y el modelado estadístico.
+
+### Base de Capital Humano
+
+El siguiente bloque de código en R realiza varias transformaciones importantes en la base de datos:
+
+1. **Conversión de Fechas**: Las columnas que contienen fechas se convierten al formato de fecha estándar de R para asegurar que se manejen correctamente como datos temporales.
+2. **Extracción de Componentes de Fecha**: Se extraen el mes y el año de nacimiento del empleado a partir de la fecha de nacimiento para análisis específicos relacionados con la temporalidad.
+3. **Cálculo de la Edad**: Se calcula la edad del empleado al convertir la diferencia entre la fecha de nacimiento y la fecha actual en años completos.
+4. **Cálculo de la Antigüedad**: Se calcula la antigüedad en días, considerando tanto a los empleados activos como a los que ya no están en la empresa, utilizando la fecha de alta y, si está disponible, la fecha de baja.
+5. **Mes de Entrada**: Se obtiene el mes de entrada del empleado a la empresa, lo cual es útil para analizar tendencias estacionales en las contrataciones.
+
+```{r}
+# Asegúrate de que las fechas son reconocidas como tal
+form_rh$`Fecha de nacimiento` <- as.Date(form_rh$`Fecha de nacimiento`, format = "%Y-%m-%d")
+form_rh$`Fecha de Alta` <- as.Date(form_rh$`Fecha de Alta`, format = "%Y-%m-%d")
+form_rh$`Fecha de Baja` <- as.Date(form_rh$`Fecha de Baja`, format = "%Y-%m-%d")
+
+# Transformar el dataframe
+form_rh <- form_rh %>%
+  mutate(
+    Mes_Nacimiento = month(`Fecha de nacimiento`),
+    Año_Nacimiento = year(`Fecha de nacimiento`),
+    # Calcular la edad en años utilizando la fecha de nacimiento y la fecha actual
+    Edad = as.integer(interval(`Fecha de nacimiento`, Sys.Date()) %/% years(1)),
+    # Calcular la antigüedad en días directamente
+    Antigüedad = as.integer(ifelse(is.na(`Fecha de Baja`), Sys.Date() - `Fecha de Alta`, `Fecha de Baja` - `Fecha de Alta`)),
+    Mes_Entrada = if_else(is.na(`Fecha de Alta`), as.integer(`Primer Mes`), month(`Fecha de Alta`))
+  )
+
+# Contar cuántos NA hay en cada columna nueva y mostrar los resultados
+na_counts <- sapply(form_rh[c("Mes_Nacimiento", "Año_Nacimiento", "Edad", "Antigüedad", "Mes_Entrada")], function(x) sum(is.na(x)))
+print(na_counts)
+```
+
+### Base de Encuesta de Satisfacción
+
+Para preparar adecuadamente la base de datos de la encuesta de satisfacción para el análisis, es útil convertir ciertas respuestas categóricas en variables ordinales. Esto permite que los modelos de aprendizaje automático interpreten estas variables de manera más significativa, asumiendo un orden natural entre las categorías.
+
+El siguiente bloque de código en R transforma las respuestas de varias preguntas de satisfacción, que originalmente están en formato de categorías como "Desacuerdo", "Neutro", y "De Acuerdo", en valores numéricos que reflejan una escala ordinal:
+
+```{r}
+form_satisfaccion <- form_satisfaccion %>%
+  mutate(
+    salario_bueno_ordinal = as.numeric(factor(salario_bueno, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    prestaciones_bueno_ordinal = as.numeric(factor(prestaciones_bueno, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    jornada_no_excesiva_ordinal = as.numeric(factor(jornada_no_excesiva, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    ofrecimiento_herramientas_ordinal = as.numeric(factor(ofrecimiento_herramientas, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    no_molestia_temperatura_ordinal = as.numeric(factor(no_molestia_temperatura, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    estres_bajo_ordinal = as.numeric(factor(estres_bajo, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    facilidad_transporte_ordinal = as.numeric(factor(facilidad_transporte, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    zona_trabajo_comoda_ordinal = as.numeric(factor(zona_trabajo_comoda, levels = c("Desacuerdo", "Neutro", "De Acuerdo")))
+  )
+```
+
+## Partición de Datos
+
+Para evaluar la eficacia del modelo de manera objetiva, es fundamental dividir la base de datos en conjuntos de entrenamiento y prueba. Esto permite ajustar el modelo con un conjunto de datos y evaluarlo con otro distinto, proporcionando una medida de cómo podría comportarse el modelo en situaciones no vistas previamente.
+
+### **Capital Humano** - Datos de Entrenamiento y Prueba
+
+El siguiente bloque de código realiza la partición de los datos y asegura la consistencia de los factores entre los conjuntos de entrenamiento y prueba:
+
+1. **Establecimiento de Factores**: Se identifica una lista de variables categóricas (factores) que necesitan tratamiento especial para mantener la consistencia de los niveles entre los conjuntos de datos.
+   
+2. **Unificación de Niveles de Factores**: Antes de la partición, se unifican los niveles de todas las variables factoriales en todo el conjunto de datos para asegurar que no haya inconsistencias después de la partición.
+
+3. **Creación de la Partición**: Se utiliza una función para dividir los datos en un 80% para entrenamiento y un 20% para prueba, basándose en la variable 'Estatus', que indica si el empleado sigue activo o no en la empresa.
+
+4. **Ajuste de Niveles en el Conjunto de Prueba**: Después de la partición, se ajustan los niveles de las variables factoriales en el conjunto de prueba para que coincidan exactamente con los del conjunto de entrenamiento, evitando así problemas durante el modelado.
+
+```{r}
+# Lista de todas las variables factoriales
+factor_vars <- c("Puesto", "Dpto", "Municipio", "Estado", "Estatus")
+
+# Asegurarse de que todos los factores tengan los mismos niveles en ambos conjuntos
+for(var in factor_vars) {
+  levels_union <- unique(c(as.character(form_rh[[var]])))
+  form_rh[[var]] <- factor(form_rh[[var]], levels = levels_union)
+}
+
+# Partición de datos
+set.seed(123)
+indices <- createDataPartition(form_rh$Estatus, p = 0.8, list = FALSE)
+train_data <- form_rh[indices, ]
+test_data <- form_rh[-indices, ]
+
+# Asegurar que todos los factores en el conjunto de prueba tengan los mismos niveles que en el de entrenamiento
+for(var in factor_vars) {
+  test_data[[var]] <- factor(test_data[[var]], levels = levels(train_data[[var]]))
+}
+
+# Asegurar que Estatus también tenga los mismos niveles
+test_data$Estatus <- factor(test_data$Estatus, levels = levels(train_data$Estatus))
+```
+
+### **Encuesta de Satisfacción** - Datos de Entrenamiento y Prueba
+
+Para el conjunto de datos de la encuesta de satisfacción, es crucial realizar una partición adecuada que permita entrenar el modelo en una porción de los datos y validar su desempeño en otra. Este proceso ayuda a evaluar cómo el modelo podría funcionar en situaciones reales no vistas durante la fase de entrenamiento.
+
+El siguiente bloque de código realiza la preparación y partición de estos datos:
+
+1. **Establecimiento de una Semilla**: Se configura una semilla para asegurar la reproducibilidad de la partición de datos. Esto significa que cada vez que se ejecute el código, la división de los datos será la misma.
+
+2. **Identificación de Variables Categóricas**: Se crea una lista con todas las variables categóricas presentes en la encuesta. Estas variables requieren un tratamiento especial para asegurar que se manejen como factores dentro del análisis.
+
+3. **Ajuste de Niveles de Factores**: Para cada variable categórica, se ajustan los niveles para incluir todos los posibles valores que la variable puede tomar. Esto es importante para evitar problemas durante el modelado si ciertos niveles sólo aparecen en el conjunto de entrenamiento o de prueba.
+
+4. **Partición de los Datos**: Utilizando la función `createDataPartition`, se divide el conjunto de datos en un 70% para entrenamiento y un 30% para prueba, basado en la variable de resultado `permanencia_form_futuro`. Este porcentaje de división asegura que haya suficientes datos para entrenar el modelo mientras se reserva una cantidad adecuada para su validación.
+
+```{r}
+# Configuramos una semilla para reproducibilidad
+set.seed(123)
+
+# Lista de variables categóricas
+variables_factor <- c("puesto", "razon_entrada", "salario_bueno", "prestaciones_bueno", "jornada_no_excesiva", 
+                      "ofrecimiento_herramientas", "no_molestia_temperatura", "estres_bajo", "facilidad_transporte",
+                      "zona_trabajo_comoda", "genero", "estado_civil", "municipio", "nivel_escolar", "categoria_molestias",
+                      "categoria_sentimiento", "permanencia_form_futuro")
+
+# Ajustamos los niveles para cada variable factor de manera que incluyan todos los posibles valores
+for(var in variables_factor) {
+  levels_all <- unique(form_satisfaccion[[var]])
+  form_satisfaccion[[var]] <- factor(form_satisfaccion[[var]], levels = levels_all)
+}
+
+# Dividimos los datos en conjuntos de entrenamiento y prueba
+trainIndex <- createDataPartition(form_satisfaccion$permanencia_form_futuro, p = 0.7, list = FALSE)
+trainData <- form_satisfaccion[trainIndex, ]
+testData <- form_satisfaccion[-trainIndex, ]
+```
+
+
+## Modelo CART
+
+El modelo CART (Classification and Regression Trees) es una técnica de modelado estadístico que construye árboles de decisión para problemas de clasificación y regresión. Funciona dividiendo el conjunto de datos en subconjuntos más pequeños, mientras desarrolla de forma simultánea un árbol de decisiones asociado. Las decisiones se toman en los nodos sobre la base de las características que mejor dividen el conjunto de datos según la pureza de los nodos resultantes, utilizando criterios como la impureza de Gini para clasificación.
+
+### Modelo 1 - Especificación RH
+
+En esta especificación del modelo CART, se seleccionan variables clave que mostraron interrelaciones importantes durante el análisis exploratorio de datos (EDA). Estas variables se consideran potencialmente influyentes en la determinación del estatus de los empleados en la empresa.
+
+#### Entrenamiento del Modelo
+
+El siguiente código en R ajusta el modelo CART utilizando un subconjunto específico de variables y visualiza el árbol de decisiones resultante para facilitar su interpretación:
+
+```{r}
+# Ajustar el modelo CART usando solo las variables especificadas
+modelo <- rpart(Estatus ~ Género + Puesto + Dpto + SD + Municipio + Estado + `Estado Civil` + Dirección + Mes_Nacimiento + Mes_Entrada + Edad,
+                data = train_data, method = "class")
+
+# Visualizar el árbol de decisión
+rpart.plot(modelo, type = 4, extra = 101)
+```
+
+**Análisis del Árbol de Decisiones Generado**
+
+El árbol de decisión obtenido nos ofrece insights valiosos sobre los factores que influyen en la permanencia del personal en la empresa. A continuación, discutimos los nodos más significativos y lo que revelan sobre la retención de empleados:
+
+- **Mes de Entrada**: Los nodos indican que los empleados contratados en los últimos meses del año tienen mayores tasas de permanencia. Esto sugiere que la temporada de contratación podría estar vinculada con la retención, tal vez debido a proyectos a largo plazo que comienzan a fin de año o a una estrategia de contratación enfocada en la estabilidad laboral.
+
+- **Salario Diario**: El salario diario emerge como un predictor crítico, donde aquellos con un salario superior a 199 tienen más probabilidad de permanecer en la empresa. Esto destaca el papel del salario como un factor clave en la satisfacción y retención de los empleados.
+
+- **Estado Civil y Puesto**: Curiosamente, el árbol sugiere que empleados casados o en unión libre, particularmente aquellos en puestos administrativos, de costura, ayudantes u operadores, muestran una tendencia a permanecer más tiempo. Esto podría reflejar una búsqueda de estabilidad laboral ligada a responsabilidades familiares.
+
+Por otro lado, los factores como la **Edad**, el **Estado Civil** y el **Departamento** proporcionan una vista detallada de los grupos con mayor índice de bajas. Los empleados más jóvenes, solteros, y aquellos en departamentos como embarques, cedis, calidad y materiales, tienden a dejar la empresa, especialmente si tienen salarios más bajos y son contratados en los primeros meses del año.
+
+Estos patrones destacan áreas de oportunidad para la empresa en términos de ajustes en la política de contratación y estructura de compensaciones para mejorar la retención del personal.
+
+#### Análisis de Impacto de Variables en el Modelo CART
+
+El gráfico de importancia de variables (Variable Importance Plot, VIP) es una herramienta esencial para comprender qué variables tienen el mayor impacto en la predicción del modelo. El VIP nos ayuda a identificar las características más influyentes y, por lo tanto, puede guiar la toma de decisiones estratégicas en la gestión de recursos humanos y la retención de empleados.
+
+El siguiente código en R genera un gráfico VIP para el modelo CART entrenado. Este gráfico visualiza la importancia asignada a cada variable dentro del modelo, lo que permite identificar cuáles contribuyen más significativamente a la clasificación de los empleados según su estatus en la empresa.
+
+```{r}
+# Crear un plot de importancia de variables
+vip(modelo)
+```
+
+- **Salario Diario (SD)**: Esta es la variable más influyente, lo que refuerza la idea de que la compensación económica es un factor determinante en la retención de empleados. Un salario diario más alto está fuertemente asociado con una mayor probabilidad de que un empleado permanezca en la empresa.
+  
+- **Mes de Entrada (Mes_Entrada)**: Coincidiendo con el análisis del árbol de decisiones, el mes de entrada de un empleado también juega un papel crucial. Los empleados contratados hacia el final del año son más propensos a permanecer, posiblemente debido a estrategias de contratación estacionales o a la naturaleza de los proyectos que inician en esos meses.
+  
+- **Puesto y Departamento (Puesto, Dpto)**: La posición y el departamento de un empleado tienen una importancia significativa. Esto sugiere que ciertas funciones o áreas de la empresa podrían estar más afectadas por la rotación y, por lo tanto, podrían necesitar atención adicional en términos de medidas de retención.
+  
+- **Dirección y Municipio**: La ubicación y la logística asociada con el traslado al lugar de trabajo pueden ser factores relevantes para algunos empleados al decidir permanecer en la empresa.
+
+- **Edad y Estado Civil**: Estas variables tienen un peso menor en el modelo en comparación con las variables económicas y de tiempo, pero aún así brindan una visión valiosa sobre los perfiles demográficos de los empleados que son más propensos a la baja.
+
+La importancia de estas variables está en línea con los resultados del árbol de decisiones y enfatiza la necesidad de considerar una estrategia de retención multifacética que aborde tanto los factores económicos como los demográficos y organizacionales.
+
+#### Evaluación de Modelo
+
+Una vez desarrollado el modelo CART, es fundamental evaluar su rendimiento para entender qué tan bien generaliza a nuevos datos. Sin embargo, es importante reconocer que en modelos interpretables como los árboles de decisión, a menudo hay una compensación entre la simplicidad (y por lo tanto, la interpretabilidad) y la precisión del modelo.
+
+Mientras que los modelos más complejos, como las redes neuronales profundas, pueden ofrecer una precisión superior, su "caja negra" hace que sea mucho más difícil entender por qué el modelo toma ciertas decisiones. En cambio, un modelo CART ofrece una ventana clara a su razonamiento, permitiendo a los analistas y tomadores de decisiones entender las variables clave y cómo influyen en las predicciones.
+
+El siguiente bloque de código genera predicciones sobre el conjunto de prueba y crea una matriz de confusión para evaluar la precisión del modelo CART:
+
+```{r}
+# Predicciones
+predicciones <- predict(modelo, test_data, type = "class")
+predicciones <- factor(predicciones, levels = levels(train_data$Estatus))
+
+# Matriz de confusión
+conf_mat <- confusionMatrix(predicciones, test_data$Estatus)
+print(conf_mat)
+```
+
+La matriz de confusión y las estadísticas resultantes ofrecen una perspectiva clara sobre el rendimiento de nuestro modelo CART. Aquí se destacan las métricas principales:
+
+- **Precisión (Accuracy)**: Con una precisión del 82.26%, el modelo es bastante confiable en general, lo que sugiere que la mayoría de las predicciones son correctas.
+
+- **Sensibilidad (Sensitivity)**: La tasa del 60.71% indica que el modelo tiene un rendimiento moderado al identificar a los empleados que permanecen activos. Esto puede ser una señal de que el modelo podría mejorar en capturar a todos los empleados propensos a permanecer.
+
+- **Especificidad (Specificity)**: Con un valor del 88.54%, el modelo es muy efectivo en identificar a los empleados que se dan de baja. Esto significa que hay una alta probabilidad de que el modelo detecte correctamente a aquellos que dejarán la empresa.
+
+- **Índice Kappa**: Un Kappa de 0.4926 indica un acuerdo moderado más allá del azar en las clasificaciones del modelo, lo que confirma que el modelo tiene una habilidad significativa para clasificar los datos correctamente.
+
+- **Equilibrio de Precisión (Balanced Accuracy)**: La precisión equilibrada del 74.63% refleja un rendimiento equitativo entre la sensibilidad y la especificidad. Esta medida ofrece una visión más completa en contextos donde las clases están desbalanceadas.
+
+El rendimiento general del modelo es bastante bueno, pero la diferencia entre la sensibilidad y la especificidad sugiere que hay margen de mejora, especialmente en la identificación de empleados activos. El índice Kappa y la precisión equilibrada también confirman que el modelo funciona bien, pero nos recuerdan que siempre hay un compromiso entre la interpretabilidad del modelo y su precisión. La interpretación del modelo se sacrifica a menudo por la precisión, pero en este caso, la comprensión clara que proporciona el modelo CART sobre las variables influyentes es una ventaja para desarrollar estrategias de intervención focalizadas.
+
+### Modelo 2 - Especificación XGBoost
+
+Después de examinar los resultados del modelo CART, optamos por explorar las capacidades del algoritmo XGBoost. XGBoost es conocido por su rendimiento superior en términos de velocidad y precisión en comparación con los modelos de árbol tradicionales. Además, ofrece una mejor interpretación de la importancia de las variables, lo que puede confirmar la consistencia entre los resultados obtenidos previamente y proporcionar nuevas perspectivas.
+
+#### Preparaciones para XGBoost
+
+El código a continuación detalla la preparación del conjunto de datos para el entrenamiento del modelo XGBoost:
+
+```{r}
+# Combinar los conjuntos de datos, aplicar las transformaciones y luego dividir de nuevo
+full_data <- rbind(train_data, test_data)
+
+# Asegurarse de que todos los factores tengan los mismos niveles
+factor_vars <- c("Puesto", "Dpto", "Municipio", "Estado", "Estatus", "Género", "Estado Civil", "Dirección")
+for (var in factor_vars) {
+  full_data[[var]] <- factor(full_data[[var]])
+}
+
+# Dividir los datos de nuevo después de asegurar la consistencia
+set.seed(123)  # Asegurarse de usar el mismo seed para reproducibilidad
+train_indices <- createDataPartition(full_data$Estatus, p = 0.8, list = FALSE)
+train_data <- full_data[train_indices, ]
+test_data <- full_data[-train_indices, ]
+
+# Convertir los datos para XGBoost
+dtrain <- xgb.DMatrix(data = model.matrix(~ Género + Puesto + Edad + Dpto + SD + Municipio + Estado + `Estado Civil` + Dirección + Mes_Nacimiento + Año_Nacimiento + Mes_Entrada - 1, train_data),
+                      label = as.numeric(train_data$Estatus) - 1)
+dtest <- xgb.DMatrix(data = model.matrix(~ Género + Puesto + Edad + Dpto + SD + Municipio + Estado + `Estado Civil` + Dirección + Mes_Nacimiento + Año_Nacimiento + Mes_Entrada - 1, test_data),
+                     label = as.numeric(test_data$Estatus) - 1)
+```
+
+#### Entrenamiento del Modelo
+
+Pasamos ahora al entrenamiento del modelo utilizando XGBoost, que requiere una serie de parámetros y un formato de datos específico. A diferencia del modelo CART, XGBoost utiliza un enfoque de ensamble de árboles de decisión para mejorar el rendimiento y la precisión. La transformación de los datos al formato adecuado y la optimización de los parámetros son pasos esenciales en este proceso.
+
+El siguiente código configura y entrena el modelo XGBoost, especificando los parámetros que controlan cómo los árboles se construyen y cómo el modelo se ajusta durante el entrenamiento:
+
+```{r}
+# Especificar los parámetros para XGBoost
+params <- list(
+    booster = "gbtree",
+    objective = "multi:softprob",
+    num_class = length(levels(full_data$Estatus)),
+    eval_metric = "mlogloss",
+    eta = 0.1,
+    gamma = 0,
+    max_depth = 6,
+    min_child_weight = 1,
+    subsample = 0.8,
+    colsample_bytree = 0.8
+)
+
+# Entrenar el modelo
+num_round <- 100
+modelo_xgb <- xgb.train(params = params, data = dtrain, nrounds = num_round, watchlist = list(train = dtrain, test = dtest), verbose = 0)
+
+# Visualizar la importancia de las variables
+importance_matrix <- xgb.importance(feature_names = colnames(model.matrix(~ Género + Puesto + Edad + Dpto + SD + Municipio + Estado + `Estado Civil` + Dirección + Mes_Nacimiento + Año_Nacimiento + Mes_Entrada - 1, train_data)), model = modelo_xgb)
+xgb.plot.importance(importance_matrix)
+```
+
+La gráfica de importancia de variables generada por XGBoost muestra una clara jerarquía de factores que influyen en la predicción del modelo. En comparación con el análisis del modelo CART, este resultado aporta una visión más granular sobre qué variables tienen el mayor peso:
+
+- **Salario Diario (SD)**: Al igual que en el modelo CART, el salario diario se mantiene como la variable más influyente. Esto enfatiza la posible influencia que tiene la compensación en la decisión de los empleados de permanecer en la empresa o de darse de baja.
+
+- **Mes de Entrada (Mes_Entrada)**: Esta variable sigue siendo significativa en XGBoost, lo cual corrobora los hallazgos del modelo CART y sugiere que el momento en que los empleados se unen a la empresa puede ser crucial para su permanencia a largo plazo.
+
+- **Edad y Fechas de Nacimiento (Edad, Año_Nacimiento, Mes_Nacimiento)**: Estas variables aparecen como más importantes en XGBoost que en CART, sugiriendo que las características demográficas podrían jugar un papel más significativo de lo inicialmente pensado en la rotación de personal.
+
+Estos resultados pueden señalar áreas clave para iniciativas de retención, como ajustes salariales estratégicos y un enfoque en el timing de la contratación. La presencia de variables demográficas indica que las políticas de retención pueden necesitar ser adaptadas a diferentes grupos de edad, apuntando hacia un enfoque de retención más personalizado. Además, la consistencia en la importancia de variables entre los dos modelos refuerza la confianza en estos factores como influencias clave en la rotación del personal.
+
+#### Evaluación de Modelo
+El modelo XGBoost fue evaluado para determinar su precisión y para identificar las variables más relevantes. Aunque XGBoost tiende a tener una menor interpretabilidad en comparación con los modelos de árbol simples como CART, su objetivo es mejorar la precisión y el desempeño general.
+
+```{r}
+# Realizar predicciones
+predicciones_xgb <- predict(modelo_xgb, dtest)
+
+# Convertir probabilidades a clases
+max_prob <- max.col(matrix(predicciones_xgb, ncol = length(levels(train_data$Estatus)), byrow = TRUE), ties.method = "first")
+predicted_classes <- factor(max_prob, levels = 1:length(levels(train_data$Estatus)), labels = levels(train_data$Estatus))
+
+# Matriz de confusión
+conf_mat_xgb <- confusionMatrix(predicted_classes, test_data$Estatus)
+print(conf_mat_xgb)
+```
+
+La matriz de confusión obtenida del modelo XGBoost nos proporciona las siguientes métricas:
+
+- **Precisión (Accuracy)**: El modelo alcanzó una precisión del 79.03%, indicando que la mayoría de las predicciones son correctas, aunque es ligeramente inferior a la del modelo CART.
+
+- **Sensibilidad (Sensitivity)**: La sensibilidad es del 50%, lo que significa que el modelo identifica correctamente a la mitad de los empleados activos. Esta es una métrica que podríamos buscar mejorar.
+
+- **Especificidad (Specificity)**: La especificidad es bastante alta, con un 87.5%, lo que implica que el modelo es muy bueno identificando a los empleados que se dan de baja.
+
+- **Índice Kappa**: El valor de Kappa es de 0.3847, lo cual es un poco más bajo que el del modelo CART, sugiriendo una concordancia moderada entre las predicciones y las clasificaciones reales.
+
+- **Equilibrio de Precisión (Balanced Accuracy)**: La precisión equilibrada es del 68.75%, lo cual refleja un rendimiento razonable en la identificación de ambas clases.
+
+Estas métricas muestran que el modelo XGBoost, si bien no supera en todos los aspectos al modelo CART, proporciona un buen equilibrio entre sensibilidad y especificidad. La precisión general más baja podría ser el resultado de la complejidad adicional en el modelo XGBoost, lo que a veces puede llevar a un sobreajuste en el conjunto de entrenamiento y una menor generalización en el conjunto de prueba. La precisión equilibrada y el índice Kappa indican que hay espacio para optimizar más el modelo, tal vez ajustando hiperparámetros o realizando una selección de características más detallada.
+
+### Modelo 3 - Especificación Encuesta
+Si bien este nuevo modelo no busca ser una versión mejorada de los 2 modelos anteriores, este tercer modelo utiliza la base de datas de encuestas para tratar más con questiones de opiniones y emociones con los cuales podemos hacer un analisis de como cada emocion asi como pocas variables demograficas podrían impactar sobre la permanencia de los empleados actuales. Si bien este analisis sería con data no histórica, nos puede dar una potencial razón de partida más que factores demográficos de gente que se retira
+
+#### Entrenamiento del Modelo
+El siguiente código entrena un modelo CART, que es un árbol de clasificación y regresión, utilizando la base de datos de la encuesta de satisfacción. Este modelo intenta predecir la `permanencia_form_futuro`, nuestra variable objetivo, que indica si un empleado permanecerá en la empresa o no. Para hacer esto, el modelo utiliza tanto las variables recién convertidas a ordinales como otras variables demográficas y de percepción relevantes.
+
+```{r}
+# Entrenar el modelo CART
+model3 <- rpart(permanencia_form_futuro ~ salario_bueno_ordinal +
+                   prestaciones_bueno_ordinal + jornada_no_excesiva_ordinal + ofrecimiento_herramientas_ordinal + no_molestia_temperatura_ordinal +
+                   estres_bajo_ordinal + facilidad_transporte_ordinal + zona_trabajo_comoda_ordinal + sufrido_situaciones_conflicto +
+                   edad + genero + estado_civil + municipio + nivel_escolar + personas_dependientes +
+                   categoria_molestias + categoria_sentimiento, 
+                   data = trainData, 
+                   method = "class")
+
+# Graficar el árbol
+rpart.plot(model3, main="Árbol de decisión CART", extra = 102) 
+```
+
+#### Analisis de Impacto
+
+Hacemos un analisis del gráfico VIP para el nuevo modelo CART entrenado. Este gráfico visualiza la importancia asignada a cada variable dentro del model como se presento anteriormente.
+
+```{r}
+# Crear un plot de importancia de variables
+vip(model3)
+```
+
+La representación visual de la importancia de las variables destaca la 'edad' como un factor significativo en la predicción de la permanencia de los empleados. Este resultado es consistente con los hallazgos del análisis de árboles de decisión anteriores y apunta a la tendencia de que los empleados más jóvenes son más propensos a dejar la empresa o a percibir una baja probabilidad de permanencia a largo plazo.
+
+#### Evaluación de Modelo
+```{r}
+# Hacer predicciones sobre el conjunto de prueba
+predictions <- predict(model3, testData, type = "class")
+
+# Crear la matriz de confusión
+confMatrix <- confusionMatrix(predictions, testData$permanencia_form_futuro)
+
+# Imprimir la matriz de confusión
+print(confMatrix)
+```
+
+La matriz de confusión para nuestro modelo presenta los siguientes resultados clave:
+
+- **Precisión (Accuracy)**: El modelo tiene una precisión del 67.74%, lo que indica que aproximadamente dos tercios de las predicciones son correctas. Sin embargo, la precisión es menor que la tasa de no información (NIR), lo cual no es ideal.
+
+- **Valor Kappa**: Un valor de Kappa de -0.0065 sugiere que no hay casi ninguna concordancia entre las predicciones del modelo y los valores reales, más allá de lo que se esperaría por azar.
+
+- **Sensibilidad (Sensitivity)**: La sensibilidad del modelo es del 74.07%, mostrando una capacidad razonable para identificar correctamente a los empleados que continuarán en la empresa (clasificados como '0').
+
+- **Especificidad (Specificity)**: La especificidad es solo del 25.00%, lo que indica una capacidad limitada para identificar correctamente a los empleados que dejarán la empresa (clasificados como '1').
+
+- **Equilibrio de Precisión (Balanced Accuracy)**: La precisión equilibrada es del 49.54%, reflejando un rendimiento equilibrado entre sensibilidad y especificidad que es esencialmente aleatorio.
+
+Estos resultados sugieren que el modelo tiene un sesgo hacia la predicción de 'permanencia', probablemente debido a la alta prevalencia de casos de 'permanencia' en el conjunto de datos. El bajo valor predictivo negativo y la baja especificidad son preocupantes, ya que indican que el modelo no es eficaz para detectar a los empleados en riesgo de baja. La precisión equilibrada cerca del 50% refuerza la idea de que el modelo apenas supera la capacidad de una predicción aleatoria.
+
+### Modelo 4 - Especificación Profundidad
+
+Continuando con los esfuerzos por perfeccionar el modelo de classificación, la siguiente iteración intenta incrementar la precisión del modelo CART. Aunque el objetivo es crear un modelo más detallado y ramificado, nos enfrentamos al desafío de que la complejidad adicional no necesariamente se traduce en una mejora de la interpretación o la precisión.
+
+#### Entrenamiento del Modelo con Ajuste Fino
+
+El entrenamiento de esta versión del modelo implica un ajuste fino de los parámetros de control para permitir una mayor ramificación del árbol. A continuación, se muestra el código utilizado para modificar estos parámetros con la intención de explorar un espacio de soluciones más amplio.
+
+```{r}
+# Parámetros de control ajustados para un árbol altamente ramificado
+control_params <- rpart.control(minsplit = 10,   # Puede ajustarse según necesidad
+                                maxdepth = 30,   # Profundidad máxima grande
+                                minbucket = 10,  # Puede ajustarse según necesidad
+                                cp = 0.000000001)      # cp muy bajo para permitir muchas ramas
+
+# Entrenar el modelo CART con los parámetros ajustados
+cartModel <- rpart(permanencia_form_futuro ~ salario_bueno_ordinal +
+                   prestaciones_bueno_ordinal + jornada_no_excesiva_ordinal + ofrecimiento_herramientas_ordinal + no_molestia_temperatura_ordinal +
+                   estres_bajo_ordinal + facilidad_transporte_ordinal + zona_trabajo_comoda_ordinal + sufrido_situaciones_conflicto +
+                   edad + genero + estado_civil + municipio + nivel_escolar + personas_dependientes +
+                   categoria_molestias + categoria_sentimiento, 
+                   data = trainData, 
+                   method = "class",
+                   control = control_params)
+
+# Graficar el árbol con gran detalle
+rpart.plot(cartModel, main="Árbol de decisión CART", extra = 104)
+```
+
+El árbol de decisión generado bajo el Modelo 4, a pesar de la intención de crear una estructura compleja y detallada, ha resultado ser demasiado simplificado. La representación visual solo muestra un nodo, lo que indica que el modelo no pudo encontrar divisiones significativas basadas en las variables proporcionadas.
+
+#### Evaluación de Modelo
+```{r}
+# Hacer predicciones sobre el conjunto de prueba
+predictions <- predict(cartModel, testData, type = "class")
+
+# Crear la matriz de confusión
+confMatrix <- confusionMatrix(predictions, testData$permanencia_form_futuro)
+
+# Imprimir la matriz de confusión
+print(confMatrix)
+```
+
+La matriz de confusión y las estadísticas asociadas muestran lo siguiente para el último modelo de árbol de decisión:
+
+- **Precisión (Accuracy)**: El modelo tiene una alta precisión del 87.1%, pero esta métrica no es indicativa de un buen desempeño del modelo en este caso, debido a que la tasa de no información (No Information Rate) es igualmente del 87.1%. Esto indica que el modelo no está haciendo mejor que una predicción aleatoria o un modelo que siempre prediga la clase mayoritaria.
+
+- **Valor Kappa**: Un Kappa de 0 confirma que no hay concordancia entre las predicciones y los valores reales más allá de la casualidad.
+
+- **Sensibilidad (Sensitivity)**: Aunque la sensibilidad es del 100%, reflejando que todos los empleados que permanecieron fueron correctamente identificados, la especificidad de 0% indica que no se identificó correctamente a ningún empleado que se dio de baja.
+
+- **Valores Predictivos**: El valor predictivo positivo es del 87.1%, y el valor predictivo negativo no se puede calcular (NaN) debido a la ausencia de verdaderos negativos.
+
+- **Balanced Accuracy**: La precisión equilibrada es solo del 50%, lo que significa que el modelo es deficiente en términos de equilibrio entre sensibilidad y especificidad.
+
+Estos resultados indican que el modelo actual es un predictor sesgado, incapaz de distinguir entre las clases de manera efectiva. La sensibilidad perfecta es engañosa en este contexto porque se debe a la prevalencia de una clase sobre la otra en el conjunto de datos. La especificidad nula y la precisión equilibrada al 50% sugieren que el modelo no ha aprendido a diferenciar entre 'permanencia' y 'baja', comportándose no mejor que un clasificador que siempre predice la clase más común. Esto nos lleva a concluir que el modelo necesita una revisión significativa, posiblemente incluyendo una mejor selección de variables, ajustes de parámetros, o la exploración de métodos de modelado alternativos.
+
+## Conclusión de Modelo
+
+Después de una evaluación cuidadosa y un análisis detallado, la elección se inclina hacia el **Modelo 1 - Especificación RH basado en CART**, que se ajusta de manera efectiva a la **Situación Problema 1: Rotación de Personal**. Este modelo ha demostrado ser particularmente valioso en términos de interpretabilidad y relevancia, poniendo de manifiesto las variables más críticas que impactan la permanencia de los empleados en FORM.
+
+### Insights
+
+A lo largo de este estudio, hemos descubierto insights significativos:
+
+- El salario diario y el mes de contratación han surgido como predictores consistentes de la permanencia de los empleados, enfatizando la importancia de estos factores en las estrategias de retención.
+- El modelo ha identificado que la antigüedad, los puestos y departamentos específicos, así como el estado civil, están asociados con las tasas de retención y baja, lo que puede guiar intervenciones específicas.
+- El análisis ha puesto de manifiesto la importancia de considerar tanto las medidas objetivas como las percepciones subjetivas de los empleados para obtener una comprensión completa de la dinámica de la retención de empleados.
+
+### Mejor Modelo
+
+El Modelo 1 se destaca por su capacidad de proporcionar una imagen clara y accionable de los factores que afectan la rotación de personal. Este modelo ofrece la ventaja de facilitar la interpretación y comprensión de los resultados, lo que es esencial para la implementación de políticas y estrategias de retención efectivas. A pesar de la competencia de modelos más sofisticados como XGBoost, la claridad y la accesibilidad del Modelo 1 de CART lo convierten en la herramienta preferida para abordar la retención de personal en FORM.
+
+Con la selección del Modelo 1, FORM puede abordar la rotación de personal con una base sólida para desarrollar intervenciones específicas y medir su eficacia, potenciando así una fuerza laboral más estable y satisfecha.
+
