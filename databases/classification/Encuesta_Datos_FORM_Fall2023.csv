@@ -1,107 +1,107 @@
-"encuesta","puesto","antiguedad","razon_entrada","salario_bueno","prestaciones_bueno","jornada_no_excesiva","ofrecimiento_herramientas","no_molestia_temperatura","estres_bajo","facilidad_transporte","zona_trabajo_comoda","permanencia_form_futuro","sufrido_situaciones_conflicto","molestias_puesto","sentimiento_form","edad","genero","estado_civil","municipio","nivel_escolar","personas_dependientes"
-1,"administrativo",9,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","cotizacion imss fecha pago comer 3pm","comodo contento","30","Femenino","Unión libre","Apodaca","Licenciatura",0
-2,"costurera",36,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo","54","Femenino","Casado","Apodaca","Primaria",0
-3,"ayudante general",4,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","trabajo estres","comoda contento","21","Femenino","Soltero","Apodaca","Preparatoria",0
-4,"ayudante general",2,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","comodo contento","20","Femenino","Casado","Apodaca","Preparatoria",0
-5,"ayudante general",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","comodo","43","Femenino","Soltero","Juárez","Secundaria",0
-6,"ayudante general",36,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","nulo","comodo comodo","61","Femenino","Unión libre","Apodaca","Secundaria",2
-7,"ayudante general",36,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","ambiente laboral","agrada hago","55","Femenino","Casado","Apodaca","Secundaria",1
-8,"administrativo",36,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","planeacion genera urgencias","contento paz  em mucho crecimiento personal profesional","29","Masculino","Soltero","Apodaca","Licenciatura",0
-9,"costurera",36,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","salario puesto vacaciones","comodo","56","Femenino","Soltero","Apodaca","Secundaria",0
-10,"ayudante general",1,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","calor beneficios dan llevar mas ano laborando boletos posada","comodo","36","Femenino","Unión libre","Apodaca","Secundaria",2
-11,"costurera",25,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","mal companerismo","comodo realizada contento","56","Femenino","Casado","Otro","Secundaria",1
-12,"ayudante general",1,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo comodo","36","Masculino","Soltero","Apodaca","Preparatoria",0
-13,"ayudante general",2,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","perfecto","muy comoda menos estres antes","30","Femenino","Casado","Apodaca","Licenciatura",1
-14,"ayudante general",1,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"bastante comodo","24","Femenino","Unión libre","Apodaca","Preparatoria",0
-15,"ayudante general",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","comodo","42","Femenino","Soltero","Apodaca","Secundaria",2
-16,"administrativo",25,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si",NA,"mucho crecimiento profesional","27","Masculino","Soltero","Apodaca","Licenciatura",1
-17,"administrativo",9,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","prestaciones capacitaciones equipo computo","comodo","26","Masculino","Soltero","Apodaca","Licenciatura",0
-18,"costurera",36,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","contento","45","Femenino","Soltero","Pesquería","Secundaria",1
-19,"ayudante general",2,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","abanicos","comodo pero podria mejorar prestaciones bono muy facil perderlo","38","Femenino","Casado","Juárez","Secundaria",1
-20,"ayudante general",22,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","estres","comodo","21","Masculino","Soltero","Apodaca","Preparatoria",0
-21,"ayudante general",11,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","calor pocas prestaciones","comodo","26","Femenino","Soltero","Apodaca","Primaria",2
-22,"administrativo",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","urgente","momento comodo","35","Femenino","Casado","Apodaca","Licenciatura",2
-23,"administrativo",2,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","computadora transporte comedor","siento hay muy buen ambiente laboral todos trabajan como equipo aunque a ves hay pequenos deacuerdos","22","Masculino","Soltero","Juárez","Licenciatura",0
-24,"administrativo",14,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","1relacion tan agradable ciertos departamentos 2 ocasiones toca hacer trabajo departamentos 3 cuenta herramientas necesarias","ambiente laboral ciertamente comodo mi equipo trabajo","24","Masculino","Soltero","Otro","Licenciatura",0
-25,"operador",25,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","comoda trabajo tan complicado","51","Femenino","Casado","Apodaca","Preparatoria",0
-26,"costurera",12,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","temperatura","comodo","46","Femenino","Soltero","Apodaca","Secundaria",2
-27,"ayudante general",1,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comoda","30","Femenino","Unión libre","Apodaca","Secundaria",3
-28,"administrativo",1,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","tratar personas desagradables","sentia muy comodo principio pero actualmente ya","25","Masculino","Unión libre","Apodaca","Licenciatura",0
-29,"costurera",14,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","condiciones laborales","comodo","54","Femenino","Casado","Apodaca","Preparatoria",0
-30,"ayudante general",1,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","nulo","comodo","58","Femenino","Casado","Apodaca","Secundaria",0
-31,"ayudante general",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo","50","Femenino","Casado","Apodaca","Secundaria",1
-32,"ayudante general",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","pocos microhondas pierde tiempo comida","comodo comoda","25","Femenino","Unión libre","Apodaca","Secundaria",2
-33,"ayudante general",1,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","comodo","20","Masculino","Soltero","Apodaca","Preparatoria",0
-34,"ayudante general",2,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","trato mas accesible","contento","24","Masculino","Soltero","Apodaca","Preparatoria",0
-35,"operador",36,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","clima","comodo","27","Masculino","Casado","Apodaca","Secundaria",2
-36,"ayudante general",11,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","calor prestacioenes bonos transportes quitar sabados","muy comodo","51","Femenino","Casado","Apodaca","Secundaria",3
-37,"operador",11,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","salario motivacion equipo","mas o menos","43","Masculino","Casado","Apodaca","Preparatoria",3
-38,"calidad",3,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","horario trabajo","comodo","26","Femenino","Unión libre","Juárez","Licenciatura",0
-39,"otro",18,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","cargado cansado","comodo","50","Femenino","Soltero","Apodaca","Primaria",0
-40,"ayudante general",12,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo le gusta","34","Femenino","Unión libre","Apodaca","Secundaria",2
-41,"administrativo",36,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","llenado solicitudes","contento realizo","30 años","Femenino","Casado","Otro","Licenciatura",2
-42,"ayudante general",3,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","cambios area","comodo","34","Femenino","Casado","Guadalupe","Secundaria",2
-43,"costurera",36,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","ambiente laboral espacio seguridadcomodidad","comodo","43","Femenino","Casado","Apodaca","Secundaria",0
-44,"operador",11,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo","51","Femenino","Soltero","Apodaca","Secundaria",3
-45,"administrativo",25,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","personal","estable","25","Femenino","Soltero","Apodaca","Preparatoria",0
-46,"ayudante general",2,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","salario prestaciones capacitan","comodo","21","Masculino","Soltero","Apodaca","Secundaria",0
-47,"administrativo",36,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","sistema funcional  falta comunicacion","insegura falta mucha retroalimentacion falta nuestros jefes directos renovaciones contratos dan tiempo forma","28","Femenino","Unión libre","Apodaca","Licenciatura",2
-48,"supervisor",36,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","espacio calor","comodo","58","Femenino","Casado","Apodaca","Secundaria",0
-49,"ayudante general",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","comodo","26","Masculino","Soltero","Apodaca","Preparatoria",0
-50,"ayudante general",1,"prestaciones",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo","36","Femenino","Casado","Apodaca","Primaria",1
-51,"ayudante general",11,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","transporte jornada laboral","comoda","21","Femenino","Soltero","Apodaca","Secundaria",0
-52,"ayudante general",1,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","normal","25","Masculino","Casado","Apodaca","Licenciatura",1
-53,"operador",36,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","contento buenas condiciones","68","Masculino","Casado","Otro","Primaria",1
-54,"ayudante general",1,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","baja estatura puede hacer todas actividades","comodo","18","Femenino","Soltero","Apodaca","Secundaria",0
-55,"calidad",36,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","resoponsablidiad","siento comodo hasta momento","20","Masculino","Soltero","Apodaca","Preparatoria",0
-56,"operador",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo","53","Femenino","Casado","Apodaca","Secundaria",3
-57,"administrativo",2,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"muy comodo","30","Femenino","Soltero","Juárez","Licenciatura",2
-58,"supervisor",36,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","calor sabados","comodo","39","Femenino","Unión libre","Apodaca","Secundaria",1
-59,"desgajo",7,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","tener herramientas trabajar favoritismo hacia hombres","comodo gusta ambiente trabajo buenos modos","49","Femenino","Casado","Apodaca","Secundaria",1
-60,"ayudante general",2,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","nulo","comodo","47","Femenino","Unión libre","Juárez","Secundaria",2
-61,"ayudante general",15,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo","36","Femenino","Unión libre","Apodaca","Primaria",1
-62,"ayudante general",30,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","temperatura salario","comodo","26","Femenino","Soltero","Apodaca","Secundaria",1
-63,"asistente de produccion",36,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","espacio trabajo atencion","comoda","43","Femenino","Soltero","Monterrey","Licenciatura",3
-64,"ayudante general",1,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","calor sabados","comodo","23","Femenino","Soltero","Juárez","Secundaria",1
-65,"ayudante general",20,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","apropian abanicos","comodo comoda","22","Femenino","Soltero","Apodaca","Preparatoria",0
-66,"ayudante general",1,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si",NA,"comodo","24","Femenino","Soltero","Apodaca","Preparatoria",0
-67,"ayudante general",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","gustaria transporte","comodo","46","Femenino","Casado","Otro","Preparatoria",0
-68,"ayudante general",1,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo","30","Masculino","Unión libre","Apodaca","Secundaria",0
-69,"administrativo",12,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Prefiero no decirlo","falta personal","comodo","33","Femenino","Soltero","Apodaca","Licenciatura",2
-70,"ayudante general",6,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","temperatura","normal","37","Femenino","Unión libre","Apodaca","Secundaria",2
-71,"ayudante general",36,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","jornada laboral","contento","54","Masculino","Casado","Juárez","Secundaria",1
-72,"supervisor",2,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","traslado","comodo contento puesto agradecida aprendizaje","31","Femenino","Soltero","Juárez","Licenciatura",0
-73,"operador",2,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","estres","comodo","53","Masculino","Casado","Apodaca","Otro",3
-74,"ayudante general",3,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"comodo","46","Femenino","Casado","Apodaca","Primaria",0
-75,"ayudante general",1,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","actividades correspondan","equis","18","Femenino","Soltero","Apodaca","Primaria",0
-76,"soldador",10,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","forma dirigen","regular","40","Masculino","Casado","Apodaca","Preparatoria",3
-77,"soldador",36,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"Si","comedor pocos micros","comodo comodo","35","Masculino","Casado","Juárez","Preparatoria",3
-78,"supervisor",36,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"contento","44","Femenino","Casado","Apodaca","Otro",3
-79,"mantenimiento",14,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","salario herramientas trabajo prestaciones","contento","28","Masculino","Casado","Juárez","Preparatoria",2
-80,"ayudante general",1,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","comedor","comodo","42","Masculino","Casado","Pesquería","Secundaria",2
-81,"administrativo",36,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","actitud companeros","muy comodo trabajando","33","Femenino","Casado","Guadalupe","Licenciatura",1
-82,"ayudante general",10,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"contento comodo","24","Masculino","Unión libre","Apodaca","Secundaria",1
-83,"administrativo",10,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","actividades aburren","contento","29","Femenino","Soltero","Apodaca","Licenciatura",0
-84,"limpieza",2,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","falta personal","comodo","42","Femenino","Soltero","Apodaca","Secundaria",0
-85,"limpieza",36,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","calor barrer afuera sol","comodo","51","Femenino","Soltero","Apodaca","Primaria",2
-86,"ayudante general",6,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","suficientes abanicos micros","comodo","20","Masculino","Soltero","Apodaca","Secundaria",0
-87,"ayudante general",1,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","transporte","comoda","22","Femenino","Unión libre","Juárez","Preparatoria",1
-88,"supervisor",36,"ambiente trabajo",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","contento","33","Femenino","Unión libre","Apodaca","Secundaria",2
-89,"ayudante general",1,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","comodo comodo","45","Femenino","Soltero","Apodaca","Secundaria",1
-90,"ayudante general",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","prestaciones","comodo","28","Masculino","Soltero","Apodaca","Secundaria",1
-91,"administrativo",25,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","negativas clientes capacidad produccion aveces llena tiempos respuesta proveedores","contento proactivo optimista","56","Masculino","Casado","Monterrey","Licenciatura",3
-92,"enfermera",5,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","orden horarios","comoda","28","Femenino","Soltero","Guadalupe","Preparatoria",3
-93,"administrativo",36,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","desacuerdos falta comucicacion","contento capaz","34","Femenino","Unión libre","Apodaca","Licenciatura",1
-94,"supervisor",36,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","estres","comodo comodo","23","Masculino","Soltero","Apodaca","Secundaria",0
-95,"otro",36,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","liderazgo","comodo","41","Masculino","Casado","Apodaca","Preparatoria",3
-96,"administrativo",1,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","horarios queda mas tiempo debido","comodo aprendiendo","26","Femenino","Soltero","Apodaca","Licenciatura",0
-97,"administrativo",2,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","comodo","49","Masculino","Casado","Apodaca","Preparatoria",1
-98,"operador",1,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","montacargas","comodo","43","Masculino","Casado","Pesquería","Preparatoria",2
-99,"administrativo",36,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","rutina","contento","48","Masculino","Casado","Guadalupe","Otro",3
-100,"operador",1,"prestaciones",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","salario sabados dias nomina","comodo normal","27","Masculino","Unión libre","Pesquería","Preparatoria",2
-101,"embarque",1,"otro",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","comodo","20","Masculino","Soltero","Apodaca","Secundaria",0
-102,"supervisor",36,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","bien","contento","41","Masculino","Soltero","Apodaca","Preparatoria",1
-103,"administrativo",36,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","estres sueldo confianza","mayor parte tiempo comodo","28","Femenino","Soltero","Apodaca","Preparatoria",2
-104,"operador",4,"ubicacion empresa",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","pocas prestaciones salario","comodo","21","Masculino","Soltero","Apodaca","Secundaria",0
-105,"administrativo",1,"salario",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","temperatura","comodo","39","Femenino","Divorciado","Otro","Licenciatura",3
-106,"administrativo",13,"razones personales",NA,NA,NA,NA,NA,NA,NA,NA,NA,"No",NA,"crecimiento personal","21","Femenino","Soltero","Monterrey","Licenciatura",0
+encuesta,puesto,antiguedad,razon_entrada,salario_bueno,prestaciones_bueno,jornada_no_excesiva,ofrecimiento_herramientas,no_molestia_temperatura,estres_bajo,facilidad_transporte,zona_trabajo_comoda,permanencia_form_futuro,sufrido_situaciones_conflicto,molestias_puesto,sentimiento_form,edad,genero,estado_civil,municipio,nivel_escolar,personas_dependientes,categoria_molestias,categoria_sentimiento
+1,administrativo,9,salario,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,cotizacion imss fecha pago comer 3pm,comodo contento,30,femenino,union libre,apodaca,licenciatura,0,Otros,Positivo
+2,costurera,36,otro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,Desacuerdo,Desacuerdo,De Acuerdo,0,0,NA,comodo,54,femenino,casado,apodaca,primaria,0,Otros,Positivo
+3,ayudante general,4,ubicacion empresa,Desacuerdo,Desacuerdo,Desacuerdo,Desacuerdo,Neutro,Desacuerdo,De Acuerdo,De Acuerdo,1,1,trabajo estres,comoda contento,21,femenino,soltero,apodaca,preparatoria,0,Estrés y Carga de Trabajo,Positivo
+4,ayudante general,2,ubicacion empresa,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,bien,comodo contento,20,femenino,casado,apodaca,preparatoria,0,Otros,Positivo
+5,ayudante general,1,ubicacion empresa,Neutro,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,Neutro,De Acuerdo,0,0,bien,comodo,43,femenino,soltero,juarez,secundaria,0,Otros,Positivo
+6,ayudante general,36,razones personales,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,nulo,comodo comodo,61,femenino,union libre,apodaca,secundaria,2,Otros,Positivo
+7,ayudante general,36,ubicacion empresa,Desacuerdo,Neutro,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Neutro,De Acuerdo,0,1,ambiente laboral,agrada hago,55,femenino,casado,apodaca,secundaria,1,Ambiente Laboral,Indefinido
+8,administrativo,36,razones personales,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,planeacion genera urgencias,contento paz  em mucho crecimiento personal profesional,29,masculino,soltero,apodaca,licenciatura,0,Otros,Positivo
+9,costurera,36,salario,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,1,salario puesto vacaciones,comodo,56,femenino,soltero,apodaca,secundaria,0,Salario y Prestaciones,Positivo
+10,ayudante general,1,salario,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,0,0,calor beneficios dan llevar mas ano laborando boletos posada,comodo,36,femenino,union libre,apodaca,secundaria,2,Condiciones Laborales,Positivo
+11,costurera,25,otro,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,0,0,mal companerismo,comodo realizada contento,56,femenino,casado,otro,secundaria,1,Otros,Positivo
+12,ayudante general,1,ambiente trabajo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,comodo comodo,36,masculino,soltero,apodaca,preparatoria,0,Otros,Positivo
+13,ayudante general,2,ubicacion empresa,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,perfecto,muy comoda menos estres antes,30,femenino,casado,apodaca,licenciatura,1,Otros,Indefinido
+14,ayudante general,1,ambiente trabajo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,bastante comodo,24,femenino,union libre,apodaca,preparatoria,0,Otros,Positivo
+15,ayudante general,1,ubicacion empresa,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,bien,comodo,42,femenino,soltero,apodaca,secundaria,2,Otros,Positivo
+16,administrativo,25,razones personales,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,1,NA,mucho crecimiento profesional,27,masculino,soltero,apodaca,licenciatura,1,Otros,Positivo
+17,administrativo,9,razones personales,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,0,0,prestaciones capacitaciones equipo computo,comodo,26,masculino,soltero,apodaca,licenciatura,0,Salario y Prestaciones,Positivo
+18,costurera,36,ubicacion empresa,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,bien,contento,45,femenino,soltero,pesqueria,secundaria,1,Otros,Positivo
+19,ayudante general,2,otro,Desacuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,Neutro,Neutro,1,0,abanicos,comodo pero podria mejorar prestaciones bono muy facil perderlo,38,femenino,casado,juarez,secundaria,1,Otros,Positivo
+20,ayudante general,22,ubicacion empresa,De Acuerdo,Desacuerdo,De Acuerdo,Neutro,Neutro,Desacuerdo,De Acuerdo,Desacuerdo,1,0,estres,comodo,21,masculino,soltero,apodaca,preparatoria,0,Estrés y Carga de Trabajo,Positivo
+21,ayudante general,11,ubicacion empresa,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,calor pocas prestaciones,comodo,26,femenino,soltero,apodaca,primaria,2,Salario y Prestaciones,Positivo
+22,administrativo,1,ubicacion empresa,De Acuerdo,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,1,urgente,momento comodo,35,femenino,casado,apodaca,licenciatura,2,Estrés y Carga de Trabajo,Positivo
+23,administrativo,2,salario,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,Desacuerdo,Desacuerdo,Neutro,De Acuerdo,0,0,computadora transporte comedor,siento hay muy buen ambiente laboral todos trabajan como equipo aunque a ves hay pequenos deacuerdos,22,masculino,soltero,juarez,licenciatura,0,Condiciones Laborales,Indefinido
+24,administrativo,14,otro,De Acuerdo,Desacuerdo,Neutro,De Acuerdo,Neutro,De Acuerdo,Desacuerdo,Desacuerdo,0,1,1relacion tan agradable ciertos departamentos 2 ocasiones toca hacer trabajo departamentos 3 cuenta herramientas necesarias,ambiente laboral ciertamente comodo mi equipo trabajo,24,masculino,soltero,otro,licenciatura,0,Equipamiento y Herramientas,Positivo
+25,operador,25,ambiente trabajo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,bien,comoda trabajo tan complicado,51,femenino,casado,apodaca,preparatoria,0,Otros,Negativo
+26,costurera,12,otro,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,Desacuerdo,Neutro,Neutro,De Acuerdo,0,1,temperatura,comodo,46,femenino,soltero,apodaca,secundaria,2,Otros,Positivo
+27,ayudante general,1,otro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,comoda,30,femenino,union libre,apodaca,secundaria,3,Otros,Indefinido
+28,administrativo,1,ambiente trabajo,Neutro,Desacuerdo,Neutro,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,0,0,tratar personas desagradables,sentia muy comodo principio pero actualmente ya,25,masculino,union libre,apodaca,licenciatura,0,Otros,Positivo
+29,costurera,14,otro,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,0,condiciones laborales,comodo,54,femenino,casado,apodaca,preparatoria,0,Condiciones Laborales,Positivo
+30,ayudante general,1,razones personales,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,nulo,comodo,58,femenino,casado,apodaca,secundaria,0,Otros,Positivo
+31,ayudante general,1,ubicacion empresa,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,comodo,50,femenino,casado,apodaca,secundaria,1,Otros,Positivo
+32,ayudante general,1,ubicacion empresa,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,Desacuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,pocos microhondas pierde tiempo comida,comodo comoda,25,femenino,union libre,apodaca,secundaria,2,Condiciones Laborales,Positivo
+33,ayudante general,1,otro,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,1,0,bien,comodo,20,masculino,soltero,apodaca,preparatoria,0,Otros,Positivo
+34,ayudante general,2,ubicacion empresa,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,1,0,trato mas accesible,contento,24,masculino,soltero,apodaca,preparatoria,0,Ambiente Laboral,Positivo
+35,operador,36,ambiente trabajo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,0,1,clima,comodo,27,masculino,casado,apodaca,secundaria,2,Otros,Positivo
+36,ayudante general,11,ambiente trabajo,De Acuerdo,Desacuerdo,Neutro,De Acuerdo,Desacuerdo,De Acuerdo,Neutro,De Acuerdo,0,0,calor prestacioenes bonos transportes quitar sabados,muy comodo,51,femenino,casado,apodaca,secundaria,3,Salario y Prestaciones,Positivo
+37,operador,11,otro,Desacuerdo,Desacuerdo,Neutro,Desacuerdo,De Acuerdo,De Acuerdo,Neutro,Desacuerdo,1,0,salario motivacion equipo,mas o menos,43,masculino,casado,apodaca,preparatoria,3,Salario y Prestaciones,Indefinido
+38,calidad,3,ubicacion empresa,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,1,0,horario trabajo,comodo,26,femenino,union libre,juarez,licenciatura,0,Horario,Positivo
+39,otro,18,ambiente trabajo,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,Desacuerdo,Desacuerdo,De Acuerdo,Desacuerdo,0,1,cargado cansado,comodo,50,femenino,soltero,apodaca,primaria,0,Estrés y Carga de Trabajo,Positivo
+40,ayudante general,12,razones personales,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,comodo le gusta,34,femenino,union libre,apodaca,secundaria,2,Otros,Positivo
+41,administrativo,36,ubicacion empresa,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,0,llenado solicitudes,contento realizo,30,femenino,casado,otro,licenciatura,2,Otros,Positivo
+42,ayudante general,3,salario,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,cambios area,comodo,34,femenino,casado,guadalupe,secundaria,2,Otros,Positivo
+43,costurera,36,otro,Desacuerdo,De Acuerdo,Desacuerdo,Desacuerdo,Desacuerdo,Neutro,Neutro,Desacuerdo,0,1,ambiente laboral espacio seguridadcomodidad,comodo,43,femenino,casado,apodaca,secundaria,0,Condiciones Laborales,Positivo
+44,operador,11,razones personales,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,0,NA,comodo,51,femenino,soltero,apodaca,secundaria,3,Otros,Positivo
+45,administrativo,25,ubicacion empresa,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,personal,estable,25,femenino,soltero,apodaca,preparatoria,0,Otros,Neutro
+46,ayudante general,2,ubicacion empresa,De Acuerdo,Desacuerdo,De Acuerdo,Neutro,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,0,salario prestaciones capacitan,comodo,21,masculino,soltero,apodaca,secundaria,0,Salario y Prestaciones,Positivo
+47,administrativo,36,salario,Desacuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,1,0,sistema funcional  falta comunicacion,insegura falta mucha retroalimentacion falta nuestros jefes directos renovaciones contratos dan tiempo forma,28,femenino,union libre,apodaca,licenciatura,2,Otros,Negativo
+48,supervisor,36,ambiente trabajo,De Acuerdo,Neutro,De Acuerdo,Neutro,Desacuerdo,Neutro,De Acuerdo,Desacuerdo,0,0,espacio calor,comodo,58,femenino,casado,apodaca,secundaria,0,Condiciones Laborales,Positivo
+49,ayudante general,1,ubicacion empresa,Desacuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,1,0,bien,comodo,26,masculino,soltero,apodaca,preparatoria,0,Otros,Positivo
+50,ayudante general,1,prestaciones,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,comodo,36,femenino,casado,apodaca,primaria,1,Otros,Positivo
+51,ayudante general,11,salario,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Neutro,De Acuerdo,0,0,transporte jornada laboral,comoda,21,femenino,soltero,apodaca,secundaria,0,Horario,Indefinido
+52,ayudante general,1,otro,Neutro,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,bien,normal,25,masculino,casado,apodaca,licenciatura,1,Otros,Neutro
+53,operador,36,ambiente trabajo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,bien,contento buenas condiciones,68,masculino,casado,otro,primaria,1,Otros,Positivo
+54,ayudante general,1,razones personales,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,0,1,baja estatura puede hacer todas actividades,comodo,18,femenino,soltero,apodaca,secundaria,0,Otros,Positivo
+55,calidad,36,salario,Neutro,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,resoponsablidiad,siento comodo hasta momento,20,masculino,soltero,apodaca,preparatoria,0,Otros,Positivo
+56,operador,1,ubicacion empresa,De Acuerdo,Desacuerdo,Desacuerdo,Desacuerdo,Desacuerdo,Desacuerdo,Desacuerdo,Desacuerdo,0,0,NA,comodo,53,femenino,casado,apodaca,secundaria,3,Otros,Positivo
+57,administrativo,2,razones personales,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,muy comodo,30,femenino,soltero,juarez,licenciatura,2,Otros,Positivo
+58,supervisor,36,ubicacion empresa,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,0,calor sabados,comodo,39,femenino,union libre,apodaca,secundaria,1,Condiciones Laborales,Positivo
+59,desgajo,7,salario,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,0,0,tener herramientas trabajar favoritismo hacia hombres,comodo gusta ambiente trabajo buenos modos,49,femenino,casado,apodaca,secundaria,1,Equipamiento y Herramientas,Positivo
+60,ayudante general,2,salario,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,0,0,nulo,comodo,47,femenino,union libre,juarez,secundaria,2,Otros,Positivo
+61,ayudante general,15,ambiente trabajo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,NA,comodo,36,femenino,union libre,apodaca,primaria,1,Otros,Positivo
+62,ayudante general,30,ubicacion empresa,Desacuerdo,Desacuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,1,temperatura salario,comodo,26,femenino,soltero,apodaca,secundaria,1,Salario y Prestaciones,Positivo
+63,asistente de produccion,36,otro,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,0,1,espacio trabajo atencion,comoda,43,femenino,soltero,monterrey,licenciatura,3,Condiciones Laborales,Indefinido
+64,ayudante general,1,otro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,0,0,calor sabados,comodo,23,femenino,soltero,juarez,secundaria,1,Condiciones Laborales,Positivo
+65,ayudante general,20,otro,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,Desacuerdo,De Acuerdo,Neutro,De Acuerdo,0,0,apropian abanicos,comodo comoda,22,femenino,soltero,apodaca,preparatoria,0,Otros,Positivo
+66,ayudante general,1,razones personales,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Neutro,0,1,NA,comodo,24,femenino,soltero,apodaca,preparatoria,0,Otros,Positivo
+67,ayudante general,1,ubicacion empresa,Desacuerdo,Neutro,Neutro,Neutro,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,gustaria transporte,comodo,46,femenino,casado,otro,preparatoria,0,Equipamiento y Herramientas,Positivo
+68,ayudante general,1,otro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,comodo,30,masculino,union libre,apodaca,secundaria,0,Otros,Positivo
+69,administrativo,12,razones personales,De Acuerdo,Desacuerdo,Desacuerdo,Neutro,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,0,0,falta personal,comodo,33,femenino,soltero,apodaca,licenciatura,2,Otros,Positivo
+70,ayudante general,6,ubicacion empresa,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,Desacuerdo,De Acuerdo,Desacuerdo,0,0,temperatura,normal,37,femenino,union libre,apodaca,secundaria,2,Otros,Neutro
+71,ayudante general,36,otro,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,jornada laboral,contento,54,masculino,casado,juarez,secundaria,1,Horario,Positivo
+72,supervisor,2,ambiente trabajo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,traslado,comodo contento puesto agradecida aprendizaje,31,femenino,soltero,juarez,licenciatura,0,Otros,Positivo
+73,operador,2,salario,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,Neutro,Desacuerdo,De Acuerdo,De Acuerdo,0,0,estres,comodo,53,masculino,casado,apodaca,otro,3,Estrés y Carga de Trabajo,Positivo
+74,ayudante general,3,ubicacion empresa,Neutro,Desacuerdo,Desacuerdo,Desacuerdo,Neutro,De Acuerdo,Neutro,Neutro,0,0,NA,comodo,46,femenino,casado,apodaca,primaria,0,Otros,Positivo
+75,ayudante general,1,razones personales,Desacuerdo,Desacuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Desacuerdo,Neutro,Desacuerdo,1,0,actividades correspondan,equis,18,femenino,soltero,apodaca,primaria,0,Otros,Neutro
+76,soldador,10,ubicacion empresa,Desacuerdo,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,1,forma dirigen,regular,40,masculino,casado,apodaca,preparatoria,3,Otros,Neutro
+77,soldador,36,ubicacion empresa,Desacuerdo,Desacuerdo,Neutro,Desacuerdo,Desacuerdo,Neutro,De Acuerdo,Neutro,0,1,comedor pocos micros,comodo comodo,35,masculino,casado,juarez,preparatoria,3,Condiciones Laborales,Positivo
+78,supervisor,36,razones personales,De Acuerdo,Desacuerdo,Neutro,De Acuerdo,Neutro,Neutro,Neutro,De Acuerdo,0,0,NA,contento,44,femenino,casado,apodaca,otro,3,Otros,Positivo
+79,mantenimiento,14,otro,Desacuerdo,Desacuerdo,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,1,0,salario herramientas trabajo prestaciones,contento,28,masculino,casado,juarez,preparatoria,2,Salario y Prestaciones,Positivo
+80,ayudante general,1,otro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,comedor,comodo,42,masculino,casado,pesqueria,secundaria,2,Condiciones Laborales,Positivo
+81,administrativo,36,salario,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,actitud companeros,muy comodo trabajando,33,femenino,casado,guadalupe,licenciatura,1,Otros,Positivo
+82,ayudante general,10,salario,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,contento comodo,24,masculino,union libre,apodaca,secundaria,1,Otros,Positivo
+83,administrativo,10,salario,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,actividades aburren,contento,29,femenino,soltero,apodaca,licenciatura,0,Otros,Positivo
+84,limpieza,2,salario,De Acuerdo,Desacuerdo,Desacuerdo,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,0,0,falta personal,comodo,42,femenino,soltero,apodaca,secundaria,0,Otros,Positivo
+85,limpieza,36,ubicacion empresa,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,calor barrer afuera sol,comodo,51,femenino,soltero,apodaca,primaria,2,Condiciones Laborales,Positivo
+86,ayudante general,6,ubicacion empresa,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,1,0,suficientes abanicos micros,comodo,20,masculino,soltero,apodaca,secundaria,0,Condiciones Laborales,Positivo
+87,ayudante general,1,ambiente trabajo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,Desacuerdo,De Acuerdo,1,0,transporte,comoda,22,femenino,union libre,juarez,preparatoria,1,Equipamiento y Herramientas,Indefinido
+88,supervisor,36,ambiente trabajo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,bien,contento,33,femenino,union libre,apodaca,secundaria,2,Otros,Positivo
+89,ayudante general,1,otro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,bien,comodo comodo,45,femenino,soltero,apodaca,secundaria,1,Otros,Positivo
+90,ayudante general,1,ubicacion empresa,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,0,prestaciones,comodo,28,masculino,soltero,apodaca,secundaria,1,Salario y Prestaciones,Positivo
+91,administrativo,25,razones personales,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,negativas clientes capacidad produccion aveces llena tiempos respuesta proveedores,contento proactivo optimista,56,masculino,casado,monterrey,licenciatura,3,Otros,Positivo
+92,enfermera,5,otro,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,0,0,orden horarios,comoda,28,femenino,soltero,guadalupe,preparatoria,3,Horario,Indefinido
+93,administrativo,36,razones personales,Neutro,Neutro,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,desacuerdos falta comucicacion,contento capaz,34,femenino,union libre,apodaca,licenciatura,1,Ambiente Laboral,Positivo
+94,supervisor,36,salario,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,estres,comodo comodo,23,masculino,soltero,apodaca,secundaria,0,Estrés y Carga de Trabajo,Positivo
+95,otro,36,ubicacion empresa,Desacuerdo,Desacuerdo,Desacuerdo,Neutro,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,0,0,liderazgo,comodo,41,masculino,casado,apodaca,preparatoria,3,Otros,Positivo
+96,administrativo,1,razones personales,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,0,0,horarios queda mas tiempo debido,comodo aprendiendo,26,femenino,soltero,apodaca,licenciatura,0,Horario,Positivo
+97,administrativo,2,salario,De Acuerdo,Neutro,De Acuerdo,Neutro,Desacuerdo,De Acuerdo,Neutro,De Acuerdo,0,0,bien,comodo,49,masculino,casado,apodaca,preparatoria,1,Otros,Positivo
+98,operador,1,ubicacion empresa,De Acuerdo,Desacuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,1,0,montacargas,comodo,43,masculino,casado,pesqueria,preparatoria,2,Estrés y Carga de Trabajo,Positivo
+99,administrativo,36,razones personales,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,rutina,contento,48,masculino,casado,guadalupe,otro,3,Otros,Positivo
+100,operador,1,prestaciones,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Desacuerdo,De Acuerdo,Neutro,De Acuerdo,0,0,salario sabados dias nomina,comodo normal,27,masculino,union libre,pesqueria,preparatoria,2,Salario y Prestaciones,Positivo
+101,embarque,1,otro,De Acuerdo,Desacuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,bien,comodo,20,masculino,soltero,apodaca,secundaria,0,Otros,Positivo
+102,supervisor,36,salario,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,bien,contento,41,masculino,soltero,apodaca,preparatoria,1,Otros,Positivo
+103,administrativo,36,razones personales,Desacuerdo,Desacuerdo,Neutro,De Acuerdo,Neutro,Desacuerdo,De Acuerdo,De Acuerdo,0,0,estres sueldo confianza,mayor parte tiempo comodo,28,femenino,soltero,apodaca,preparatoria,2,Salario y Prestaciones,Positivo
+104,operador,4,ubicacion empresa,De Acuerdo,Desacuerdo,De Acuerdo,Neutro,Desacuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,pocas prestaciones salario,comodo,21,masculino,soltero,apodaca,secundaria,0,Salario y Prestaciones,Positivo
+105,administrativo,1,salario,De Acuerdo,Neutro,De Acuerdo,De Acuerdo,Desacuerdo,Neutro,De Acuerdo,De Acuerdo,0,0,temperatura,comodo,39,femenino,divorciado,otro,licenciatura,3,Otros,Positivo
+106,administrativo,13,razones personales,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,De Acuerdo,0,0,NA,crecimiento personal,21,femenino,soltero,monterrey,licenciatura,0,Otros,Positivo
