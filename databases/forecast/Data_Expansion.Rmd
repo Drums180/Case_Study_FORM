@@ -1,0 +1,147 @@
+---
+title: 'Evidence 1 : FORM Study Case'
+author: "David Dominguez - A01570975"
+date: "2024-04-05"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
+---
+
+# Modelado de Datos - Expansión 
+
+## Librerías
+```{r message=FALSE, warning=FALSE}
+library(imputeTS) # Rellenar datos faltantes
+library(xts) # Manipulación de series temporales
+library(zoo) # Sistemas de series temporales
+library(tseries) # Análisis de series temporales
+library(stats) # Funciones estadísticas básicas
+library(forecast) # Predicción de series temporales
+library(astsa) # Análisis de series temporales aplicado
+library(corrplot) # Visualización de matrices de correlación
+library(wordcloud) # Crear nubes de palabras
+library(tidytext) # Análisis de texto con tidy data
+library(AER) # Análisis econométrico con R
+library(vars) # Modelos VAR y SVAR
+library(dynlm) # Modelos lineales dinámicos
+library(mFilter) # Filtros para series temporales
+library(TSstudio) # Herramientas interactivas series temporales
+library(tidyverse) # Colección de paquetes de datos tidy
+library(sarima) # Modelos SARIMA
+library(readr) # Leer archivos planos
+library(readxl) # Leer archivos Excel
+library(heatmaply) # Heatmaps interactivos
+library(dplyr) # Manipulación de datos
+library(ggplot2) # Sistema de gráficos
+library(psych) # Procedimientos psicométricos
+library(tidyr) # Reorganización de datos
+library(readtext) # Leer archivos de texto
+library(syuzhet) # Análisis de sentimientos
+library(RColorBrewer) # Paletas de colores
+library(tm) # Minería de texto
+library(caret) # Entrenamiento de modelos predictivos
+library(MASS) # Métodos estadísticos adicionales
+library(rpart) # Modelos de partición recursiva
+library(rpart.plot) # Gráficos para rpart
+library(party) # Modelos basados en árboles
+library(gmodels) # Herramientas de modelado
+library(knitr) # Reportes dinámicos
+library(cluster) # Métodos de agrupamiento
+library(e1071) # Misc funciones SVM
+library(pROC) # Curvas ROC
+library(ISLR) # Data sets para aprendizaje estadístico
+library(gridExtra) # Disposición de múltiples gráficos
+library(car) # Regresión y Anova con R
+library(DataExplorer) # Automatizar análisis exploratorio
+library(randomForest) # Clasificación con random forest
+library(class) # k-vecinos más cercanos
+library(factoextra) # Visualización de resultados de clustering
+library(purrr) # Programación funcional
+library(viridis) # Paletas de colores para gráficos
+library(scales) # Escalado de gráficos
+library(lubridate) # Manipulación de fechas y horas
+library(patchwork) # Combinar ggplot2 plots
+library(janeaustenr) # Textos de Jane Austen
+library(reshape2) # Reestructurar datos
+library(tmap) # Crear mapas
+library(sf) # Manipulación de datos geoespaciales
+```
+
+## Bases de Datos
+```{r message=FALSE, warning=FALSE}
+form_ventas_detalle = read_csv("Datos_FORM_Ventas_FJ2024.csv")
+form_ventas_factores = read_csv("FORM_Factores.csv")
+```
+
+## Cambio de Estructura
+```{r}
+base_df <- form_ventas_detalle %>%
+  mutate(Fecha = as.Date(Fecha),                    # Convertir Fecha a tipo Date
+         Dia = day(Fecha),                          # Extraer el día del mes
+         Mes = month(Fecha),                        # Extraer el mes
+         Numero_de_Semana = week(Fecha),            # Extraer el número de semana del año
+         Año = year(Fecha)) %>%
+
+  group_by(Numero_de_Semana, Año) %>%
+  mutate(Fecha = min(Fecha),                        # Seleccionar la fecha mínima de la semana
+         Dia = day(Fecha),                          # Actualizar el día como el primer día de la semana
+         Mes = month(Fecha)) %>%                    # Actualizar el mes de la fecha mínima
+  ungroup() %>%
+
+  # Guardar este dataframe para el join posterior
+  select(Fecha, Dia, Mes, Numero_de_Semana, Año, Cliente, Cantidad)
+```
+
+## Incremento de Variables 
+```{r}
+form_modelado <- base_df %>%
+  group_by(Numero_de_Semana, Año, Cliente) %>%
+  summarise(Total_Cantidad = sum(Cantidad, na.rm = TRUE),
+            Promedio_Cantidad = mean(Cantidad, na.rm = TRUE),
+            .groups = "drop") %>%
+  pivot_wider(names_from = Cliente, values_from = c(Total_Cantidad, Promedio_Cantidad),
+              names_glue = "{Cliente} {.value}") %>%
+
+  # Unir con las columnas de tiempo del dataframe base
+  left_join(base_df %>%
+            group_by(Numero_de_Semana, Año) %>%
+            summarise(Fecha = first(Fecha),                # Tomar la fecha mínima para cada semana y año
+                      Dia = first(Dia),
+                      Mes = first(Mes),
+                      .groups = "drop"),
+            by = c("Numero_de_Semana", "Año")) %>%
+
+  # Llenar NA con 0 y redondear decimales a dos lugares
+  mutate(across(where(is.numeric), ~replace_na(round(., 2), 0))) %>%
+
+  # Reordenar columnas para que las de tiempo estén al principio
+  select(Fecha, Dia, Mes, Numero_de_Semana, Año, everything())
+
+# Imprimir el resultado para verificar
+head(form_modelado)
+```
+
+## Transformaciones Necesarias
+```{r}
+form_ventas_factores <- form_ventas_factores %>%
+  # Eliminar la columna AnoMes
+  select(-AnoMes) %>%
+  # Asegurar que Fecha es tipo Date
+  mutate(Fecha = as.Date(Fecha)) %>%
+  # Crear columnas de Año y Mes
+  mutate(Año = year(Fecha), 
+         Mes = month(Fecha))
+```
+
+## Guardar Bases
+```{r}
+# Guardar la base de datos de factores
+write_csv(form_ventas_factores, "FORM_Factores.csv")
+
+# Guardar la base de datos de modelado
+write_csv(form_modelado, "FORM_Modelado.csv")
+```
+
