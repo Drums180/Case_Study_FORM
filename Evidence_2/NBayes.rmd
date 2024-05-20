@@ -1,0 +1,433 @@
+---
+title: "Modelo Naive Bayes"
+author: "Alejandra Suárez Rodríguez - A00835247"
+date: "2024-03-21"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
+---
+
+# RH - Modelo 3 Naive Bayes
+
+![FORM BANNER](C:\\Users\\suare\\Downloads\\formm.jpg)
+
+Este documento se centra en el análisis de modelos Naive Bayes, aplicados al problema de rotación de personal de la Situación Problema 1. 
+
+Los modelos Naive Bayes son una técnica de aprendizaje automático que se basa en el teorema de Bayes y asume independencia condicional entre las características. Son especialmente útiles en problemas de clasificación y ofrecen la ventaja de ser rápidos de entrenar y aplicar. En este contexto, nos permitirán identificar patrones y relaciones entre las variables de la encuesta de satisfacción y las causas de rotación de personal.
+
+
+
+## Librerías Requeridas
+
+```{r message=FALSE, warning=FALSE}
+library(imputeTS)
+library(lubridate)
+library(xts)
+library(zoo)
+library(tseries)
+library(stats)
+library(forecast)
+library(astsa)
+library(corrplot)
+library(wordcloud)
+library(tidytext)
+library(AER)
+library(vars)
+library(dynlm)
+library(mFilter)
+library(TSstudio)
+library(tidyverse)
+library(sarima)
+library(readr)
+library(readxl)
+library(patchwork)
+library(heatmaply)
+library(dplyr)
+library(ggplot2)
+library(psych)
+library(tidyr)
+library(readtext)
+library(syuzhet)
+library(RColorBrewer)
+library(tm)
+library(caret)
+library(MASS)
+library(rpart)
+library(rpart.plot)
+library(party)
+library(gmodels)
+library(knitr)
+library(cluster)    
+library(e1071)
+library(janeaustenr)
+library(pROC)
+library(ISLR)
+library(gridExtra)
+library(car)
+library(DataExplorer)
+library(randomForest)
+library(class)
+library(factoextra)
+library(purrr)
+library(reshape2)
+library(tmap)
+library(sf)
+library(zoo)
+library(pdp)
+library(vip)
+library(xgboost)
+library(forcats)
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+#setwd("../databases")
+
+form_satisfaccion <- read_csv("C:\\Users\\suare\\Downloads\\Encuesta_Datos_FORM_Fall2023.csv")
+form_rh = read_csv("C:\\Users\\suare\\Downloads\\Datos_FORM_RH_FJ2024.csv")
+
+```
+
+## Transformaciones Necesarias
+
+Las transformaciones aplicadas a la base de datos de Capital Humano tienen como objetivo mejorar la interpretabilidad y utilidad de las variables para el análisis. Estas modificaciones son esenciales para adaptar los datos demográficos y de empleo a formatos que faciliten la exploración y el modelado estadístico.
+
+### Base de Capital Humano
+
+El siguiente bloque de código en R realiza varias transformaciones importantes en la base de datos:
+
+1. **Conversión de Fechas**: Las columnas que contienen fechas se convierten al formato de fecha estándar de R para asegurar que se manejen correctamente como datos temporales.
+2. **Extracción de Componentes de Fecha**: Se extraen el mes y el año de nacimiento del empleado a partir de la fecha de nacimiento para análisis específicos relacionados con la temporalidad.
+3. **Cálculo de la Edad**: Se calcula la edad del empleado al convertir la diferencia entre la fecha de nacimiento y la fecha actual en años completos.
+4. **Cálculo de la Antigüedad**: Se calcula la antigüedad en días, considerando tanto a los empleados activos como a los que ya no están en la empresa, utilizando la fecha de alta y, si está disponible, la fecha de baja.
+5. **Mes de Entrada**: Se obtiene el mes de entrada del empleado a la empresa, lo cual es útil para analizar tendencias estacionales en las contrataciones.
+
+```{r}
+# Asegúrate de que las fechas son reconocidas como tal
+form_rh$`Fecha de nacimiento` <- as.Date(form_rh$`Fecha de nacimiento`, format = "%Y-%m-%d")
+form_rh$`Fecha de Alta` <- as.Date(form_rh$`Fecha de Alta`, format = "%Y-%m-%d")
+form_rh$`Fecha de Baja` <- as.Date(form_rh$`Fecha de Baja`, format = "%Y-%m-%d")
+
+# Transformar el dataframe
+form_rh <- form_rh %>%
+  mutate(
+    Mes_Nacimiento = month(`Fecha de nacimiento`),
+    Año_Nacimiento = year(`Fecha de nacimiento`),
+    # Calcular la edad en años utilizando la fecha de nacimiento y la fecha actual
+    Edad = as.integer(interval(`Fecha de nacimiento`, Sys.Date()) %/% years(1)),
+    # Calcular la antigüedad en días directamente
+    Antigüedad = as.integer(ifelse(is.na(`Fecha de Baja`), Sys.Date() - `Fecha de Alta`, `Fecha de Baja` - `Fecha de Alta`)),
+    Mes_Entrada = if_else(is.na(`Fecha de Alta`), as.integer(`Primer Mes`), month(`Fecha de Alta`))
+  )
+
+# Contar cuántos NA hay en cada columna nueva y mostrar los resultados
+na_counts <- sapply(form_rh[c("Mes_Nacimiento", "Año_Nacimiento", "Edad", "Antigüedad", "Mes_Entrada")], function(x) sum(is.na(x)))
+print(na_counts)
+```
+
+### Base de Encuesta de Satisfacción
+
+Para preparar adecuadamente la base de datos de la encuesta de satisfacción para el análisis, es útil convertir ciertas respuestas categóricas en variables ordinales. Esto permite que los modelos de aprendizaje automático interpreten estas variables de manera más significativa, asumiendo un orden natural entre las categorías.
+
+El siguiente bloque de código en R transforma las respuestas de varias preguntas de satisfacción, que originalmente están en formato de categorías como "Desacuerdo", "Neutro", y "De Acuerdo", en valores numéricos que reflejan una escala ordinal:
+
+```{r}
+form_satisfaccion <- form_satisfaccion %>%
+  mutate(
+    salario_bueno_ordinal = as.numeric(factor(salario_bueno, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    prestaciones_bueno_ordinal = as.numeric(factor(prestaciones_bueno, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    jornada_no_excesiva_ordinal = as.numeric(factor(jornada_no_excesiva, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    ofrecimiento_herramientas_ordinal = as.numeric(factor(ofrecimiento_herramientas, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    no_molestia_temperatura_ordinal = as.numeric(factor(no_molestia_temperatura, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    estres_bajo_ordinal = as.numeric(factor(estres_bajo, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    facilidad_transporte_ordinal = as.numeric(factor(facilidad_transporte, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    zona_trabajo_comoda_ordinal = as.numeric(factor(zona_trabajo_comoda, levels = c("Desacuerdo", "Neutro", "De Acuerdo")))
+  )
+```
+
+## Partición de Datos
+
+Para evaluar la eficacia del modelo de manera objetiva, es fundamental dividir la base de datos en conjuntos de entrenamiento y prueba. Esto permite ajustar el modelo con un conjunto de datos y evaluarlo con otro distinto, proporcionando una medida de cómo podría comportarse el modelo en situaciones no vistas previamente.
+
+### **Capital Humano** - Datos de Entrenamiento y Prueba
+
+El siguiente bloque de código realiza la partición de los datos y asegura la consistencia de los factores entre los conjuntos de entrenamiento y prueba:
+
+1. **Establecimiento de Factores**: Se identifica una lista de variables categóricas (factores) que necesitan tratamiento especial para mantener la consistencia de los niveles entre los conjuntos de datos.
+   
+2. **Unificación de Niveles de Factores**: Antes de la partición, se unifican los niveles de todas las variables factoriales en todo el conjunto de datos para asegurar que no haya inconsistencias después de la partición.
+
+3. **Creación de la Partición**: Se utiliza una función para dividir los datos en un 80% para entrenamiento y un 20% para prueba, basándose en la variable 'Estatus', que indica si el empleado sigue activo o no en la empresa.
+
+4. **Ajuste de Niveles en el Conjunto de Prueba**: Después de la partición, se ajustan los niveles de las variables factoriales en el conjunto de prueba para que coincidan exactamente con los del conjunto de entrenamiento, evitando así problemas durante el modelado.
+
+```{r}
+# Lista de todas las variables factoriales
+factor_vars <- c("Puesto", "Dpto", "Municipio", "Estado", "Estatus")
+
+# Asegurarse de que todos los factores tengan los mismos niveles en ambos conjuntos
+for(var in factor_vars) {
+  levels_union <- unique(c(as.character(form_rh[[var]])))
+  form_rh[[var]] <- factor(form_rh[[var]], levels = levels_union)
+}
+
+# Partición de datos
+set.seed(123)
+indices <- createDataPartition(form_rh$Estatus, p = 0.8, list = FALSE)
+train_data <- form_rh[indices, ]
+test_data <- form_rh[-indices, ]
+
+# Asegurar que todos los factores en el conjunto de prueba tengan los mismos niveles que en el de entrenamiento
+for(var in factor_vars) {
+  test_data[[var]] <- factor(test_data[[var]], levels = levels(train_data[[var]]))
+}
+
+# Asegurar que Estatus también tenga los mismos niveles
+test_data$Estatus <- factor(test_data$Estatus, levels = levels(train_data$Estatus))
+```
+
+### **Encuesta de Satisfacción** - Datos de Entrenamiento y Prueba
+
+Para el conjunto de datos de la encuesta de satisfacción, es crucial realizar una partición adecuada que permita entrenar el modelo en una porción de los datos y validar su desempeño en otra. Este proceso ayuda a evaluar cómo el modelo podría funcionar en situaciones reales no vistas durante la fase de entrenamiento.
+
+El siguiente bloque de código realiza la preparación y partición de estos datos:
+
+1. **Establecimiento de una Semilla**: Se configura una semilla para asegurar la reproducibilidad de la partición de datos. Esto significa que cada vez que se ejecute el código, la división de los datos será la misma.
+
+2. **Identificación de Variables Categóricas**: Se crea una lista con todas las variables categóricas presentes en la encuesta. Estas variables requieren un tratamiento especial para asegurar que se manejen como factores dentro del análisis.
+
+3. **Ajuste de Niveles de Factores**: Para cada variable categórica, se ajustan los niveles para incluir todos los posibles valores que la variable puede tomar. Esto es importante para evitar problemas durante el modelado si ciertos niveles sólo aparecen en el conjunto de entrenamiento o de prueba.
+
+4. **Partición de los Datos**: Utilizando la función `createDataPartition`, se divide el conjunto de datos en un 70% para entrenamiento y un 30% para prueba, basado en la variable de resultado `permanencia_form_futuro`. Este porcentaje de división asegura que haya suficientes datos para entrenar el modelo mientras se reserva una cantidad adecuada para su validación.
+
+```{r}
+# Configuramos una semilla para reproducibilidad
+set.seed(123)
+
+# Lista de variables categóricas
+variables_factor <- c("puesto", "razon_entrada", "salario_bueno", "prestaciones_bueno", "jornada_no_excesiva", 
+                      "ofrecimiento_herramientas", "no_molestia_temperatura", "estres_bajo", "facilidad_transporte",
+                      "zona_trabajo_comoda", "genero", "estado_civil", "municipio", "nivel_escolar", "categoria_molestias",
+                      "categoria_sentimiento", "permanencia_form_futuro")
+
+# Ajustamos los niveles para cada variable factor de manera que incluyan todos los posibles valores
+for(var in variables_factor) {
+  levels_all <- unique(form_satisfaccion[[var]])
+  form_satisfaccion[[var]] <- factor(form_satisfaccion[[var]], levels = levels_all)
+}
+
+# Dividimos los datos en conjuntos de entrenamiento y prueba
+trainIndex <- createDataPartition(form_satisfaccion$permanencia_form_futuro, p = 0.7, list = FALSE)
+trainData <- form_satisfaccion[trainIndex, ]
+testData <- form_satisfaccion[-trainIndex, ]
+
+```
+
+## Análisis
+
+En este análisis, nos enfocaremos en abordar el problema de rotación de personal, utilizando técnicas de aprendizaje automático. Nuestro objetivo es identificar patrones y factores clave que influyen en la rotación de empleados, con el fin de desarrollar estrategias efectivas para retener al talento humano.
+
+## **Modelo Naive Bayes**
+Comenzaremos explorando el modelo Naive Bayes, una técnica de aprendizaje automático ampliamente utilizada en problemas de clasificación. Analizaremos cómo este modelo se aplica a nuestros datos y qué insights puede proporcionar para comprender mejor la rotación de personal.
+
+Una de las ventajas clave del modelo Naive Bayes es su simplicidad y velocidad de entrenamiento, lo que lo hace especialmente útil para conjuntos de datos grandes. Además, es robusto ante la presencia de variables irrelevantes y puede manejar bien conjuntos de datos con características categóricas y numéricas.
+
+Ahora aplicaremos el modelo Naive Bayes a nuestros datos de encuesta de satisfacción y registros de empleados. Utilizaremos una variedad de características, incluyendo niveles de satisfacción con el salario, prestaciones, jornada laboral, entre otros, para predecir la probabilidad de rotación de empleados.
+
+
+## **Modelo 1**: Usando Variables Demográficas del Capital Humano
+
+```{r}
+# Modelo 1: Naive Bayes con variables demográficas
+modelo_nb1 <- naiveBayes(Estatus ~ Edad + Antigüedad + Mes_Nacimiento + Mes_Entrada, data = train_data)
+
+# Predicciones y evaluación
+predicciones_nb1 <- predict(modelo_nb1, test_data)
+resultados_nb1 <- confusionMatrix(predicciones_nb1, test_data$Estatus)
+print(resultados_nb1)
+
+```
+El código del Modelo 1 utiliza variables demográficas del conjunto de datos de Capital Humano para predecir si un empleado seguirá en la empresa o no.
+
+**Variables utilizadas:**
+
+**Edad:** Esta variable representa la edad del empleado en años. Podría suponerse que los empleados más jóvenes tienen una mayor probabilidad de rotación debido a la búsqueda de nuevas oportunidades y el crecimiento profesional, mientras que los empleados mayores pueden tener una mayor estabilidad laboral.
+
+
+**Antigüedad:** Indica la cantidad de tiempo que un empleado ha estado en la empresa en días. 
+
+
+**Mes de Nacimiento:** Esta variable representa el mes en que nació el empleado. Podría explorarse si existe alguna estacionalidad en la rotación de personal basada en el mes de nacimiento.
+
+
+**Mes de Entrada:** Indica el mes en que el empleado ingresó a la empresa. Podría investigarse si el mes de entrada está relacionado con la probabilidad de rotación, por ejemplo, si hay temporadas de contratación que influyan en la estabilidad laboral.
+
+**Resultados del Modelo:**
+
+La matriz de confusión muestra que el modelo clasificó correctamente 6 casos de empleados activos y 89 casos de empleados dados de baja, con una precisión general del 76.61%.
+La sensibilidad (tasa de verdaderos positivos) del modelo es baja, lo que indica que tiene dificultades para identificar correctamente a los empleados activos.
+La especificidad (tasa de verdaderos negativos) del modelo es alta, lo que sugiere que tiene una buena capacidad para identificar a los empleados que se darán de baja.
+El valor predictivo positivo es bajo, lo que indica que el modelo tiene una tendencia a clasificar erróneamente a los empleados como activos cuando en realidad están dados de baja.
+
+**Razón de Uso:** Este modelo se basa en variables demográficas clave relacionadas con la edad y la antigüedad de los empleados, así como en el mes de nacimiento y de entrada a la empresa. Estas variables pueden proporcionar información sobre la experiencia laboral y la longevidad en la empresa, lo que puede influir en la decisión de un empleado de permanecer o abandonar la organización. 
+
+En resumen, si bien el modelo muestra una precisión general aceptable, se observa una baja sensibilidad en la identificación de empleados activos. Esto sugiere que el modelo podría beneficiarse de la inclusión de variables adicionales o de técnicas de ajuste para mejorar su rendimiento predictivo.
+
+
+## **Modelo 2**: Usando Variables de Satisfacción
+Descripción:
+Este modelo emplea variables relacionadas con la satisfacción de los empleados, tales como la percepción del salario y las prestaciones, para predecir su permanencia futura en la empresa.
+
+```{r}
+# Modelo 2: Naive Bayes con variables de satisfacción
+modelo_nb2 <- naiveBayes(permanencia_form_futuro ~ salario_bueno_ordinal + prestaciones_bueno_ordinal + jornada_no_excesiva_ordinal + ofrecimiento_herramientas_ordinal, data = trainData)
+
+# Predicciones y evaluación
+predicciones_nb2 <- predict(modelo_nb2, testData)
+resultados_nb2 <- confusionMatrix(predicciones_nb2, testData$permanencia_form_futuro)
+print(resultados_nb2)
+
+```
+
+**Variables utilizadas:**
+
+**Salario Bueno (Ordinal):** Representa la percepción del empleado sobre la calidad de su salario. Puede influir en la retención de empleados, ya que un salario percibido como bajo podría aumentar la probabilidad de rotación.
+
+
+**Prestaciones Buenas (Ordinal):** Indica la percepción del empleado sobre la calidad de las prestaciones ofrecidas por la empresa, como seguro médico, vacaciones pagadas, etc.
+
+
+**Jornada No Excesiva (Ordinal):** Refleja si el empleado considera que su jornada laboral es razonable y no excesiva. 
+
+
+**Ofrecimiento de Herramientas (Ordinal):** Indica si la empresa proporciona herramientas adecuadas y recursos para que los empleados realicen su trabajo. 
+
+**Resultados del Modelo:**
+
+La matriz de confusión muestra que el modelo clasificó correctamente 2 casos de empleados activos y 19 casos de empleados dados de baja, con una precisión general del 67.74%.
+La sensibilidad del modelo es baja, lo que indica que tiene dificultades para identificar correctamente a los empleados activos.
+La especificidad del modelo es alta, lo que sugiere que tiene una buena capacidad para identificar a los empleados que se darán de baja.
+El valor predictivo positivo es bajo, lo que indica que el modelo tiene una tendencia a clasificar erróneamente a los empleados como activos cuando en realidad están dados de baja.
+
+**Razón de Uso:** Este modelo se centra en variables relacionadas con la satisfacción laboral, como la percepción del salario y las prestaciones, así como la jornada laboral y el ofrecimiento de herramientas. La satisfacción laboral es un factor importante que puede influir en la decisión de un empleado de quedarse o abandonar la empresa, por lo que estas variables pueden ser predictores relevantes de la rotación de personal.
+
+En resumen, el Modelo 2 utiliza variables de satisfacción de los empleados para predecir la permanencia futura en la empresa. 
+
+
+
+## **Modelo 3**: Combinación de Variables Demográficas y de Satisfacción
+Descripción:
+Este modelo combina variables demográficas y de satisfacción para mejorar la capacidad predictiva.
+
+
+```{r}
+# Se añade columna de identificación a los dataframes de entrenamiento y prueba
+train_data$ID_empleado <- 1:nrow(train_data)
+test_data$ID_empleado <- 1:nrow(test_data)
+
+trainData$ID_empleado <- 1:nrow(trainData)
+testData$ID_empleado <- 1:nrow(testData)
+
+
+```
+
+```{r}
+# Fusionar los dataframes de entrenamiento y prueba
+merged_train_data <- merge(train_data, trainData, by = "ID_empleado")
+merged_test_data <- merge(test_data, testData, by = "ID_empleado")
+
+# Esto permite combinar las variables demográficas y de satisfacción en un solo dataframe para su posterior análisis.
+
+```
+
+```{r}
+# Modelo 3: Naive Bayes con combinación de variables demográficas y de satisfacción
+modelo_nb3 <- naiveBayes(Estatus ~ Edad + Antigüedad + salario_bueno_ordinal + prestaciones_bueno_ordinal, data = merged_train_data)
+
+# Predicciones y evaluación
+predicciones_nb3 <- predict(modelo_nb3, merged_test_data)
+resultados_nb3 <- confusionMatrix(predicciones_nb3, merged_test_data$Estatus)
+print(resultados_nb3)
+
+```
+**Variables utilizadas:**
+
+**Edad:** Representa la edad del empleado. Podría influir en la permanencia futura de los empleados.
+
+
+**Antigüedad:** Indica el tiempo que un empleado ha estado trabajando en la empresa. La antigüedad puede reflejar la estabilidad laboral y la relación del empleado con la empresa.
+
+
+**Salario Bueno (Ordinal):** Un salario percibido como bajo puede influir en la decisión de un empleado de permanecer en la empresa.
+
+
+**Prestaciones Buenas (Ordinal):** Las prestaciones competitivas pueden contribuir a la satisfacción y retención de los empleados.
+
+**Resultados del Modelo:**
+
+La matriz de confusión muestra que el modelo clasificó correctamente 2 casos de empleados activos y 19 casos de empleados dados de baja, con una precisión general del 67.74%.
+La sensibilidad del modelo es baja, lo que indica que tiene dificultades para identificar correctamente a los empleados activos.
+La especificidad del modelo es alta, lo que sugiere que tiene una buena capacidad para identificar a los empleados que se darán de baja.
+El valor predictivo positivo es bajo, lo que indica que el modelo tiene una tendencia a clasificar erróneamente a los empleados como activos cuando en realidad están dados de baja.
+
+**Razón de Uso:** Este modelo combina variables demográficas con variables de satisfacción para capturar tanto la experiencia laboral como la satisfacción laboral de los empleados. Al combinar estas dos categorías de variables, se busca mejorar la capacidad predictiva del modelo al considerar múltiples aspectos del empleado que pueden influir en su decisión de permanecer en la empresa.
+
+Aunque sería lo más óptimo que todos los empleados hubieran respondido a la encuesta de satisfacción, la realidad es que la muestra disponible es muy pequeña. Esta limitación impide que se pueda maximizar el potencial del modelo al combinar fuentes de datos demográficas y de satisfacción. Por lo tanto, aunque la intención era crear un modelo más robusto, la limitada disponibilidad de datos de la encuesta restringe su efectividad y su capacidad predictiva.
+
+En conclusión, a pesar de los esfuerzos por combinar múltiples fuentes de datos, el tamaño reducido de la muestra de la encuesta de satisfacción limita la eficacia de este modelo. Sin embargo, esta metodología sigue siendo valiosa y podría ser altamente efectiva con una mayor cantidad de datos disponibles.
+
+
+
+```{r}
+# Comparación de los modelos
+print(resultados_nb1)
+print(resultados_nb2)
+print(resultados_nb3)
+
+# Seleccionar el mejor modelo basado en la métrica de precisión
+mejor_modelo <- ifelse(resultados_nb1$overall['Accuracy'] > resultados_nb2$overall['Accuracy'] & resultados_nb1$overall['Accuracy'] > resultados_nb3$overall['Accuracy'], "Modelo 1", 
+                       ifelse(resultados_nb2$overall['Accuracy'] > resultados_nb3$overall['Accuracy'], "Modelo 2", "Modelo 3"))
+print(paste("El mejor modelo es:", mejor_modelo))
+
+```
+
+
+## **Resultados**: 
+Después de analizar los resultados de los tres modelos de Naive Bayes, se puede observar lo siguiente:
+
+**Modelo 1**: Variables Demográficas del Capital Humano
+
+Precisión: 76.61%
+Sensibilidad (capacidad para identificar empleados activos): 21.43%
+Especificidad (capacidad para identificar empleados dados de baja): 92.71%
+
+**Modelo 2**: Variables de Satisfacción
+
+Precisión: 80.65%
+Sensibilidad: 81.48%
+Especificidad: 75.00%
+
+**Modelo 3**: Combinación de Variables Demográficas y de Satisfacción
+
+Precisión: 67.74%
+Sensibilidad: 25.00%
+Especificidad: 82.61%
+
+## **Modelo Seleccionado**
+Basándonos en la métrica de precisión, que indica la proporción de predicciones correctas realizadas por el modelo, el Modelo 2 es el que presenta la mayor precisión, con un valor del 80.65%. Esto sugiere que el Modelo 2 es el más efectivo para predecir la permanencia futura de los empleados en la empresa.
+
+El Modelo 2 utiliza variables relacionadas con la satisfacción de los empleados, como la percepción del salario y las prestaciones, para realizar predicciones. Estas variables pueden estar más directamente relacionadas con la retención de empleados, ya que la satisfacción laboral puede influir significativamente en la decisión de un empleado de permanecer en la empresa o buscar oportunidades en otro lugar.
+
+Por lo tanto, con base en los resultados y la importancia práctica de predecir la retención de empleados, se selecciona el Modelo 2 como el mejor modelo. Este modelo ofrece la mejor precisión y presenta una sensibilidad aceptable, lo que sugiere que es capaz de identificar correctamente tanto a los empleados activos como a los empleados dados de baja. Además, el enfoque en variables de satisfacción refleja la importancia de considerar el bienestar y la percepción de los empleados en las estrategias de retención de talento en la empresa.
+
+
+
+
+
+
+
+
