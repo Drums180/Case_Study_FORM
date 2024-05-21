@@ -1,0 +1,169 @@
+---
+title: "Red_Neuronal_FORM "
+author: "Lalo Camacho, Daniel Najera"
+date: "2024-04-17"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(tidyverse) 
+library(broom)
+library(readr)
+library(caret)
+library(ggplot2)
+library(zoo)
+library(dplyr)
+library(modeest)
+library(tibble)
+library(pROC)
+library(irr)
+library(corrplot)
+library(neuralnet)
+```
+
+```{r}
+datos <- read.csv("C:\\Users\\Eduardo\\Downloads\\Bases_FORM\\Datos_FORM_RH_FJ2024.csv")
+```
+
+```{r}
+str(datos)
+```
+
+```{r}
+nuevos_nombres <- names(datos) %>%
+  str_replace_all("\\s+", " ") %>%  # Reemplazar múltiples espacios por uno solo
+  str_to_lower() %>%               # Convertir todo a minúsculas
+  str_replace_all("[^[:alnum:] ]", "") %>%  # Eliminar caracteres no alfanuméricos
+  str_replace_all(" ", "") %>%     # Eliminar espacios
+  str_replace_all("(?<=[a-z])([A-Z])", "\\1\\2") %>%  # Asegurar camelCase
+  make.names()  # Evitar nombres de variables inválidos
+
+names(datos) <- nuevos_nombres
+
+```
+
+```{r}
+str(datos)
+summary(datos)
+```
+
+```{r}
+names(datos)
+```
+
+
+Observamos la cantidad de datos nulos para saber si se tiene que hacer algun tipo de tratamiento para realizar el modelo de red neuronal
+
+```{r}
+na_count <- colSums(is.na(datos))
+na_count
+```
+
+
+
+```{r}
+datos$sd[is.na(datos$sd)] <- median(datos$sd, na.rm = TRUE)
+datos <- datos[!is.na(datos$puesto), ]
+print(datos)
+```
+
+Quitamos acentos del nombre de cada una de las variales para que no genere ninguna confusion a la hora de realziar el modelo
+
+```{r}
+names(datos)[names(datos) == "género"] <- "genero"
+names(datos)[names(datos) == "factordecréditoinfonavit"] <- "factordecreditoinfonavit"
+names(datos)[names(datos) == "dirección"] <- "direccion"
+names(datos)[names(datos) == "nodecréditoinfonavit"] <- "nodecreditoinfonavit"
+names(datos)[names(datos) == "número"] <- "numero"
+names(datos)[names(datos) == "númerodetélefono"] <- "numerodetelefono"
+```
+
+```{r}
+# Preprocesamiento de datos usando nombres en camelCase
+datos <- datos %>%
+  mutate(estatus = as.factor(estatus),
+         genero = as.factor(genero),
+         municipio = as.factor(municipio),
+         puesto = as.factor(puesto),
+         estadocivil = as.factor(estadocivil),
+         fechadealta = as.Date(fechadealta, "%Y-%m-%d"),
+         fechadedebaja = as.Date(fechadebaja, "%Y-%m-%d")) %>%
+  filter(!is.na(estatus)) # Asegurar que el estatus está presente
+
+#datos$estatus <- ifelse(datos$estatus == "Activo", "Si", 
+                            #ifelse(datos$estatus == "Baja", "No", datos$estatus))
+datos$estatus <- ifelse(datos$estatus == "activo", "si", "no")
+
+datos$estatus <- as.factor(datos$estatus)
+
+```
+
+```{r}
+datos$genero <- as.factor(datos$genero)
+datos$estatus <- as.factor(datos$estatus)
+datos$puesto <- as.factor(datos$puesto)
+datos$municipio <- as.factor(datos$municipio)
+datos$estadocivil <- as.factor(datos$estadocivil)
+datos$dpto <- as.factor(datos$dpto)
+
+datos$genero <- as.numeric(datos$genero)
+datos$puesto <- as.numeric(datos$puesto)
+datos$municipio <- as.numeric(datos$municipio)
+datos$estadocivil <- as.numeric(datos$estadocivil)
+datos$dpto <- as.numeric(datos$dpto)
+
+```
+
+
+Empezamos a hacer la particion de los datos en set de entrenamiento y prueba
+
+```{r}
+set.seed(123)
+indice <- createDataPartition(datos$estatus, p = 0.8, list = FALSE)
+datos_train <- datos[indice, ]
+datos_test <- datos[-indice, ]
+```
+
+
+Escalamos los datos para eu la red neuronal pueda generar una estimacion mas exacta de lo que estamos buscando y no haya algunos datos que generene que sea una mala estimacion.
+
+```{r}
+preproc <- preProcess(datos_train, method = c("center", "scale"))
+datos_train_norm <- predict(preproc, datos_train)
+datos_test_norm <- predict(preproc, datos_test)
+```
+
+```{r}
+#head(datos_train_norm)
+```
+
+Escogemos la variabels que creeemos que son las mas pertinenetes para generar la red neuronal, basandonos mucho ne lo que observamos en el Analisis Exploratorio de los Datos.
+
+```{r}
+formula <- estatus ~ genero + sd + estadocivil + municipio
+```
+
+Generamos el modelo que cuenta con dos capas ocultas una de 5 y otra de 3 neuronas, esperando de uotput un "si" o "no", que determina si se encontrara activo dentro de la empresa.
+
+```{r}
+nn_model = neuralnet( formula, data = datos_train_norm, hidden = c(5, 3), linear.output = FALSE)
+plot (nn_model)
+```
+
+Observamos un error de 66, lo cual es bueno para lo que estamos tratando de estimar.
+
+
+Generamos predicciones
+
+```{r}
+
+predicciones <- compute(nn_model, datos_test_norm[, -which(names(datos_test_norm) == "estatus")])
+
+predicciones <- predicciones$net.result
+
+predicciones_clase <- ifelse(predicciones > 0.5, 1, 0)  
+
+print(predicciones_clase)
+
+```
