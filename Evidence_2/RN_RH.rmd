@@ -1,0 +1,232 @@
+---
+title: "Red_Neuronal_FORM "
+author: "Lalo Camacho, Daniel Nájera"
+date: "2024-04-17"
+output: html_document
+---
+
+## Importar Librerías
+
+```{r warning=FALSE, message=FALSE}
+library(dplyr)
+library(tidyverse) 
+library(broom)
+library(readr)
+library(caret)
+library(ggplot2)
+library(zoo)
+library(dplyr)
+library(modeest)
+library(tibble)
+library(pROC)
+library(irr)
+library(corrplot)
+library(neuralnet)
+```
+ 
+ 
+* **Importación de Librerías:** Explicación de por qué se importan las librerías y su propósito.
+
+* **Carga de Datos:** Descripción de la carga de datos y la importancia de la ruta correcta.
+
+* **Preprocesamiento de Datos:** Detalles sobre la limpieza de nombres de columnas, manejo de valores nulos y conversión de tipos de datos.
+
+* **Creación de los Modelos:** Explicación de la partición de datos, escalado y selección de variables.
+
+* **Configuración y Entrenamiento de Modelos:** Descripción de la estructura de los modelos de redes neuronales y la lógica detrás de cada configuración.
+
+* **Predicciones y Evaluación:** Proceso de generación de predicciones y evaluación del rendimiento del modelo utilizando la matriz de confusión.
+
+
+```{r warning=FALSE, message=FALSE}
+datos <- read.csv("C:\\Users\\Eduardo\\Downloads\\Bases_FORM\\Datos_FORM_RH_FJ2024.csv")
+```
+
+```{r warning=FALSE, message=FALSE}
+str(datos)
+```
+
+## Preprocesamiento de los Datos
+
+```{r warning=FALSE, message=FALSE}
+nuevos_nombres <- names(datos) %>%
+  str_replace_all("\\s+", " ") %>%  # Reemplazar múltiples espacios por uno solo
+  str_to_lower() %>%               # Convertir todo a minúsculas
+  str_replace_all("[^[:alnum:] ]", "") %>%  # Eliminar caracteres no alfanuméricos
+  str_replace_all(" ", "") %>%     # Eliminar espacios
+  str_replace_all("(?<=[a-z])([A-Z])", "\\1\\2") %>%  # Asegurar camelCase
+  make.names()  # Evitar nombres de variables inválidos
+
+names(datos) <- nuevos_nombres
+
+
+```
+
+```{r warning=FALSE, message=FALSE}
+#str(datos)
+#summary(datos)
+```
+
+
+Vemos como cambian los nombres de las variables que tenemos
+
+```{r warning=FALSE, message=FALSE}
+names(datos)
+```
+
+
+Observamos la cantidad de datos nulos para saber si se tiene que hacer algun tipo de tratamiento con las variabless que utilizaremos para realizar el modelo de red neuronal
+
+```{r warning=FALSE, message=FALSE}
+na_count <- colSums(is.na(datos))
+na_count
+```
+
+
+
+```{r warning=FALSE, message=FALSE}
+datos$sd[is.na(datos$sd)] <- median(datos$sd, na.rm = TRUE)
+datos <- datos[!is.na(datos$puesto), ]
+#print(datos)
+```
+
+Quitamos acentos del nombre de cada una de las variales para que no genere ninguna confusion a la hora de realziar el modelo
+
+```{r warning=FALSE, message=FALSE}
+names(datos)[names(datos) == "género"] <- "genero"
+names(datos)[names(datos) == "factordecréditoinfonavit"] <- "factordecreditoinfonavit"
+names(datos)[names(datos) == "direccin"] <- "direccion"
+names(datos)[names(datos) == "nodecréditoinfonavit"] <- "nodecreditoinfonavit"
+names(datos)[names(datos) == "número"] <- "numero"
+names(datos)[names(datos) == "númerodetélefono"] <- "numerodetelefono"
+```
+
+```{r warning=FALSE, message=FALSE}
+# Preprocesamiento de datos usando nombres en camelCase
+datos <- datos %>%
+  mutate(estatus = as.factor(estatus),
+         genero = as.factor(genero),
+         municipio = as.factor(municipio),
+         puesto = as.factor(puesto),
+         estadocivil = as.factor(estadocivil),
+         fechadealta = as.Date(fechadealta, "%Y-%m-%d"),
+         fechadedebaja = as.Date(fechadebaja, "%Y-%m-%d")) %>%
+  filter(!is.na(estatus)) # Asegurar que el estatus está presente
+
+#datos$estatus <- ifelse(datos$estatus == "Activo", "Si", 
+                            #ifelse(datos$estatus == "Baja", "No", datos$estatus))
+datos$estatus <- ifelse(datos$estatus == "activo", "si", "no")
+
+datos$estatus <- as.factor(datos$estatus)
+
+```
+
+```{r warning=FALSE, message=FALSE}
+datos$genero <- as.factor(datos$genero)
+datos$estatus <- as.factor(datos$estatus)
+datos$puesto <- as.factor(datos$puesto)
+datos$municipio <- as.factor(datos$municipio)
+datos$estadocivil <- as.factor(datos$estadocivil)
+datos$dpto <- as.factor(datos$dpto)
+
+datos$genero <- as.numeric(datos$genero)
+datos$estatus <- as.numeric(datos$estatus)
+datos$puesto <- as.numeric(datos$puesto)
+datos$municipio <- as.numeric(datos$municipio)
+datos$estadocivil <- as.numeric(datos$estadocivil)
+datos$dpto <- as.numeric(datos$dpto)
+
+```
+
+## Creación de los modelos
+
+Empezamos a hacer la particion de los datos en set de entrenamiento y prueba
+
+```{r warning=FALSE, message=FALSE}
+set.seed(123)
+indice <- createDataPartition(datos$estatus, p = 0.8, list = FALSE)
+datos_train <- datos[indice, ]
+datos_test <- datos[-indice, ]
+```
+
+
+Escalamos los datos para eu la red neuronal pueda generar una estimacion mas exacta de lo que estamos buscando y no haya algunos datos que generene que sea una mala estimacion.
+
+```{r warning=FALSE, message=FALSE}
+preproc <- preProcess(datos_train, method = c("center", "scale"))
+datos_train_norm <- predict(preproc, datos_train)
+datos_test_norm <- predict(preproc, datos_test)
+```
+
+
+Escogemos la variabels que creeemos que son las mas pertinenetes para generar la red neuronal, basandonos mucho ne lo que observamos en el Analisis Exploratorio de los Datos.
+
+```{r warning=FALSE, message=FALSE}
+formula <- estatus ~ genero + sd + estadocivil + municipio
+```
+
+
+
+### Modelo 1
+
+Generamos el modelo que cuenta con dos capas ocultas una de 6 y otra de 3 neuronas, esperando de output el estatus, que determina si se encontrará activo dentro de la empresa.
+
+```{r }
+nn_model = neuralnet( formula, data = datos_train_norm, hidden = c(6, 3), linear.output = FALSE, lifesign = 'minimal')
+plot(nn_model)
+```
+
+### Modelo 2
+
+Aumentamos la complejidad del modelo con más neuronas y capas
+
+```{r}
+nn_model2 = neuralnet(formula, data = datos_train_norm, hidden = c(10, 5), linear.output = FALSE, lifesign = 'minimal', act.fct = "logistic")
+plot(nn_model2)
+```
+
+
+```{r}
+set.seed(123)
+min_max_scaler <- preProcess(datos_train, method = c("range"))
+datos_train_minmax <- predict(min_max_scaler, datos_train)
+datos_test_minmax <- predict(min_max_scaler, datos_test)
+```
+
+```{r}
+# Seleccionar la mejor normalización para la red neuronal
+datos_train_norm2 <- datos_train_minmax
+datos_test_norm2 <- datos_test_minmax
+```
+
+### Modelo 3
+
+Utilizando la normalización Min-Max con una configuración similar al modelo 2
+
+```{r}
+nn_model3 = neuralnet(formula, data = datos_train_norm2, hidden = c(10, 5), linear.output = FALSE, lifesign = 'minimal', act.fct = "logistic")
+plot(nn_model3)
+```
+
+
+Observamos que baja mucho el error en el caso de este modelo con est etipo de tratamiento de los datos, al utilizar un min max, lo cual es bueno para lo que estamos tratando de estimar.
+
+
+
+### Predicciones para Modelo 3
+
+
+```{r warning=FALSE, message=FALSE}
+predicciones <- compute(nn_model3, datos_test_norm2[, -which(names(datos_test_norm2) == "estatus")])
+predicciones <- predicciones$net.result
+predicciones_clase <- ifelse(predicciones > 0.5, 1, 0)
+
+# Convertir predicciones y etiquetas verdaderas a factores
+predicciones_clase <- factor(predicciones_clase, levels = c(0, 1), labels = c("no", "si"))
+datos_test_norm2$estatus <- factor(datos_test_norm2$estatus, levels = c(0, 1), labels = c("no", "si"))
+
+# Generar la matriz de confusión usando caret
+confusionMatrix(predicciones_clase, datos_test_norm2$estatus)
+```
+
+Representa un accuracy bueno, pero lo que vemos que hace muy bien este modelo es determinar a la gente que se va y no se encontrará activa, por eso es que tiene una especificidad tan alta, como lo vemos aqui.
