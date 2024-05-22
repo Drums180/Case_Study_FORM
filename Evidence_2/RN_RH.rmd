@@ -59,6 +59,7 @@ nuevos_nombres <- names(datos) %>%
 
 names(datos) <- nuevos_nombres
 
+
 ```
 
 ```{r warning=FALSE, message=FALSE}
