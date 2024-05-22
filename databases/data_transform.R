@@ -761,3 +761,63 @@ write_csv(datos, file_path)
 
 # Mensaje de confirmación
 cat("El archivo ha sido guardado en:", file_path)
+
+# Cargar el paquete readxl
+library(readxl)
+
+# Definir la ruta del archivo
+file_path <- "/Users/daviddrums180/Tec/Case_Study_Form/databases/form/PREGUNTAS FRECUENTES 1.xlsx"
+
+# Leer la única hoja del archivo Excel
+data <- read_excel(file_path)
+
+# Mostrar los primeros registros del data frame
+head(data)
+
+# Añadir la columna 'Clave' con palabras clave manualmente seleccionadas
+library(dplyr)
+data <- data %>%
+  mutate(Clave = case_when(
+    `Duda` == "¿Qué prestaciones tienen?" ~ "prestaciones, beneficios, seguro, infonavit, aguinaldo, vacaciones, bono, fondo de ahorro",
+    `Duda` == "¿Qué papeleria piden?" ~ "papeleria, documentos, acta nacimiento, constancia fiscal, SAT, CURP, IFE, INE, seguro social, comprobante domicilio, comprobante estudio",
+    `Duda` == "¿Dónde estan ubicados?" ~ "ubicacion, direccion, calle, Sabinal, Apodaca, referencia, Merco, colonia, Pueblo Nuevo, calle Alemania",
+    `Duda` == "¿Tienen transporte? / Rutas de transporte" ~ "transporte, rutas, apoyo, semanal, 350, 527, 222, 109, 105, Transmetro, Romulo Garza",
+    `Duda` == "¿Qué hacen? / ¿A que se dedica la empresa?" ~ "empresa, dedicacion, empaque, embalaje, industria automotriz, cajas, carton, plastico, coroplast, racks, almacenaje, dunnage",
+    `Duda` == "¿Se necesita experiencia?" ~ "experiencia, ayudantes generales, no pedimos",
+    `Duda` == "¿Hacen examen medico? / ¿Qué examenes hacen?" ~ "examen, medico, antidoping, orina, glucosa, presion arterial, prueba embarazo, mujeres, beber agua",
+    `Duda` == "¿Es contratación inmediata?" ~ "contratacion, inmediata, proceso, rapido, entrevista, examen medico, respuesta inmediata, referencias",
+    `Duda` == "¿Tienen semana desfasada?/ ¿Es semana al corriente?" ~ "semana, nomina, desfasada, corriente, periodo, miercoles, jueves, viernes",
+    `Duda` == "¿El sueldo ya es libre de impuestos?" ~ "sueldo, impuestos, base, premios, faltas, retardos",
+    `Duda` == "¿Tienen comedor subsidiado?" ~ "comedor, subsidiado, area, break, comida, refrigeradores, microondas",
+    `Duda` == "¿Con que tarjeta pagan?" ~ "tarjeta, pago, AFIRME, tramite, banco",
+    `Duda` == "¿Es contratación directa con la empresa?" ~ "contratacion, directa, empresa, FORM",
+    `Duda` == "¿Cuándo puedo ir a entrevista?" ~ "entrevista, fecha, ir",
+    TRUE ~ ""
+  ), Referencia = case_when(
+    `Duda` == "¿Qué prestaciones tienen?" ~ "Prestaciones",
+    `Duda` == "¿Qué papeleria piden?" ~ "Documentos requeridos",
+    `Duda` == "¿Dónde estan ubicados?" ~ "Ubicación",
+    `Duda` == "¿Tienen transporte? / Rutas de transporte" ~ "Transporte",
+    `Duda` == "¿Qué hacen? / ¿A que se dedica la empresa?" ~ "Actividad de la empresa",
+    `Duda` == "¿Se necesita experiencia?" ~ "Experiencia requerida",
+    `Duda` == "¿Hacen examen medico? / ¿Qué examenes hacen?" ~ "Examen médico",
+    `Duda` == "¿Es contratación inmediata?" ~ "Contratación inmediata",
+    `Duda` == "¿Tienen semana desfasada?/ ¿Es semana al corriente?" ~ "Semana de nómina",
+    `Duda` == "¿El sueldo ya es libre de impuestos?" ~ "Sueldo e impuestos",
+    `Duda` == "¿Tienen comedor subsidiado?" ~ "Comedor subsidiado",
+    `Duda` == "¿Con que tarjeta pagan?" ~ "Tarjeta de pago",
+    `Duda` == "¿Es contratación directa con la empresa?" ~ "Contratación directa",
+    `Duda` == "¿Cuándo puedo ir a entrevista?" ~ "Entrevista",
+    TRUE ~ "General"
+  ))
+
+
+# Mostrar los primeros registros del data frame actualizado
+head(data)
+
+library(readr)
+# Ruta del archivo donde se guardará el data frame
+file_path <- "/Users/daviddrums180/Tec/Case_Study_Form/databases/chatbot/q&a.csv"
+
+# Guardar el data frame 'datos' en la carpeta 'classification' con el nombre especificado
+write_csv(data, file_path)
