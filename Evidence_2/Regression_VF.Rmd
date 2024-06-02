@@ -1,0 +1,435 @@
+---
+title: "Regression_VF"
+author: "David Dominguez - A01570975"
+date: "2024-03-21"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
+---
+
+# VF - Regression Model 
+
+![FORM BANNER](/Users/daviddrums180/Tec/Case_Study_Form/src/form.jpg)
+
+Este documento está dedicado al análisis de diferentes modelos de regresión múltiple, aplicados a la **Situación Problema 2: Predicción de Demanda**. Utiliza tanto los datos históricos de ventas como las variables relevantes para la producción y venta de autopartes de FORM.
+
+Los modelos de regresión múltiple son una técnica valiosa en el análisis de datos, ofreciendo la ventaja de identificar la relación entre múltiples variables predictoras y la variable de interés. Esto los hace especialmente útiles para anticipar la demanda de productos y optimizar los procesos de producción.
+
+## Librerías Requeridas
+
+A continuación, se enumeran las librerías necesarias para la transformación y limpieza de datos. Aunque la mayoría de la limpieza de datos se ha completado previamente, se incluye también el proceso de creación de columnas adicionales para facilitar una mejor interpretación de los resultados. Junto a cada librería, se proporciona una breve descripción de su propósito:
+
+
+```{r message=FALSE, warning=FALSE}
+library(imputeTS)
+library(lubridate)
+library(xts)
+library(zoo)
+library(tseries)
+library(stats)
+library(forecast)
+library(astsa)
+library(corrplot)
+library(wordcloud)
+library(tidytext)
+library(AER)
+library(vars)
+library(dynlm)
+library(mFilter)
+library(TSstudio)
+library(tidyverse)
+library(sarima)
+library(readr)
+library(readxl)
+library(patchwork)
+library(heatmaply)
+library(dplyr)
+library(ggplot2)
+library(psych)
+library(tidyr)
+library(readtext)
+library(syuzhet)
+library(RColorBrewer)
+library(tm)
+library(caret)
+library(MASS)
+library(rpart)
+library(rpart.plot)
+library(party)
+library(gmodels)
+library(knitr)
+library(cluster)    
+library(e1071)
+library(janeaustenr)
+library(pROC)
+library(ISLR)
+library(gridExtra)
+library(car)
+library(DataExplorer)
+library(randomForest)
+library(class)
+library(factoextra)
+library(purrr)
+library(reshape2)
+library(tmap)
+library(sf)
+library(zoo)
+library(pdp)
+library(vip)
+library(xgboost)
+library(forcats)
+library(recommenderlab)
+library(arules)
+library(arulesViz)
+library(MLmetrics)
+```
+
+## Bases de Datos Necesarias
+
+Como se mencionó anteriormente, el análisis para abordar la **Situación Problema 2** involucra tres conjuntos de datos principales:
+
+1. **Base de Datos de Ventas Desglosadas de FORM**: Esta base proporciona un overview de ventas diarias con registros detallados que incluyen quién compró el producto, el cliente, el producto específico, la categoría del producto, la cantidad vendida, el estatus de la venta, entre otros datos que reflejan las transacciones individuales.
+
+2. **Base de Datos de Expansión**: Este conjunto de datos ofrece una matriz más expandida, de la cual se crean columnas por cliente para medir si el impacto de cada cliente se puede predecir independientemente. Esto permite analizar patrones específicos y comportamientos de compra individualizados.
+
+3. **Base de Datos de Factores Externos**: Utilizando fuentes externas, esta base de datos divide el conjunto de datos inicial en diferentes variables como categoría de productos, tipo de vehículos correspondientes y fuentes externas de industrias. Esto se hace para tratar de medir correlaciones entre estos factores y la demanda de productos, mejorando la precisión de las predicciones.
+
+Estos tres conjuntos de datos juntos nos permiten tener una visión integral de los factores que influyen en la demanda de productos y desarrollar modelos predictivos más precisos y robustos.
+
+```{r message=FALSE, warning=FALSE}
+setwd("../databases")
+
+form_ventas <- read_csv("forecast/Datos_FORM_Ventas_FJ2024.csv")
+form_factores <- read_csv("forecast/FORM_Factores.csv")
+form_expandido <- read_csv("forecast/FORM_Modelado.csv")
+industria_autos <- read_xlsx("industry_autos_mx/exportacion_vehiculos.xlsx")
+```
+
+## Transformaciones Necesarias
+
+### Base de Ventas de FORM
+
+1. **Expansión de la fecha**:
+   - Se expande la columna de fechas en varias componentes: año, mes, día, semana del año, semana del mes, día de la semana y si el día es hábil (no es sábado o domingo).
+
+2. **Estacionalidad Anual**:
+   - Se calcula la estacionalidad anual agrupando los datos por año y semana del año, sumando la cantidad semanal y calculando el promedio semanal. Luego, se clasifica en deciles para obtener la estacionalidad anual.
+
+3. **Estacionalidad Mensual**:
+   - Se calcula la estacionalidad mensual agrupando los datos por año, mes y semana del mes, sumando la cantidad semanal del mes y calculando el promedio semanal del mes. Luego, se clasifica en deciles para obtener la estacionalidad mensual.
+
+4. **Registros Semanales**:
+   - Se agrupan los datos por varias variables relevantes (semana del año, año, mes, semana del mes, cliente, producto, categoría de producto, tipo de producto, promedio de cantidad, estacionalidad anual y estacionalidad mensual) y se suma la cantidad semanal para obtener los registros semanales.
+
+```{r}
+# 1. Expansión de la fecha
+form_ventas <- form_ventas %>%
+  mutate(Fecha = ymd(Fecha),
+         Año = year(Fecha),
+         Mes = month(Fecha),
+         Dia = day(Fecha),
+         Semana_Año = week(Fecha),
+         Semana_Mes = ceiling(day(Fecha) / 7),
+         Dia_Semana = wday(Fecha, label = TRUE),
+         Dia_Habil = ifelse(Dia_Semana %in% c("Sat", "Sun"), 0, 1))
+
+# 2. Estacionalidad Anual
+estacionalidad_anual <- form_ventas %>%
+  group_by(Año, Semana_Año) %>%
+  summarise(Cantidad_Semanal = sum(Cantidad, na.rm = TRUE)) %>%
+  group_by(Semana_Año) %>%
+  summarise(Promedio_Cantidad = mean(Cantidad_Semanal, na.rm = TRUE)) %>%
+  mutate(Estacionalidad_Annual = ntile(Promedio_Cantidad, 10))
+
+form_ventas <- form_ventas %>%
+  left_join(estacionalidad_anual, by = "Semana_Año")
+
+# 3. Estacionalidad Mensual
+estacionalidad_mensual <- form_ventas %>%
+  group_by(Año, Mes, Semana_Mes) %>%
+  summarise(Cantidad_Semanal_Mensual = sum(Cantidad, na.rm = TRUE)) %>%
+  group_by(Mes, Semana_Mes) %>%
+  summarise(Promedio_Cantidad_Mensual = mean(Cantidad_Semanal_Mensual, na.rm = TRUE)) %>%
+  mutate(Estacionalidad_Mensual = ntile(Promedio_Cantidad_Mensual, 10))
+
+form_ventas <- form_ventas %>%
+  left_join(estacionalidad_mensual, by = c("Mes", "Semana_Mes"))
+
+# 4. Registros Semanales
+form_ventas_semanal <- form_ventas %>%
+  group_by(Semana_Año, Año, Mes, Semana_Mes, Cliente, Producto, `Categoría de producto`, Tipo, Promedio_Cantidad, Estacionalidad_Annual, Promedio_Cantidad_Mensual, Estacionalidad_Mensual) %>%
+  summarise(Cantidad_Semanal = sum(Cantidad, na.rm = TRUE),
+            .groups = 'drop')
+
+# Verificación del dataframe resultante
+head(form_ventas_semanal)
+```
+
+### Base de Industria Automotriz
+- añadir codigo que haga una columna para cada valor unico de la columna segmento y haga lo demás igual, osea que agrupe por segmento y sume la cantidad por mes y año, mantengamos el total asi como está, solo añadamos ese componente de por segmento
+- añadir codigo que haga una columna para cada valor unico de la columna marca y haga lo demás igual, osea que agrupe por segmento y sume la cantidad por mes y año, mantengamos el total asi como está, solo añadamos ese componente de por marca
+
+```{r}
+# Función para limpiar los nombres de las columnas
+clean_names <- function(df) {
+  names(df) <- tolower(gsub(" ", "_", names(df)))
+  return(df)
+}
+
+industria_autos <- clean_names(industria_autos)
+
+# Primero, convertir los nombres de los meses a números
+meses_a_numeros <- function(mes) {
+  meses <- c("enero" = 1, "febrero" = 2, "marzo" = 3, "abril" = 4, "mayo" = 5, "junio" = 6,
+             "julio" = 7, "agosto" = 8, "septiembre" = 9, "octubre" = 10, "noviembre" = 11, "diciembre" = 12)
+  return(meses[tolower(mes)])
+}
+
+# Aplicar la conversión al dataframe
+industria_autos <- industria_autos %>%
+  mutate(mes = sapply(mes, meses_a_numeros))
+
+# Agrupar por año, mes y segmento, y sumar la columna cantidad
+industria_autos_segmento <- industria_autos %>%
+  group_by(año, mes, segmento) %>%
+  summarise(cantidad_total_segmento = sum(cantidad, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = segmento, values_from = cantidad_total_segmento, values_fill = list(cantidad_total_segmento = 0))
+
+# Agrupar por año, mes y marca, y sumar la columna cantidad
+industria_autos_marca <- industria_autos %>%
+  group_by(año, mes, marca) %>%
+  summarise(cantidad_total_marca = sum(cantidad, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = marca, values_from = cantidad_total_marca, values_fill = list(cantidad_total_marca = 0))
+
+# Agrupar por año y mes, y sumar la columna cantidad para el total general
+industria_autos_monthly <- industria_autos %>%
+  group_by(año, mes) %>%
+  summarise(cantidad_total = sum(cantidad, na.rm = TRUE)) %>%
+  ungroup()
+
+# Crear un dataframe final combinando las tres tablas
+industria_autos_combined <- industria_autos_monthly %>%
+  left_join(industria_autos_segmento, by = c("año", "mes")) %>%
+  left_join(industria_autos_marca, by = c("año", "mes"))
+
+# Función para ajustar un modelo ARIMA y predecir los próximos 12 meses
+predecir_columna <- function(columna) {
+  ts_data <- ts(industria_autos_combined[[columna]], start = c(min(industria_autos_combined$año), min(industria_autos_combined$mes)), frequency = 12)
+  fit <- auto.arima(ts_data)
+  forecasted_values <- forecast(fit, h = 12)
+  return(forecasted_values$mean)
+}
+
+# Realizar la predicción para todas las columnas excepto año y mes
+predicciones <- lapply(names(industria_autos_combined)[-c(1, 2)], predecir_columna)
+
+# Crear un dataframe con las predicciones y las fechas correspondientes
+predicted_years <- rep(2023:2024, each = 12)[8:19]
+predicted_months <- rep(1:12, times = 2)[8:19]
+predictions_df <- data.frame(
+  año = predicted_years,
+  mes = predicted_months
+)
+
+# Añadir las predicciones al dataframe
+for (i in seq_along(predicciones)) {
+  predictions_df[[names(industria_autos_combined)[-c(1, 2)][i]]] <- predicciones[[i]]
+}
+
+# Combinar los datos históricos seleccionados con las predicciones
+industria_autos_prediction <- bind_rows(
+  industria_autos_combined,
+  predictions_df
+)
+
+# Mostrar el dataframe final
+tail(industria_autos_prediction)
+```
+### Base de Datos Unificada
+```{r}
+# Unir form_ventas_semanal con industria_autos por Año y Mes
+base_datos_unificada <- form_ventas_semanal %>%
+  left_join(industria_autos_prediction, by = c("Año" = "año", "Mes" = "mes"))
+
+# Verificación del dataframe resultante
+head(base_datos_unificada)
+```
+
+## Creación del Modelo de Clusters
+
+### Preparación de los Datos para Clustering
+
+Para crear el modelo de clusters, primero es necesario preparar los datos. Esto incluye la selección de las columnas relevantes y la normalización de los datos:
+
+1. **Selección de las columnas necesarias para el clustering**:
+   - Se seleccionan las columnas `Cantidad_Semanal`, `Promedio_Cantidad`, `Estacionalidad_Annual` y `Estacionalidad_Mensual` de la base de datos unificada. Estas columnas se consideran relevantes para el análisis de clusters.
+
+2. **Normalización de los datos para clustering**:
+   - Se escalan los datos seleccionados para asegurar que todas las variables tengan una media de 0 y una desviación estándar de 1. La normalización es importante en el clustering para evitar que las variables con rangos más amplios dominen el proceso de agrupamiento.
+
+3. **Verificación del dataframe resultante**:
+   - Se muestra una vista previa del dataframe normalizado para asegurar que la normalización se realizó correctamente.
+
+```{r}
+# Seleccionar las columnas necesarias para el clustering
+datos_clustering <- base_datos_unificada %>%
+  select(Cantidad_Semanal, Promedio_Cantidad, Estacionalidad_Annual, Estacionalidad_Mensual)
+
+# Normalizar los datos para clustering
+datos_clustering_scaled <- scale(datos_clustering)
+
+# Verificar el dataframe resultante
+head(datos_clustering_scaled)
+```
+
+### Determinar el Número Óptimo de Clusters con el Método del Codo
+
+Para determinar el número óptimo de clusters en el modelo de K-means, se utiliza el método del codo. Este método ayuda a identificar el número de clusters donde se produce una disminución significativa en la suma de las distancias cuadradas dentro de los clusters (within-cluster sum of squares).
+
+1. **Método del codo**:
+   - Se calcula la suma de las distancias cuadradas dentro de los clusters (`within-cluster sum of squares`, WSS) para diferentes números de clusters.
+   - Se grafica el WSS en función del número de clusters.
+   - El "codo" del gráfico, donde la disminución de WSS se vuelve menos pronunciada, indica el número óptimo de clusters.
+
+```{r message=FALSE, warning=FALSE}
+# Calcular el número óptimo de clusters utilizando el método del codo
+fviz_nbclust(datos_clustering_scaled, kmeans, method = "wss")
+```
+
+## Entrenamiento del Modelo K-means
+
+Una vez determinado el número óptimo de clusters, se procede a entrenar el modelo K-means con los datos normalizados. El proceso incluye los siguientes pasos:
+
+1. **Selección del número óptimo de clusters**:
+   - Basado en el resultado del método del codo, se selecciona el número óptimo de clusters, en este caso, `k = 3`.
+
+2. **Entrenamiento del modelo K-means**:
+   - Se establece una semilla aleatoria (`set.seed(123)`) para asegurar la reproducibilidad de los resultados.
+   - Se entrena el modelo K-means con `k` clusters y 25 inicializaciones diferentes (`nstart = 25`) para mejorar la estabilidad del resultado.
+
+3. **Asignación de clusters a los datos originales**:
+   - Se añaden los clusters resultantes como una nueva columna en el dataframe original.
+
+4. **Verificación de los datos con los clusters añadidos**:
+   - Se muestra una vista previa del dataframe con la nueva columna de clusters para verificar la correcta asignación de los clusters.
+
+```{r message=FALSE, warning=FALSE}
+# Seleccionar el número óptimo de clusters (por ejemplo, k = 3)
+set.seed(123)
+k <- 3
+modelo_kmeans <- kmeans(datos_clustering_scaled, centers = k, nstart = 25)
+
+# Añadir los clusters a los datos originales
+base_datos_unificada <- base_datos_unificada %>%
+  mutate(Cluster = modelo_kmeans$cluster)
+
+# Verificar los datos con los clusters añadidos
+head(base_datos_unificada)
+```
+
+## Modelo de Regresión Múltiple
+
+### Preparación de los Datos para la Regresión Múltiple
+
+Para crear un modelo de regresión múltiple, primero es necesario preparar los datos adecuadamente. Esto incluye la selección de las columnas relevantes, la conversión de columnas categóricas a factores y la división de los datos en conjuntos de entrenamiento y prueba.
+
+1. **Selección de las columnas necesarias para el modelo de regresión**:
+   - Se seleccionan las columnas `Cantidad_Semanal`, `Cluster`, `Promedio_Cantidad`, `Estacionalidad_Annual`, `Estacionalidad_Mensual`, `Cliente`, `Mes` y `Semana_Año` de la base de datos unificada. Estas columnas son consideradas relevantes para el análisis de regresión.
+
+2. **Conversión de las columnas categóricas a factores**:
+   - Se convierten las columnas categóricas (`Cliente`, `Mes`, `Semana_Año` y `Cluster`) a factores para que puedan ser utilizadas correctamente en el modelo de regresión.
+
+3. **División de los datos en conjunto de entrenamiento y prueba**:
+   - Se establece una semilla aleatoria (`set.seed(123)`) para asegurar la reproducibilidad de los resultados.
+   - Se dividen los datos en conjuntos de entrenamiento (80%) y prueba (20%) utilizando la función `createDataPartition`.
+
+```{r message=FALSE, warning=FALSE}
+# Seleccionar las columnas necesarias para el modelo de regresión
+datos_regresion <- base_datos_unificada %>%
+  select(Cantidad_Semanal, Cluster, Promedio_Cantidad, Estacionalidad_Annual, Estacionalidad_Mensual, Cliente, Mes, Semana_Año)
+
+# Convertir las columnas categóricas a factores
+datos_regresion <- datos_regresion %>%
+  mutate(Cliente = as.factor(Cliente),
+         Mes = as.factor(Mes),
+         Semana_Año = as.factor(Semana_Año),
+         Cluster = as.factor(Cluster))
+
+# Dividir los datos en conjunto de entrenamiento y prueba
+set.seed(123)
+train_index <- createDataPartition(datos_regresion$Cantidad_Semanal, p = 0.8, list = FALSE)
+train_data_regresion <- datos_regresion[train_index, ]
+test_data_regresion <- datos_regresion[-train_index, ]
+```
+
+
+### Entrenamiento del Modelo de Regresión Múltiple
+
+Una vez preparados los datos, se procede a entrenar el modelo de regresión múltiple. Este proceso incluye la creación del modelo y la generación de un resumen para evaluar su rendimiento inicial.
+
+1. **Creación del modelo de regresión múltiple**:
+   - Se utiliza la función `lm()` para ajustar un modelo de regresión múltiple con la variable dependiente `Cantidad_Semanal` y todas las variables seleccionadas como predictoras.
+
+2. **Resumen del modelo**:
+   - Se genera un resumen del modelo utilizando la función `summary()`, que proporciona información detallada sobre los coeficientes del modelo, el valor del R-squared, el estadístico F, entre otros. Estos indicadores son útiles para evaluar el ajuste del modelo y la significancia de las variables predictoras.
+
+```{r}
+# Crear el modelo de regresión múltiple
+modelo_regresion <- lm(Cantidad_Semanal ~ ., data = train_data_regresion)
+
+# Resumen del modelo
+summary(modelo_regresion)
+```
+### Observaciones del Modelo de Regresión Múltiple
+
+1. **Coeficientes Significativos**:
+   - `Cluster2` (365.9) y `Cluster3` (7225.0) tienen un impacto significativo en la cantidad semanal.
+   - Otros coeficientes significativos incluyen `ClienteAptiv`, `Mes12`, `Semana_Año3`, `Semana_Año4`, y `Semana_Año48`.
+
+2. **Variables No Significativas**:
+   - `Promedio_Cantidad`, `Estacionalidad_Annual` y `Estacionalidad_Mensual` no son significativas.
+   - La mayoría de los clientes no muestran un impacto significativo.
+
+3. **Medidas de Ajuste del Modelo**:
+   - **R-squared**: 0.591, el modelo explica el 59.1% de la variabilidad.
+   - **Adjusted R-squared**: 0.5871.
+   - **Residual standard error**: 811.8.
+
+4. **Multicolinealidad**:
+   - Tres variables no definidas debido a singularidades, sugiriendo posibles problemas de multicolinealidad.
+
+
+### Evaluación del Modelo de Regresión
+
+Para evaluar el rendimiento del modelo de regresión múltiple, se utilizan las siguientes métricas: MSE (Mean Squared Error), RMSE (Root Mean Squared Error) y R-squared. Estas métricas ayudan a comprender la precisión del modelo y su capacidad para explicar la variabilidad en los datos.
+
+```{r}
+# Realizar predicciones en el conjunto de prueba
+predicciones <- predict(modelo_regresion, newdata = test_data_regresion)
+
+# Calcular métricas de evaluación
+mse <- mean((predicciones - test_data_regresion$Cantidad_Semanal)^2)
+rmse <- sqrt(mse)
+r_squared <- summary(modelo_regresion)$r.squared
+
+# Mostrar las métricas de evaluación
+print(paste("MSE:", mse))
+print(paste("RMSE:", rmse))
+print(paste("R-squared:", r_squared))
+```
+
+1. **MSE (Mean Squared Error)**: 447299.03
+   - Este valor indica el promedio de los errores al cuadrado. Un valor más bajo sugiere que el modelo tiene un mejor rendimiento.
+
+2. **RMSE (Root Mean Squared Error)**: 668.80
+   - La RMSE es la raíz cuadrada del MSE y tiene las mismas unidades que la variable dependiente (Cantidad Semanal). Es una medida más interpretativa del error.
+
+3. **R-squared**: 0.591
+   - El R-squared indica que el modelo explica el 59.1% de la variabilidad en la cantidad semanal. Esto sugiere que el modelo tiene un ajuste moderado.
+
+
