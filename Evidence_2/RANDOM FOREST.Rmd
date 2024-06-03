@@ -1,0 +1,213 @@
+---
+title: "MODEL2 - RF"
+author: "Gabriel Medina"
+date: "2024-05-28"
+output: rmdformats::material
+---
+
+# Librerías
+
+```{r}
+library(readr)
+library(ggplot2)
+library(tidyr)
+library(viridis)
+library(scales) 
+library(readxl)
+library(RColorBrewer)
+library(dplyr)
+library(forecast)
+library(caret)
+library(MASS)
+library(rpart)
+library(rpart.plot)
+library(party)
+library(gmodels)
+library(knitr)
+library(readxl)
+library(readr)
+library(dplyr)
+library(cluster)
+library(ggplot2)
+library(corrplot)
+library(tseries)
+library(e1071)
+library(pROC)
+library(ISLR)
+library(knitr)
+library(gridExtra)
+library(car)
+library(DataExplorer)
+library(tidyr)
+library(ggplot2)
+library(randomForest)
+library(class)
+library(caret)
+library(cluster)    
+library(factoextra) 
+library(purrr)
+library(imputeTS)
+library(xts)
+library(zoo)
+library(tseries)
+library(stats)
+library(forecast)
+library(astsa)
+library(corrplot)
+library(wordcloud)
+library(tidytext)
+library(AER)
+library(vars)
+library(dynlm)
+library(mFilter)
+library(TSstudio)
+library(tidyverse)
+library(sarima)
+library(readr)
+library(readxl)
+library(heatmaply)
+library(dplyr)
+library(ggplot2)
+library(psych)
+library(tidyr)
+library(readtext)
+library(syuzhet)
+library(RColorBrewer)
+library(tm)
+library(caret)
+library(MASS)
+library(rpart)
+library(rpart.plot)
+library(party)
+library(gmodels)
+library(knitr)
+library(cluster)    
+library(e1071)
+library(pROC)
+library(ISLR)
+library(gridExtra)
+library(car)
+library(DataExplorer)
+library(randomForest)
+library(class)
+library(factoextra)
+library(purrr)
+```
+
+# Importación de datos
+
+```{r}
+df=read.csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/forecast/datos_FORM_ventas_FJ2024.csv")
+head(df)
+```
+
+# Transformación de las variables
+
+
+```{r}
+# Se realizó un proceso de limpieza de la base de datos previo.
+
+distinct(df,Categoría.de.producto)
+
+# Agrupar categorías de producto
+df <- df %>%
+  mutate(Categoria_Simplificada = case_when(
+    grepl("carton", `Categoría.de.producto`, ignore.case = TRUE) ~ "carton",
+    grepl("retornable", `Categoría.de.producto`, ignore.case = TRUE) ~ "retornable",
+    grepl("servicios", `Categoría.de.producto`, ignore.case = TRUE) ~ "servicios",
+    TRUE ~ NA_character_
+  ))
+# Filtrar y crear bases de datos separadas
+df_carton <- df %>% filter(Categoria_Simplificada == "carton")
+df_retornable <- df %>% filter(Categoria_Simplificada == "retornable")
+df_servicios <- df %>% filter(Categoria_Simplificada == "servicios")
+
+# Convertir la columna Fecha a formato Date
+df_carton <- df_carton %>%
+  mutate(Fecha = as.Date(Fecha, format = "%Y-%m-%d"))
+
+df_retornable$Fecha <- as.Date(df_retornable$Fecha, format = "%Y-%m-%d")
+df_servicios$Fecha <- as.Date(df_servicios$Fecha, format = "%Y-%m-%d")
+
+# Verificar la conversión de fechas
+print(head(df_carton$Fecha))
+print(head(df_retornable$Fecha))
+print(head(df_servicios$Fecha))
+
+
+```
+
+```{r}
+
+
+# Agrupar los datos por mes y sumar la columna Cantidad
+ventas_mensuales_carton <- df_carton %>%
+  mutate(Mes = floor_date(Fecha, "month")) %>%
+  group_by(Mes) %>%
+  summarise(Total_Venta = sum(Cantidad))
+
+ventas_mensuales_retornable <- df_retornable %>%
+  mutate(Mes = floor_date(Fecha, "month")) %>%
+  group_by(Mes) %>%
+  summarise(Total_Venta = sum(Cantidad))
+
+ventas_mensuales_servicios <- df_servicios %>%
+  mutate(Mes = floor_date(Fecha, "month")) %>%
+  group_by(Mes) %>%
+  summarise(Total_Venta = sum(Cantidad))
+
+ventas_mensuales_retornable
+```
+
+# Modelo random forest 
+
+Para este modelo se utilizó un random forest con restrasos de las ventas de FORM. 
+
+```{r}
+# Crear características de retraso (lag features)
+ventas_mensuales_carton <- ventas_mensuales_carton %>%
+  arrange(Mes) %>%
+  mutate(Lag1 = lag(Total_Venta, 1),
+         Lag2 = lag(Total_Venta, 2),
+         Lag3 = lag(Total_Venta, 3)) %>%
+  drop_na()
+```
+
+```{r}
+# Dividir los datos en conjunto de entrenamiento (80%) y prueba (20%)
+set.seed(123)
+n <- nrow(ventas_mensuales_carton)
+train_size <- floor(0.8 * n)
+train_indices <- sample(seq_len(n), size = train_size)
+
+train_data <- ventas_mensuales_carton[train_indices, ]
+test_data <- ventas_mensuales_carton[-train_indices, ]
+```
+
+
+
+```{r}
+# Entrenar el modelo Random Forest
+modelo_rf <- randomForest(Total_Venta ~ Lag1 + Lag2 + Lag3, data = train_data, ntree = 500)
+
+
+```
+
+# Evaluación del modelo
+
+```{r}
+# Hacer predicciones en el conjunto de prueba
+predicciones <- predict(modelo_rf, test_data)
+
+# Calcular el RMSE
+actual_values <- test_data$Total_Venta
+rmse <- sqrt(mean((actual_values - predicciones)^2))
+print(paste("RMSE:", rmse))
+
+# Visualizar predicciones vs valores reales
+plot(test_data$Mes, actual_values, type = "l", col = "blue", xlab = "Mes", ylab = "Ventas", main = "Predicciones vs Valores Reales")
+lines(test_data$Mes, predicciones, col = "red")
+legend("topright", legend = c("Actual", "Predicciones"), col = c("blue", "red"), lty = 1)
+```
+
+
