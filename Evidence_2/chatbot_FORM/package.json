@@ -1,0 +1,23 @@
+{
+  "name": "bariatric-plus-chatbot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "daviddrums180",
+  "license": "ISC",
+  "dependencies": {
+    "@adiwajshing/baileys": "^5.0.0",
+    "@whiskeysockets/baileys": "^6.6.0",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongodb": "^6.5.0",
+    "openai": "^4.38.0",
+    "qrcode-terminal": "^0.12.0",
+    "sqlite3": "^5.1.7"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "description": ""
+}
