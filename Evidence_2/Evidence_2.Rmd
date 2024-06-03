@@ -1,0 +1,1475 @@
+
+---
+title: 'Evidencia 2- Preparación y modelado de los datos'
+author: 'David Dominguez - A01570975, Alejandra Suárez - A00835247, Daniel Nájera - A01709578, Eduardo Camacho - A01026437, Gabriel Medina - A01275763'
+date: '28-04-24'
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_download: TRUE
+    theme: cosmo
+
+---
+
+
+
+![FORM BANNER](/Users/gabrielmedina/Downloads/form.jpeg)
+
+# Introducción
+
+## Descripción General del Proyecto
+La empresa FORM, actualmente una empresa líder en la industria del cartón, se enfrenta con desafíos significativos como lo es las dos situaciones problemas que nos presenta. 
+1. Retención de clientes
+2. Predicción de demandas futuras. 
+El objetivo de este proyecto es poder realizar técnicas avanzadas de análisis de datos para poder anticipar y entender las necesidades del mercado y de los clientes, así mejorando la competitividad del Socio Formador. La empresa podrá optimizar su producción y gestión de inventarios debido a que con el análisis predictivo se estimará las ventas del próximo mes, también en el área de retención, buscaremos desarrollar estrategias para mejorar la lealtad, satisfacción y compromiso por parte de los clientes.
+
+## Objetivos del Documento
+1.- Documentar el Proceso de Limpieza de Datos: Realizar un análisis detallado de cada etapa de la limpieza de datos, detallando desde la identificación de valores nulos hasta las transformaciones más complejas y específicas aplicadas en para mejorar la calidad de los datos.
+
+2.- Desarrollo y Evaluación de Modelos de Inteligencia Artificial: Documentar la construcción y evaluación de varios modelos predictivos y de clasificación para datos estructurados y no estructurados.
+
+3.- Comparativa entre los Modelos: Realizar un análisis comparativo de los modelos para determinar cuál es el más eficaz y preciso para abordar los desafíos específicos de el Socio Formador, como la retención de clientes y la predicción de ventas.
+
+4.- Proporcionar Recomendaciones Estratégicas: Basado en los análisis, ofrecer recomendaciones que FORM pueda implementar para mejorar la retención de clientes y optimizar la planificación de producción.
+
+# Proceso de Limpieza de Datos
+
+## Estructura General de los Datos antes de la Limpieza
+
+Se realizó una transformación para limpiar la base de datos de la empresa FORM, para poder analizar factores internos de la empresa que pueden influir en la retención de clientes y la optimización operativa. Los variables que se muestran en la base de datos son datos demográficos, roles de empleados y sueldos.
+
+
+## Identificación de Valores Nulos
+
+Se identificaron valores nulos en múltiples columnas clave como Fecha de nacimiento, Género, Puesto, Departamento, Sueldo Diario, Municipio, Estado, Estado Civil, y Dirección. Esta identificación es crucial para preparar los datos para análisis predictivos, asegurando que la calidad de los datos no comprometa los modelos futuros.
+
+## Manejo de Valores Nulos
+
+Los valores nulos se manejan con estrategias específicas para minimizar su impacto en los análisis:
+
+Estado: Sustitución utilizando la moda del municipio correspondiente, una técnica que preserva la estructura geográfica y puede ser relevante para entender patrones regionales de demanda.
+Municipio y Estado: Sustitución directa cuando falta información de estado, utilizando nombres comunes como 'guadalupe' y 'nuevo leon' que pueden ser centros de actividad significativos para la empresa.
+Sueldo Diario: Imputación basada en el rol ocupacional, lo que podría ser indicativo de la estructura de costos y cómo esto afecta la retención y satisfacción de clientes.
+
+## Etapas de Limpieza Detalladas
+
+Categorización de molestias y sentimientos: Transformación de textos libres a categorías, lo que nos ayuda en el análisis de sentimiento y clima organizacional, factores importantes para la retención de talento e indirectamente, la satisfacción del cliente.
+Conversión y limpieza de tipos de datos: Asegura que las edades y otros datos numéricos estén correctamente formateados para análisis.
+
+
+## Reglas de Negocio en la Limpieza
+
+Las decisiones de limpieza están guiadas por reglas de negocio que reflejan la estructura y necesidades operativas de FORM, como la asignación de sueldos basada en roles específicos, y la imputación geográfica que podría reflejar la distribución de la cadena de suministro o centros de servicio.
+
+## Estructura Final de los Datos
+
+El resultado es un conjunto de datos limpios, organizados y listos para ser utilizados en modelos predictivos que podrían ayudar a FORM a mejorar la retención de clientes y la precisión en la predicción de demanda. Los datos están en un formato CSV, facilitando su uso en herramientas analíticas y de modelado.
+
+Estos ajustes específicos en la limpieza de los datos están diseñados para alinear los datos con las estrategias de negocio y operativas de FORM, asegurando que la base de datos transformada sea un recurso valioso para enfrentar los desafíos actuales de la empresa.
+
+
+# SP1: Forecast de Ventas
+
+## Modelos Regresivos:
+
+###Series de Tiempo
+
+##### Introducción
+
+Actualmente, FORM enfrenta la necesidad y la gran oportunidad de optimizar su cadena de producción en función de la demanda de sus diversos productos. Es crucial generar predicciones precisas de la demanda para que FORM pueda aumentar la eficiencia en toda su cadena de producción, reducir costos y mejorar el servicio al cliente. Para lograr esto, se desarrollará un modelo de series temporales utilizando técnicas de modelado como SARIMA, con el fin de predecir las ventas futuras basándose en los datos históricos de ventas de los últimos años.
+
+##### Justificación del modelo
+
+Se escogió un modelo SARIMA debido a que la naturaleza de los datos permite acoplarse muy bien con modelos de series de tiempo y dicho modelo logra capturar los componentes estacionales de la serie.
+
+##### Datos utilzados
+
+Se utilizó la base de datos VENTAS_FORM_FJ_2024 proporcionada por la empresa, la cual incluye un registro detallado de sus ventas en el periodo 2021-2023.
+
+##### Modelado
+
+```{r message=FALSE, warning=FALSE}
+library(readr)
+library(imputeTS)
+library(lubridate)
+library(xts)
+library(zoo)
+library(foreign)
+library(modelr)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(broom)
+library(ISLR)
+library(caret)
+library(e1071)
+library(class)
+library(ROCR)
+library(pROC)
+library(lmtest)
+library(caTools)
+library(rpart)
+library(rpart.plot)
+library(psych)
+library(ggpubr)
+library(reshape)
+library(Metrics)
+library(mlbench)
+library(rsample)
+library(cluster)
+library(factoextra)
+library(gridExtra)
+library(modeest)
+library(tibble)
+library(randomForest)
+library(irr)
+library(corrplot)
+library(vcd)
+library(car)
+library(tseries)
+library(stats)
+library(forecast)
+library(astsa)
+library(wordcloud)
+library(tidytext)
+library(AER)
+library(vars)
+library(dynlm)
+library(mFilter)
+library(TSstudio)
+library(sarima)
+library(readxl)
+library(patchwork)
+library(heatmaply)
+library(readtext)
+library(syuzhet)
+library(RColorBrewer)
+library(tm)
+library(MASS)
+library(party)
+library(gmodels)
+library(knitr)
+library(purrr)
+library(reshape2)
+library(tmap)
+library(sf)
+library(pdp)
+library(vip)
+library(xgboost)
+library(forcats)
+library(viridis)
+library(scales)
+library(neuralnet)
+library(DataExplorer)
+library(recommenderlab)
+library(arules)
+library(arulesViz)
+library(MLmetrics)
+library(janeaustenr)
+
+```
+
+
+```{r}
+ventas_nv <- read_csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/form/VENTAS_FORM_B.csv")
+head(ventas_nv)
+
+
+```
+
+
+```{r}
+na_count <- colSums(is.na(ventas_nv))
+na_count
+
+# Renombra columnas
+names(ventas_nv)[names(ventas_nv) == "Ventas Totales"] <- "Ventas_totales"
+names(ventas_nv)[names(ventas_nv) == "Total Carton"] <- "Total_carton"
+names(ventas_nv)[names(ventas_nv) == "Total Retornable"] <- "Total_retornable"
+names(ventas_nv)
+```
+
+```{r}
+
+Sys.setlocale("LC_TIME", "es_ES.UTF-8")
+ventas_nv <- na.omit(ventas_nv[, c("Año", "Mes", "Ventas_totales", "Total_carton", "Total_retornable", "Servicios")])
+ventas_nv$Fecha <- as.Date(paste(ventas_nv$Año, ventas_nv$Mes, "01"), format = "%Y %B %d")
+ventas_t <- ts(ventas_nv$Ventas_totales, start = c(as.numeric(format(min(ventas_nv$Fecha), "%Y")), as.numeric(format(min(ventas_nv$Fecha), "%m"))), frequency = 12)
+ts_plot(ventas_t)
+```
+
+```{r}
+Carton <- ts(ventas_nv$Total_carton, start = c(year(min(ventas_nv$Fecha)), month(min(ventas_nv$Fecha))), frequency = 12)
+
+ts_plot(Carton)
+```
+
+```{r}
+Retornable <- ts(ventas_nv$Total_retornable, start = c(year(min(ventas_nv$Fecha)), month(min(ventas_nv$Fecha))), frequency = 12)
+ts_plot(Retornable)
+```
+
+
+```{r}
+servicio <- ts(ventas_nv$Servicios, start = c(year(min(ventas_nv$Fecha)), month(min(ventas_nv$Fecha))), frequency = 12)
+ts_plot(servicio)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+adf.test(ventas_t)
+```
+Con la prueba de ADF podemos observar que la serie de tiempo de las ventas es estacionaria, es decir, no muestra tendencias a lo largo del tiempo y es ideal para modelar un ARIMA que logre capturar los componentes estacionales de la serie de tiempo
+
+```{r}
+# Graficar la ACF y PACF
+par(mfrow = c(1, 2))
+acf(ventas_t, main = "ACF de Ventas Totales")
+pacf(ventas_t, main = "PACF de Ventas Totales")
+```
+
+No se aprecia aurocorrelación serial.
+
+```{r}
+# Ajustar el modelo ARMA con p=1 y q=1
+sarima <- auto.arima(ventas_t, seasonal = TRUE)
+summary(sarima)
+
+```
+
+El modelo ARMA(1,1) ajustado a la serie de tiempo de ventas muestra que el componente autorregresivo es altamente significativo, indicando que las ventas actuales dependen fuertemente de las ventas pasadas. Sin embargo, el componente de media móvil no es significativo. La significancia del intercepto sugiere un término constante relevante. A pesar de la variabilidad en los residuos, este modelo proporciona una base sólida para capturar las dinámicas de las ventas.
+
+#### Pruebas de diagnóstico
+
+**Modelo Arma**
+```{r}
+sarima_residuals<-sarima$residuals
+Box.test(sarima_residuals,lag=1,type="Ljung-Box")
+```
+
+El valor de p obtenido en la prueba de Box-Ljung (0,88) es mayor que el valor de p máximo comúnmente utilizado que es 0,05. Esto significa que no se encontró evidencia significativa de autocorrelación en los residuos, ya que el valor p es mayor que 0,05, lo que respalda la validez del modelo en términos de autocorrelación.
+
+```{r}
+#Testing residuals
+suppressWarnings({
+sarima$residuals <- na.omit(sarima$residuals)
+adf.test(sarima$residuals)
+})
+```
+El valor de p de 0,01, inferior al umbral de 0,05, indica una fuerte evidencia contra la hipótesis nula de no estacionariedad. Esto significa que es poco probable que los residuos sean no estacionarios.
+
+##### Predicciones
+
+```{r}
+# Realizar predicciones para los próximos 4 meses
+forecast_sarima <- forecast(sarima, h = 7)
+
+# Graficar las predicciones
+autoplot(forecast_sarima) +
+  ggtitle("Predicciones de Ventas Totales") +
+  xlab("Tiempo") +
+  ylab("Ventas Totales")
+
+```
+
+```{r}
+forecast_sarima
+```
+
+```{r}
+n <- length(ventas_t)
+ventas_t_2<- head(ventas_t, n - 6)
+sarima2 <- auto.arima(ventas_t_2, seasonal = TRUE)
+forecast_sarima_2 <- forecast(sarima2, h = 6)
+ventas_t_3<- tail(ventas_t, 6)
+
+# Valores predichos
+predicted_values <- forecast_sarima_2$mean
+
+# Valores reales (ajusta el índice según tu serie temporal)
+
+
+actual_values = ventas_t_3
+
+# Calcular el RMSE
+rmse <- sqrt(mean((actual_values - predicted_values)^2))
+print(paste("RMSE = ", rmse))
+
+```
+
+##### Conclusiones
+
+El modelo SARIMA ajustado a la serie de tiempo de ventas ha sido utilizado para realizar predicciones para los próximos 12 meses. Las predicciones muestran la tendencia esperada de las ventas totales, proporcionando una herramienta valiosa para la planificación y la toma de decisiones en la optimización de la cadena de producción. La significancia del componente autorregresivo sugiere que las ventas pasadas tienen un impacto considerable en las ventas futuras, mientras que el componente de media móvil no resultó ser significativo en este modelo. Las pruebas de diagnóstico respaldan la validez del modelo, indicando que no hay autocorrelación significativa en los residuos y que los residuos son estacionarios. Se sugiere complementar el modelo con más datos históricos de la compañía, así como de variables externas que impactan a las ventas de FORM.
+Sin embargo, indicadores como el RMSE muestran niveles relativamente de confianza, con valores de 46267, por lo cual es importante seguir mejorando el modelo.
+
+
+### Regresión Múltiple
+
+
+Este modelo está dedicado al análisis de diferentes modelos de regresión múltiple, aplicados a la **Situación Problema 2: Predicción de Demanda**. Utiliza tanto los datos históricos de ventas como las variables relevantes para la producción y venta de autopartes de FORM.
+
+Los modelos de regresión múltiple son una técnica valiosa en el análisis de datos, ofreciendo la ventaja de identificar la relación entre múltiples variables predictoras y la variable de interés. Esto los hace especialmente útiles para anticipar la demanda de productos y optimizar los procesos de producción.
+
+
+## Bases de Datos Necesarias
+
+Como se mencionó anteriormente, el análisis para abordar la **Situación Problema 2** involucra tres conjuntos de datos principales:
+
+1. **Base de Datos de Ventas Desglosadas de FORM**: Esta base proporciona un overview de ventas diarias con registros detallados que incluyen quién compró el producto, el cliente, el producto específico, la categoría del producto, la cantidad vendida, el estatus de la venta, entre otros datos que reflejan las transacciones individuales.
+
+2. **Base de Datos de Expansión**: Este conjunto de datos ofrece una matriz más expandida, de la cual se crean columnas por cliente para medir si el impacto de cada cliente se puede predecir independientemente. Esto permite analizar patrones específicos y comportamientos de compra individualizados.
+
+3. **Base de Datos de Factores Externos**: Utilizando fuentes externas, esta base de datos divide el conjunto de datos inicial en diferentes variables como categoría de productos, tipo de vehículos correspondientes y fuentes externas de industrias. Esto se hace para tratar de medir correlaciones entre estos factores y la demanda de productos, mejorando la precisión de las predicciones.
+
+Estos tres conjuntos de datos juntos nos permiten tener una visión integral de los factores que influyen en la demanda de productos y desarrollar modelos predictivos más precisos y robustos.
+
+```{r message=FALSE, warning=FALSE}
+
+
+form_ventas <- read_csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/forecast/Datos_FORM_Ventas_FJ2024.csv")
+form_factores <- read_csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/forecast/FORM_Factores.csv")
+form_expandido <- read_csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/forecast/FORM_Modelado.csv")
+industria_autos <- read_xlsx("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/industry_autos_mx/exportacion_vehiculos.xlsx")
+```
+
+## Transformaciones Necesarias
+
+### Base de Ventas de FORM
+
+1. **Expansión de la fecha**:
+   - Se expande la columna de fechas en varias componentes: año, mes, día, semana del año, semana del mes, día de la semana y si el día es hábil (no es sábado o domingo).
+
+2. **Estacionalidad Anual**:
+   - Se calcula la estacionalidad anual agrupando los datos por año y semana del año, sumando la cantidad semanal y calculando el promedio semanal. Luego, se clasifica en deciles para obtener la estacionalidad anual.
+
+3. **Estacionalidad Mensual**:
+   - Se calcula la estacionalidad mensual agrupando los datos por año, mes y semana del mes, sumando la cantidad semanal del mes y calculando el promedio semanal del mes. Luego, se clasifica en deciles para obtener la estacionalidad mensual.
+
+4. **Registros Semanales**:
+   - Se agrupan los datos por varias variables relevantes (semana del año, año, mes, semana del mes, cliente, producto, categoría de producto, tipo de producto, promedio de cantidad, estacionalidad anual y estacionalidad mensual) y se suma la cantidad semanal para obtener los registros semanales.
+
+```{r}
+# 1. Expansión de la fecha
+form_ventas <- form_ventas %>%
+  mutate(Fecha = ymd(Fecha),
+         Año = year(Fecha),
+         Mes = month(Fecha),
+         Dia = day(Fecha),
+         Semana_Año = week(Fecha),
+         Semana_Mes = ceiling(day(Fecha) / 7),
+         Dia_Semana = wday(Fecha, label = TRUE),
+         Dia_Habil = ifelse(Dia_Semana %in% c("Sat", "Sun"), 0, 1))
+
+# 2. Estacionalidad Anual
+estacionalidad_anual <- form_ventas %>%
+  group_by(Año, Semana_Año) %>%
+  summarise(Cantidad_Semanal = sum(Cantidad, na.rm = TRUE)) %>%
+  group_by(Semana_Año) %>%
+  summarise(Promedio_Cantidad = mean(Cantidad_Semanal, na.rm = TRUE)) %>%
+  mutate(Estacionalidad_Annual = ntile(Promedio_Cantidad, 10))
+
+form_ventas <- form_ventas %>%
+  left_join(estacionalidad_anual, by = "Semana_Año")
+
+# 3. Estacionalidad Mensual
+estacionalidad_mensual <- form_ventas %>%
+  group_by(Año, Mes, Semana_Mes) %>%
+  summarise(Cantidad_Semanal_Mensual = sum(Cantidad, na.rm = TRUE)) %>%
+  group_by(Mes, Semana_Mes) %>%
+  summarise(Promedio_Cantidad_Mensual = mean(Cantidad_Semanal_Mensual, na.rm = TRUE)) %>%
+  mutate(Estacionalidad_Mensual = ntile(Promedio_Cantidad_Mensual, 10))
+
+form_ventas <- form_ventas %>%
+  left_join(estacionalidad_mensual, by = c("Mes", "Semana_Mes"))
+
+# 4. Registros Semanales
+form_ventas_semanal <- form_ventas %>%
+  group_by(Semana_Año, Año, Mes, Semana_Mes, Cliente, Producto, `Categoría de producto`, Tipo, Promedio_Cantidad, Estacionalidad_Annual, Promedio_Cantidad_Mensual, Estacionalidad_Mensual) %>%
+  summarise(Cantidad_Semanal = sum(Cantidad, na.rm = TRUE),
+            .groups = 'drop')
+
+# Verificación del dataframe resultante
+head(form_ventas_semanal)
+```
+
+### Base de Industria Automotriz
+- añadir codigo que haga una columna para cada valor unico de la columna segmento y haga lo demás igual, osea que agrupe por segmento y sume la cantidad por mes y año, mantengamos el total asi como está, solo añadamos ese componente de por segmento
+- añadir codigo que haga una columna para cada valor unico de la columna marca y haga lo demás igual, osea que agrupe por segmento y sume la cantidad por mes y año, mantengamos el total asi como está, solo añadamos ese componente de por marca
+
+```{r}
+# Función para limpiar los nombres de las columnas
+clean_names <- function(df) {
+  names(df) <- tolower(gsub(" ", "_", names(df)))
+  return(df)
+}
+
+industria_autos <- clean_names(industria_autos)
+
+# Primero, convertir los nombres de los meses a números
+meses_a_numeros <- function(mes) {
+  meses <- c("enero" = 1, "febrero" = 2, "marzo" = 3, "abril" = 4, "mayo" = 5, "junio" = 6,
+             "julio" = 7, "agosto" = 8, "septiembre" = 9, "octubre" = 10, "noviembre" = 11, "diciembre" = 12)
+  return(meses[tolower(mes)])
+}
+
+# Aplicar la conversión al dataframe
+industria_autos <- industria_autos %>%
+  mutate(mes = sapply(mes, meses_a_numeros))
+
+# Agrupar por año, mes y segmento, y sumar la columna cantidad
+industria_autos_segmento <- industria_autos %>%
+  group_by(año, mes, segmento) %>%
+  summarise(cantidad_total_segmento = sum(cantidad, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = segmento, values_from = cantidad_total_segmento, values_fill = list(cantidad_total_segmento = 0))
+
+# Agrupar por año, mes y marca, y sumar la columna cantidad
+industria_autos_marca <- industria_autos %>%
+  group_by(año, mes, marca) %>%
+  summarise(cantidad_total_marca = sum(cantidad, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = marca, values_from = cantidad_total_marca, values_fill = list(cantidad_total_marca = 0))
+
+# Agrupar por año y mes, y sumar la columna cantidad para el total general
+industria_autos_monthly <- industria_autos %>%
+  group_by(año, mes) %>%
+  summarise(cantidad_total = sum(cantidad, na.rm = TRUE)) %>%
+  ungroup()
+
+# Crear un dataframe final combinando las tres tablas
+industria_autos_combined <- industria_autos_monthly %>%
+  left_join(industria_autos_segmento, by = c("año", "mes")) %>%
+  left_join(industria_autos_marca, by = c("año", "mes"))
+
+# Función para ajustar un modelo ARIMA y predecir los próximos 12 meses
+predecir_columna <- function(columna) {
+  ts_data <- ts(industria_autos_combined[[columna]], start = c(min(industria_autos_combined$año), min(industria_autos_combined$mes)), frequency = 12)
+  fit <- auto.arima(ts_data)
+  forecasted_values <- forecast(fit, h = 12)
+  return(forecasted_values$mean)
+}
+
+# Realizar la predicción para todas las columnas excepto año y mes
+predicciones <- lapply(names(industria_autos_combined)[-c(1, 2)], predecir_columna)
+
+# Crear un dataframe con las predicciones y las fechas correspondientes
+predicted_years <- rep(2023:2024, each = 12)[8:19]
+predicted_months <- rep(1:12, times = 2)[8:19]
+predictions_df <- data.frame(
+  año = predicted_years,
+  mes = predicted_months
+)
+
+# Añadir las predicciones al dataframe
+for (i in seq_along(predicciones)) {
+  predictions_df[[names(industria_autos_combined)[-c(1, 2)][i]]] <- predicciones[[i]]
+}
+
+# Combinar los datos históricos seleccionados con las predicciones
+industria_autos_prediction <- bind_rows(
+  industria_autos_combined,
+  predictions_df
+)
+
+# Mostrar el dataframe final
+tail(industria_autos_prediction)
+```
+### Base de Datos Unificada
+```{r}
+# Unir form_ventas_semanal con industria_autos por Año y Mes
+base_datos_unificada <- form_ventas_semanal %>%
+  left_join(industria_autos_prediction, by = c("Año" = "año", "Mes" = "mes"))
+
+# Verificación del dataframe resultante
+head(base_datos_unificada)
+```
+
+## Creación del Modelo de Clusters
+
+### Preparación de los Datos para Clustering
+
+Para crear el modelo de clusters, primero es necesario preparar los datos. Esto incluye la selección de las columnas relevantes y la normalización de los datos:
+
+1. **Selección de las columnas necesarias para el clustering**:
+   - Se seleccionan las columnas `Cantidad_Semanal`, `Promedio_Cantidad`, `Estacionalidad_Annual` y `Estacionalidad_Mensual` de la base de datos unificada. Estas columnas se consideran relevantes para el análisis de clusters.
+
+2. **Normalización de los datos para clustering**:
+   - Se escalan los datos seleccionados para asegurar que todas las variables tengan una media de 0 y una desviación estándar de 1. La normalización es importante en el clustering para evitar que las variables con rangos más amplios dominen el proceso de agrupamiento.
+
+3. **Verificación del dataframe resultante**:
+   - Se muestra una vista previa del dataframe normalizado para asegurar que la normalización se realizó correctamente.
+
+```{r}
+# Seleccionar las columnas necesarias para el clustering
+datos_clustering <- base_datos_unificada %>%
+  select(Cantidad_Semanal, Promedio_Cantidad, Estacionalidad_Annual, Estacionalidad_Mensual)
+
+# Normalizar los datos para clustering
+datos_clustering_scaled <- scale(datos_clustering)
+
+# Verificar el dataframe resultante
+head(datos_clustering_scaled)
+```
+
+### Determinar el Número Óptimo de Clusters con el Método del Codo
+
+Para determinar el número óptimo de clusters en el modelo de K-means, se utiliza el método del codo. Este método ayuda a identificar el número de clusters donde se produce una disminución significativa en la suma de las distancias cuadradas dentro de los clusters (within-cluster sum of squares).
+
+1. **Método del codo**:
+   - Se calcula la suma de las distancias cuadradas dentro de los clusters (`within-cluster sum of squares`, WSS) para diferentes números de clusters.
+   - Se grafica el WSS en función del número de clusters.
+   - El "codo" del gráfico, donde la disminución de WSS se vuelve menos pronunciada, indica el número óptimo de clusters.
+
+```{r message=FALSE, warning=FALSE}
+# Calcular el número óptimo de clusters utilizando el método del codo
+fviz_nbclust(datos_clustering_scaled, kmeans, method = "wss")
+```
+
+## Entrenamiento del Modelo K-means
+
+Una vez determinado el número óptimo de clusters, se procede a entrenar el modelo K-means con los datos normalizados. El proceso incluye los siguientes pasos:
+
+1. **Selección del número óptimo de clusters**:
+   - Basado en el resultado del método del codo, se selecciona el número óptimo de clusters, en este caso, `k = 3`.
+
+2. **Entrenamiento del modelo K-means**:
+   - Se establece una semilla aleatoria (`set.seed(123)`) para asegurar la reproducibilidad de los resultados.
+   - Se entrena el modelo K-means con `k` clusters y 25 inicializaciones diferentes (`nstart = 25`) para mejorar la estabilidad del resultado.
+
+3. **Asignación de clusters a los datos originales**:
+   - Se añaden los clusters resultantes como una nueva columna en el dataframe original.
+
+4. **Verificación de los datos con los clusters añadidos**:
+   - Se muestra una vista previa del dataframe con la nueva columna de clusters para verificar la correcta asignación de los clusters.
+
+```{r message=FALSE, warning=FALSE}
+# Seleccionar el número óptimo de clusters (por ejemplo, k = 3)
+set.seed(123)
+k <- 3
+modelo_kmeans <- kmeans(datos_clustering_scaled, centers = k, nstart = 25)
+
+# Añadir los clusters a los datos originales
+base_datos_unificada <- base_datos_unificada %>%
+  mutate(Cluster = modelo_kmeans$cluster)
+
+# Verificar los datos con los clusters añadidos
+head(base_datos_unificada)
+```
+
+## Modelo de Regresión Múltiple
+
+### Preparación de los Datos para la Regresión Múltiple
+
+Para crear un modelo de regresión múltiple, primero es necesario preparar los datos adecuadamente. Esto incluye la selección de las columnas relevantes, la conversión de columnas categóricas a factores y la división de los datos en conjuntos de entrenamiento y prueba.
+
+1. **Selección de las columnas necesarias para el modelo de regresión**:
+   - Se seleccionan las columnas `Cantidad_Semanal`, `Cluster`, `Promedio_Cantidad`, `Estacionalidad_Annual`, `Estacionalidad_Mensual`, `Cliente`, `Mes` y `Semana_Año` de la base de datos unificada. Estas columnas son consideradas relevantes para el análisis de regresión.
+
+2. **Conversión de las columnas categóricas a factores**:
+   - Se convierten las columnas categóricas (`Cliente`, `Mes`, `Semana_Año` y `Cluster`) a factores para que puedan ser utilizadas correctamente en el modelo de regresión.
+
+3. **División de los datos en conjunto de entrenamiento y prueba**:
+   - Se establece una semilla aleatoria (`set.seed(123)`) para asegurar la reproducibilidad de los resultados.
+   - Se dividen los datos en conjuntos de entrenamiento (80%) y prueba (20%) utilizando la función `createDataPartition`.
+
+```{r message=FALSE, warning=FALSE}
+# Seleccionar las columnas necesarias para el modelo de regresión
+datos_regresion <- base_datos_unificada %>%
+  select(Cantidad_Semanal, Cluster, Promedio_Cantidad, Estacionalidad_Annual, Estacionalidad_Mensual, Cliente, Mes, Semana_Año)
+
+# Convertir las columnas categóricas a factores
+datos_regresion <- datos_regresion %>%
+  mutate(Cliente = as.factor(Cliente),
+         Mes = as.factor(Mes),
+         Semana_Año = as.factor(Semana_Año),
+         Cluster = as.factor(Cluster))
+
+# Dividir los datos en conjunto de entrenamiento y prueba
+set.seed(123)
+train_index <- createDataPartition(datos_regresion$Cantidad_Semanal, p = 0.8, list = FALSE)
+train_data_regresion <- datos_regresion[train_index, ]
+test_data_regresion <- datos_regresion[-train_index, ]
+```
+
+
+### Entrenamiento del Modelo de Regresión Múltiple
+
+Una vez preparados los datos, se procede a entrenar el modelo de regresión múltiple. Este proceso incluye la creación del modelo y la generación de un resumen para evaluar su rendimiento inicial.
+
+1. **Creación del modelo de regresión múltiple**:
+   - Se utiliza la función `lm()` para ajustar un modelo de regresión múltiple con la variable dependiente `Cantidad_Semanal` y todas las variables seleccionadas como predictoras.
+
+2. **Resumen del modelo**:
+   - Se genera un resumen del modelo utilizando la función `summary()`, que proporciona información detallada sobre los coeficientes del modelo, el valor del R-squared, el estadístico F, entre otros. Estos indicadores son útiles para evaluar el ajuste del modelo y la significancia de las variables predictoras.
+
+```{r}
+# Crear el modelo de regresión múltiple
+modelo_regresion <- lm(Cantidad_Semanal ~ ., data = train_data_regresion)
+
+# Resumen del modelo
+summary(modelo_regresion)
+```
+### Observaciones del Modelo de Regresión Múltiple
+
+1. **Coeficientes Significativos**:
+   - `Cluster2` (365.9) y `Cluster3` (7225.0) tienen un impacto significativo en la cantidad semanal.
+   - Otros coeficientes significativos incluyen `ClienteAptiv`, `Mes12`, `Semana_Año3`, `Semana_Año4`, y `Semana_Año48`.
+
+2. **Variables No Significativas**:
+   - `Promedio_Cantidad`, `Estacionalidad_Annual` y `Estacionalidad_Mensual` no son significativas.
+   - La mayoría de los clientes no muestran un impacto significativo.
+
+3. **Medidas de Ajuste del Modelo**:
+   - **R-squared**: 0.591, el modelo explica el 59.1% de la variabilidad.
+   - **Adjusted R-squared**: 0.5871.
+   - **Residual standard error**: 811.8.
+
+4. **Multicolinealidad**:
+   - Tres variables no definidas debido a singularidades, sugiriendo posibles problemas de multicolinealidad.
+
+
+### Evaluación del Modelo de Regresión
+
+Para evaluar el rendimiento del modelo de regresión múltiple, se utilizan las siguientes métricas: MSE (Mean Squared Error), RMSE (Root Mean Squared Error) y R-squared. Estas métricas ayudan a comprender la precisión del modelo y su capacidad para explicar la variabilidad en los datos.
+
+```{r}
+# Realizar predicciones en el conjunto de prueba
+predicciones <- predict(modelo_regresion, newdata = test_data_regresion)
+
+# Calcular métricas de evaluación
+mse <- mean((predicciones - test_data_regresion$Cantidad_Semanal)^2)
+rmse <- sqrt(mse)
+r_squared <- summary(modelo_regresion)$r.squared
+
+# Mostrar las métricas de evaluación
+print(paste("MSE:", mse))
+print(paste("RMSE:", rmse))
+print(paste("R-squared:", r_squared))
+```
+
+1. **MSE (Mean Squared Error)**: 447299.03
+   - Este valor indica el promedio de los errores al cuadrado. Un valor más bajo sugiere que el modelo tiene un mejor rendimiento.
+
+2. **RMSE (Root Mean Squared Error)**: 668.80
+   - La RMSE es la raíz cuadrada del MSE y tiene las mismas unidades que la variable dependiente (Cantidad Semanal). Es una medida más interpretativa del error.
+
+3. **R-squared**: 0.591
+   - El R-squared indica que el modelo explica el 59.1% de la variabilidad en la cantidad semanal. Esto sugiere que el modelo tiene un ajuste moderado.
+
+
+
+
+
+### Random Forest
+
+
+
+##### Importación de datos
+
+```{r}
+df=read.csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/forecast/datos_FORM_ventas_FJ2024.csv")
+head(df)
+```
+
+##### Transformación de las variables
+
+
+```{r}
+# Se realizó un proceso de limpieza de la base de datos previo.
+
+distinct(df,Categoría.de.producto)
+
+# Agrupar categorías de producto
+df <- df %>%
+  mutate(Categoria_Simplificada = case_when(
+    grepl("carton", `Categoría.de.producto`, ignore.case = TRUE) ~ "carton",
+    grepl("retornable", `Categoría.de.producto`, ignore.case = TRUE) ~ "retornable",
+    grepl("servicios", `Categoría.de.producto`, ignore.case = TRUE) ~ "servicios",
+    TRUE ~ NA_character_
+  ))
+# Filtrar y crear bases de datos separadas
+df_carton <- df %>% filter(Categoria_Simplificada == "carton")
+df_retornable <- df %>% filter(Categoria_Simplificada == "retornable")
+df_servicios <- df %>% filter(Categoria_Simplificada == "servicios")
+
+# Convertir la columna Fecha a formato Date
+df_carton <- df_carton %>%
+  mutate(Fecha = as.Date(Fecha, format = "%Y-%m-%d"))
+
+df_retornable$Fecha <- as.Date(df_retornable$Fecha, format = "%Y-%m-%d")
+df_servicios$Fecha <- as.Date(df_servicios$Fecha, format = "%Y-%m-%d")
+
+# Verificar la conversión de fechas
+print(head(df_carton$Fecha))
+print(head(df_retornable$Fecha))
+print(head(df_servicios$Fecha))
+
+
+```
+
+
+```{r}
+
+
+# Agrupar los datos por mes y sumar la columna Cantidad
+ventas_mensuales_carton <- df_carton %>%
+  mutate(Mes = floor_date(Fecha, "month")) %>%
+  group_by(Mes) %>%
+  summarise(Total_Venta = sum(Cantidad))
+
+ventas_mensuales_retornable <- df_retornable %>%
+  mutate(Mes = floor_date(Fecha, "month")) %>%
+  group_by(Mes) %>%
+  summarise(Total_Venta = sum(Cantidad))
+
+ventas_mensuales_servicios <- df_servicios %>%
+  mutate(Mes = floor_date(Fecha, "month")) %>%
+  group_by(Mes) %>%
+  summarise(Total_Venta = sum(Cantidad))
+
+ventas_mensuales_retornable
+```
+
+En esta transformación de datos se agruparon los datos por meses y se corrigió el formato de fechas para poder realizar el modelo...
+
+#### Modelo random forest 
+
+Para este modelo se utilizó un random forest con restrasos de las ventas de FORM. 
+
+```{r}
+# Crear características de retraso (lag features)
+ventas_mensuales_carton <- ventas_mensuales_carton %>%
+  arrange(Mes) %>%
+  mutate(Lag1 = lag(Total_Venta, 1),
+         Lag2 = lag(Total_Venta, 2),
+         Lag3 = lag(Total_Venta, 3)) %>%
+  drop_na()
+```
+
+```{r}
+# Dividir los datos en conjunto de entrenamiento (80%) y prueba (20%)
+set.seed(123)
+n <- nrow(ventas_mensuales_carton)
+train_size <- floor(0.8 * n)
+train_indices <- sample(seq_len(n), size = train_size)
+
+train_data <- ventas_mensuales_carton[train_indices, ]
+test_data <- ventas_mensuales_carton[-train_indices, ]
+```
+
+
+Con base a los datos, se realiza el siguiente modelo de random forest...
+
+```{r}
+# Entrenar el modelo Random Forest
+modelo_rf <- randomForest(Total_Venta ~ Lag1 + Lag2 + Lag3, data = train_data, ntree = 500)
+
+
+```
+
+#### Evaluación del modelo
+
+```{r}
+# Hacer predicciones en el conjunto de prueba
+predicciones <- predict(modelo_rf, test_data)
+
+# Calcular el RMSE
+actual_values <- test_data$Total_Venta
+rmse <- sqrt(mean((actual_values - predicciones)^2))
+print(paste("RMSE:", rmse))
+
+# Visualizar predicciones vs valores reales
+plot(test_data$Mes, actual_values, type = "l", col = "blue", xlab = "Mes", ylab = "Ventas", main = "Predicciones vs Valores Reales")
+lines(test_data$Mes, predicciones, col = "red")
+legend("topright", legend = c("Actual", "Predicciones"), col = c("blue", "red"), lty = 1)
+```
+
+Se aprecia un modelo más adaptado a la naturaleza de los datos en comparación a los demás modelos, bajando la mitad del RMSE en comparación del de series de tiempo para predecir ventas. Estas proyecciones con un RMSE de 21,000 demuestran indicadores más confiables de cara a la predicción de ventas de FORM.
+
+
+
+# SP2: Bajas de Capital Humano
+
+## Modelos de Clasificación:
+
+
+
+### CART
+
+#### RH - CART Model Tree
+
+## Partición de Datos
+
+Para evaluar la eficacia del modelo de manera objetiva, es fundamental dividir la base de datos en conjuntos de entrenamiento y prueba. Esto permite ajustar el modelo con un conjunto de datos y evaluarlo con otro distinto, proporcionando una medida de cómo podría comportarse el modelo en situaciones no vistas previamente.
+
+### **Capital Humano** - Datos de Entrenamiento y Prueba
+
+El siguiente bloque de código realiza la partición de los datos y asegura la consistencia de los factores entre los conjuntos de entrenamiento y prueba:
+
+1. **Establecimiento de Factores**: Se identifica una lista de variables categóricas (factores) que necesitan tratamiento especial para mantener la consistencia de los niveles entre los conjuntos de datos.
+   
+2. **Unificación de Niveles de Factores**: Antes de la partición, se unifican los niveles de todas las variables factoriales en todo el conjunto de datos para asegurar que no haya inconsistencias después de la partición.
+
+3. **Creación de la Partición**: Se utiliza una función para dividir los datos en un 80% para entrenamiento y un 20% para prueba, basándose en la variable 'Estatus', que indica si el empleado sigue activo o no en la empresa.
+
+4. **Ajuste de Niveles en el Conjunto de Prueba**: Después de la partición, se ajustan los niveles de las variables factoriales en el conjunto de prueba para que coincidan exactamente con los del conjunto de entrenamiento, evitando así problemas durante el modelado.
+
+#### El modelo CART (Classification and Regression Trees) es una técnica de modelado estadístico que construye árboles de decisión para problemas de clasificación y regresión. Funciona dividiendo el conjunto de datos en subconjuntos más pequeños, mientras desarrolla de forma simultánea un árbol de decisiones asociado. Las decisiones se toman en los nodos sobre la base de las características que mejor dividen el conjunto de datos según la pureza de los nodos resultantes, utilizando criterios como la impureza de Gini para clasificación.
+
+```{r}
+library(sf)
+
+form_satisfaccion <- read_csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/classification/Encuesta_Datos_FORM_Fall2023.csv")
+form_rh = read_csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/classification/Datos_FORM_RH_FJ2024.csv")
+form_geo <- st_read("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/classification/form_bajas_espacial.shp")
+
+
+```
+
+
+```{r}
+# Lista de todas las variables factoriales
+factor_vars <- c("Puesto", "Dpto", "Municipio", "Estado", "Estatus")
+
+# Asegurarse de que todos los factores tengan los mismos niveles en ambos conjuntos
+for(var in factor_vars) {
+  levels_union <- unique(c(as.character(form_rh[[var]])))
+  form_rh[[var]] <- factor(form_rh[[var]], levels = levels_union)
+}
+
+# Partición de datos
+set.seed(123)
+indices <- createDataPartition(form_rh$Estatus, p = 0.8, list = FALSE)
+train_data <- form_rh[indices, ]
+test_data <- form_rh[-indices, ]
+
+# Asegurar que todos los factores en el conjunto de prueba tengan los mismos niveles que en el de entrenamiento
+for(var in factor_vars) {
+  test_data[[var]] <- factor(test_data[[var]], levels = levels(train_data[[var]]))
+}
+
+# Asegurar que Estatus también tenga los mismos niveles
+test_data$Estatus <- factor(test_data$Estatus, levels = levels(train_data$Estatus))
+```
+
+
+## Librerías Requeridas
+
+
+En esta especificación del modelo CART, se seleccionan variables clave que mostraron interrelaciones importantes durante el análisis exploratorio de datos (EDA). Estas variables se consideran potencialmente influyentes en la determinación del estatus de los empleados en la empresa.
+
+#### Entrenamiento del Modelo
+
+El siguiente código en R ajusta el modelo CART utilizando un subconjunto específico de variables y visualiza el árbol de decisiones resultante para facilitar su interpretación:
+
+```{r}
+# Ajustar el modelo CART usando solo las variables especificadas
+modelo <- rpart(Estatus ~ Género + Puesto + Dpto + SD + Municipio + Estado + `Estado Civil` + Dirección,
+                data = train_data, method = "class")
+
+
+# Visualizar el árbol de decisión
+rpart.plot(modelo, type = 4, extra = 101)
+```
+
+**Análisis del Árbol de Decisiones Generado**
+
+El árbol de decisión obtenido nos ofrece insights valiosos sobre los factores que influyen en la permanencia del personal en la empresa. A continuación, discutimos los nodos más significativos y lo que revelan sobre la retención de empleados:
+
+- **Mes de Entrada**: Los nodos indican que los empleados contratados en los últimos meses del año tienen mayores tasas de permanencia. Esto sugiere que la temporada de contratación podría estar vinculada con la retención, tal vez debido a proyectos a largo plazo que comienzan a fin de año o a una estrategia de contratación enfocada en la estabilidad laboral.
+
+- **Salario Diario**: El salario diario emerge como un predictor crítico, donde aquellos con un salario superior a 199 tienen más probabilidad de permanecer en la empresa. Esto destaca el papel del salario como un factor clave en la satisfacción y retención de los empleados.
+
+- **Estado Civil y Puesto**: Curiosamente, el árbol sugiere que empleados casados o en unión libre, particularmente aquellos en puestos administrativos, de costura, ayudantes u operadores, muestran una tendencia a permanecer más tiempo. Esto podría reflejar una búsqueda de estabilidad laboral ligada a responsabilidades familiares.
+
+Por otro lado, los factores como la **Edad**, el **Estado Civil** y el **Departamento** proporcionan una vista detallada de los grupos con mayor índice de bajas. Los empleados más jóvenes, solteros, y aquellos en departamentos como embarques, cedis, calidad y materiales, tienden a dejar la empresa, especialmente si tienen salarios más bajos y son contratados en los primeros meses del año.
+
+Estos patrones destacan áreas de oportunidad para la empresa en términos de ajustes en la política de contratación y estructura de compensaciones para mejorar la retención del personal.
+
+#### Análisis de Impacto de Variables en el Modelo CART
+
+El gráfico de importancia de variables (Variable Importance Plot, VIP) es una herramienta esencial para comprender qué variables tienen el mayor impacto en la predicción del modelo. El VIP nos ayuda a identificar las características más influyentes y, por lo tanto, puede guiar la toma de decisiones estratégicas en la gestión de recursos humanos y la retención de empleados.
+
+El siguiente código en R genera un gráfico VIP para el modelo CART entrenado. Este gráfico visualiza la importancia asignada a cada variable dentro del modelo, lo que permite identificar cuáles contribuyen más significativamente a la clasificación de los empleados según su estatus en la empresa.
+
+```{r}
+# Crear un plot de importancia de variables
+vip(modelo)
+```
+
+- **Salario Diario (SD)**: Esta es la variable más influyente, lo que refuerza la idea de que la compensación económica es un factor determinante en la retención de empleados. Un salario diario más alto está fuertemente asociado con una mayor probabilidad de que un empleado permanezca en la empresa.
+  
+- **Mes de Entrada (Mes_Entrada)**: Coincidiendo con el análisis del árbol de decisiones, el mes de entrada de un empleado también juega un papel crucial. Los empleados contratados hacia el final del año son más propensos a permanecer, posiblemente debido a estrategias de contratación estacionales o a la naturaleza de los proyectos que inician en esos meses.
+  
+- **Puesto y Departamento (Puesto, Dpto)**: La posición y el departamento de un empleado tienen una importancia significativa. Esto sugiere que ciertas funciones o áreas de la empresa podrían estar más afectadas por la rotación y, por lo tanto, podrían necesitar atención adicional en términos de medidas de retención.
+  
+- **Dirección y Municipio**: La ubicación y la logística asociada con el traslado al lugar de trabajo pueden ser factores relevantes para algunos empleados al decidir permanecer en la empresa.
+
+- **Edad y Estado Civil**: Estas variables tienen un peso menor en el modelo en comparación con las variables económicas y de tiempo, pero aún así brindan una visión valiosa sobre los perfiles demográficos de los empleados que son más propensos a la baja.
+
+La importancia de estas variables está en línea con los resultados del árbol de decisiones y enfatiza la necesidad de considerar una estrategia de retención multifacética que aborde tanto los factores económicos como los demográficos y organizacionales.
+
+#### Evaluación de Modelo
+
+Una vez desarrollado el modelo CART, es fundamental evaluar su rendimiento para entender qué tan bien generaliza a nuevos datos. Sin embargo, es importante reconocer que en modelos interpretables como los árboles de decisión, a menudo hay una compensación entre la simplicidad (y por lo tanto, la interpretabilidad) y la precisión del modelo.
+
+Mientras que los modelos más complejos, como las redes neuronales profundas, pueden ofrecer una precisión superior, su "caja negra" hace que sea mucho más difícil entender por qué el modelo toma ciertas decisiones. En cambio, un modelo CART ofrece una ventana clara a su razonamiento, permitiendo a los analistas y tomadores de decisiones entender las variables clave y cómo influyen en las predicciones.
+
+El siguiente bloque de código genera predicciones sobre el conjunto de prueba y crea una matriz de confusión para evaluar la precisión del modelo CART:
+
+```{r}
+# Predicciones
+predicciones <- predict(modelo, test_data, type = "class")
+predicciones <- factor(predicciones, levels = levels(train_data$Estatus))
+
+# Matriz de confusión
+conf_mat <- confusionMatrix(predicciones, test_data$Estatus)
+print(conf_mat)
+```
+
+La matriz de confusión y las estadísticas resultantes ofrecen una perspectiva clara sobre el rendimiento de nuestro modelo CART. Aquí se destacan las métricas principales:
+
+- **Precisión (Accuracy)**: Con una precisión del 82.26%, el modelo es bastante confiable en general, lo que sugiere que la mayoría de las predicciones son correctas.
+
+- **Sensibilidad (Sensitivity)**: La tasa del 60.71% indica que el modelo tiene un rendimiento moderado al identificar a los empleados que permanecen activos. Esto puede ser una señal de que el modelo podría mejorar en capturar a todos los empleados propensos a permanecer.
+
+- **Especificidad (Specificity)**: Con un valor del 88.54%, el modelo es muy efectivo en identificar a los empleados que se dan de baja. Esto significa que hay una alta probabilidad de que el modelo detecte correctamente a aquellos que dejarán la empresa.
+
+- **Índice Kappa**: Un Kappa de 0.4926 indica un acuerdo moderado más allá del azar en las clasificaciones del modelo, lo que confirma que el modelo tiene una habilidad significativa para clasificar los datos correctamente.
+
+- **Equilibrio de Precisión (Balanced Accuracy)**: La precisión equilibrada del 74.63% refleja un rendimiento equitativo entre la sensibilidad y la especificidad. Esta medida ofrece una visión más completa en contextos donde las clases están desbalanceadas.
+
+El rendimiento general del modelo es bastante bueno, pero la diferencia entre la sensibilidad y la especificidad sugiere que hay margen de mejora, especialmente en la identificación de empleados activos. El índice Kappa y la precisión equilibrada también confirman que el modelo funciona bien, pero nos recuerdan que siempre hay un compromiso entre la interpretabilidad del modelo y su precisión. La interpretación del modelo se sacrifica a menudo por la precisión, pero en este caso, la comprensión clara que proporciona el modelo CART sobre las variables influyentes es una ventaja para desarrollar estrategias de intervención focalizadas.
+
+
+### RH - Regresión Logistica
+
+La regresión logística es un modelo estadístico utilizado para predecir la probabilidad de un resultado binario o dicotómico, es decir, un resultado que puede tener uno de dos posibles valores, típicamente representados como 0 y 1. 
+
+Ventajas:
+  
+  Es fácil de interpretar en términos de probabilidades.
+Puede manejar múltiples variables independientes.
+No requiere que las variables independientes sean linealmente relacionadas con la variable dependiente.
+
+#### Librerías Requeridas
+
+
+
+En esta especificación del modelo CART, se seleccionan variables clave que mostraron interrelaciones importantes durante el análisis exploratorio de datos (EDA). Estas variables se consideran potencialmente influyentes en la determinación del estatus de los empleados en la empresa.
+
+Para realizar este modelo utilizamos el modelo K-mean cluster, para agrupar las edades y buscar un mejor resultado.
+
+```{r}
+
+datos <- read.csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/form/Datos_FORM_RH_RL.csv")
+```
+
+```{r}
+datos$genero<-as.factor(datos$genero)
+datos$puesto<-as.factor(datos$puesto)
+datos$dpto<-as.factor(datos$dpto)
+datos$estado<-as.factor(datos$estado)
+datos$estatus<-as.factor(datos$estatus)
+datos$estado_civil<-as.factor(datos$estadocivil)
+```
+
+
+#### K-MEANS Clustering
+
+K-Means Clustering.
+El objetivo principal de K-Means Clustering es identificar patrones de datos y agrupar observaciones de datos en diferentes grupos en función de sus similitudes. Vale la pena mencionar que K-Means Clustering es un algoritmo de agrupación no supervisado. También es muy útil cuando se trabaja con un conjunto de datos que no tiene etiquetas.
+
+Exploremos la agrupación de k-medias relacionada con "edad" en años
+
+Cabe mencionar que el análisis de agrupamiento de k-medias solo puede incluir variables cuantitativas.
+
+```{r message=FALSE, warning=FALSE}
+rh_edad<-datos %>% select(genero,estadocivil,sd,Edad)
+```
+
+La normalización de un conjunto de datos (variables cuantitativas) utilizando el valor medio y la desviación estándar se realiza mediante scale()
+
+```{r message=FALSE, warning=FALSE}
+rh_edad_norm<-scale(rh_edad[3:4]) 
+```
+
+Utilizamos la función fviz para ver el diagrama de codo para visualizar el número óptimo de grupos
+
+```{r message=FALSE, warning=FALSE}
+fviz_nbclust(rh_edad_norm, kmeans, method="wss")+ 
+  geom_vline(xintercept=3, linetype=2)+          
+  labs(subtitle = "Elbow method")  
+```
+
+¿Cómo elegir el número adecuado de clusters?
+  La suma de los cuadrados dentro del grupo es un indicador de la dispersión de las observaciones dentro de cada grupo. En términos generales, un grupo con una suma baja de cuadrados es más denso y compacto que un grupo con una suma alta de cuadrados. Normalmente, se selecciona el número ideal de clusters cuando se observa que la SSE empieza a estabilizarse y se forma una curva en codo.
+
+
+
+```{r message=FALSE, warning=FALSE}
+edad_cluster1 <- kmeans(rh_edad_norm, 3)
+
+fviz_cluster(edad_cluster1, data = rh_edad_norm)
+```
+
+La selección de 5 grupos explica aproximadamente el 85% de la variabilidad del conjunto de datos.
+
+Agreguemos la información de los grupos estimados al conjunto de datos original para que podamos interpretar los resultados.
+
+```{r message=FALSE, warning=FALSE}
+rh_logistic_alt1<-datos
+rh_logistic_alt1$Clusters<-edad_cluster1$cluster
+```
+
+Creemos un conjunto de datos para que podamos identificar algunas características de “edad” por grupo.
+
+```{r message=FALSE, warning=FALSE}
+rh_logistic_alt2<-rh_logistic_alt1 %>% group_by(Clusters) %>% summarise(Edad=max(Edad)) %>% arrange(desc(Edad))
+```
+
+Agrupamos los clusters por nombre
+
+```{r message=FALSE, warning=FALSE}
+rh_logistic_alt1$Cluster_Names<-factor(rh_logistic_alt1$Clusters,levels = c(1,2,3), 
+                                       labels=c("Avanzada","Adulta","Jóven"))
+```
+
+Agrupamos los grupos por nombres de grupo y resumir las columnas
+
+```{r message=FALSE, warning=FALSE}
+rh_logistic_alt3<-rh_logistic_alt1 %>% group_by(Cluster_Names) %>% summarize(edad_años=max(Edad), 
+                                                                             salario=mean(sd),
+                                                                             Count=n())
+```
+
+Vemos los resultados de la agrupación en la tabla.
+
+```{r message=FALSE, warning=FALSE}
+clusters<-as.data.frame(rh_logistic_alt3)
+clusters
+```
+
+En la tabla podemos ver el nombre de cada agrupación, el promedio de edad, el promedio de salario y el conteo de personas que se encuentran en esa agrupación.
+
+#### Modelo
+
+```{r message=FALSE, warning=FALSE}
+set.seed(123) # useful for creating simulations or random objects that can be reproduced
+training<-rh_logistic_alt1$Cluster_Names %>%     # training dataset is implemented to build up a model
+  createDataPartition(p=0.75,list=FALSE)
+train.data<-rh_logistic_alt1[training, ]
+test.data<-rh_logistic_alt1[-training, ]    
+```
+
+```{r message=FALSE, warning=FALSE}
+logit_model3<-glm(estatus~sd+Cluster_Names, data=train.data, family=binomial(link='logit'))
+summary(logit_model3)
+```
+
+El coeficiente de sd es -0.014293. Esto significa que por cada aumento de una unidad en sd, el logaritmo de las probabilidades relativas (log-odds) de que el estatus sea "baja" (frente a "activo") disminuye en aproximadamente 0.014293. Este hallazgo es estadísticamente significativo, lo que proporciona una fuerte evidencia de que sd es un predictor relevante para estatus.
+
+Al considerar los resultados del método K-Means Clustering, el modelo logit estimado mejora los resultados de la regresión. Primero, la edad en años se relaciona negativamente con la probabilidad de “bajas”, sin embargo, ninguno es estadisticamente significativo, esto sugiere que estas categorías de Cluster_Names no tienen un efecto significativo en estatus en el modelo ajustado. En segundo lugar, el R2 no es mayor que el de otros modelos estimados, sin embargo tiene un mayor accuracy y un AIC menor que los otros modelos. En resumen, los resultados estimados indican que el aumento de la edad reduce la probabilidad de “bajas”, pero este resultado difiere entre grupos de edad.
+
+#### Evaluación del modelo.
+
+```{r message=FALSE, warning=FALSE}
+test.data$logit_model3_prob <- predict(logit_model3, test.data, type="response")
+
+test.data <- test.data  %>% mutate(logit_model3_pred = 1*(logit_model3_prob > .50) + 0,
+                                   bajas_binary_3 = 1*(estatus == "baja") + 0)
+
+test.data <- test.data %>% mutate(accurate_3=1*(logit_model3_pred == bajas_binary_3))
+sum(test.data$accurate_3)/nrow(test.data) 
+```
+
+El R2 calculado indica que aproximadamente el 82% de la variación en la variable dependiente se explica por la especificación del modelo logit.
+
+```{r message=FALSE, warning=FALSE}
+prediccion_rl3 <- predict(logit_model3, test.data, type = "response")
+
+confusion_rl3 <- confusionMatrix(as.factor(ifelse(prediccion_rl3>0.6, "baja", "activo")), test.data$estatus, positive = "activo")
+confusion_rl3
+```
+
+La matriz de confusión y las estadísticas resultantes ofrecen una perspectiva clara sobre el rendimiento de nuestro modelo de regresión. Aquí se destacan las métricas principales:
+  
+- **Precisión (Accuracy)**: Con una precisión del 79.35%, el modelo es bastante confiable en general, lo que sugiere que la mayoría de las predicciones son correctas.
+
+- **Sensibilidad (Sensitivity)**: La tasa del 3.12% indica que el modelo no tiene un rendimiento moderado al identificar a los empleados que permanecen activos. Esto puede ser una señal de que el modelo podría mejorar en capturar a todos los empleados propensos a permanecer.
+
+- **Especificidad (Specificity)**: Con un valor del 99.184%, el modelo es muy efectivo en identificar a los empleados que se dan de baja. Esto significa que hay una alta probabilidad de que el modelo detecte correctamente a aquellos que dejarán la empresa.
+
+- **Índice Kappa**: Un Kappa de 0.0354 indica un acuerdo medio moderado más allá del azar en las clasificaciones del modelo, lo que confirma que el modelo tiene una habilidad significativa para clasificar los datos correctamente.
+
+- **Equilibrio de Precisión (Balanced Accuracy)**: La precisión equilibrada del 51.15% refleja un rendimiento equitativo entre la sensibilidad y la especificidad. Esta medida ofrece una visión más completa en contextos donde las clases están desbalanceadas.
+
+El rendimiento general del modelo es moderado, basicamente la diferencia entre la sensibilidad y la especificidad sugiere que hay margen de mejora, especialmente en la identificación de empleados activos. El índice Kappa también confirman que el modelo tiene aun mas area de mejora, pero nos recuerdan que siempre hay un compromiso entre la interpretabilidad del modelo y su precisión.
+
+
+### Naive Bayes
+
+#### RH - Naive Bayes Model
+
+####Los modelos Naive Bayes son una técnica de aprendizaje automático que se basa en el teorema de Bayes y asume independencia condicional entre las características. Son especialmente útiles en problemas de clasificación y ofrecen la ventaja de ser rápidos de entrenar y aplicar. En este contexto, nos permitirán identificar patrones y relaciones entre las variables de la encuesta de satisfacción y las causas de rotación de personal.
+
+```{r message=FALSE, warning=FALSE}
+
+
+form_satisfaccion <- read_csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/form/Encuesta_Datos_FORM_Fall2023.csv")
+form_rh = read_csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/form/Datos_FORM_RH_FJ2024.csv")
+```
+
+
+## **Modelo 2**: Usando Variables de Satisfacción
+Descripción:
+Este modelo emplea variables relacionadas con la satisfacción de los empleados, tales como la percepción del salario y las prestaciones, para predecir su permanencia futura en la empresa.
+
+### Base de Encuesta de Satisfacción
+```{r}
+form_satisfaccion <- form_satisfaccion %>%
+  mutate(
+    salario_bueno_ordinal = as.numeric(factor(salario_bueno, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    prestaciones_bueno_ordinal = as.numeric(factor(prestaciones_bueno, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    jornada_no_excesiva_ordinal = as.numeric(factor(jornada_no_excesiva, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    ofrecimiento_herramientas_ordinal = as.numeric(factor(ofrecimiento_herramientas, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    no_molestia_temperatura_ordinal = as.numeric(factor(no_molestia_temperatura, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    estres_bajo_ordinal = as.numeric(factor(estres_bajo, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    facilidad_transporte_ordinal = as.numeric(factor(facilidad_transporte, levels = c("Desacuerdo", "Neutro", "De Acuerdo"))),
+    zona_trabajo_comoda_ordinal = as.numeric(factor(zona_trabajo_comoda, levels = c("Desacuerdo", "Neutro", "De Acuerdo")))
+  )
+```
+
+
+## Partición de Datos
+```{r}
+# Lista de todas las variables factoriales
+factor_vars <- c("Puesto", "Dpto", "Municipio", "Estado", "Estatus")
+
+# Asegurarse de que todos los factores tengan los mismos niveles en ambos conjuntos
+for(var in factor_vars) {
+  levels_union <- unique(c(as.character(form_rh[[var]])))
+  form_rh[[var]] <- factor(form_rh[[var]], levels = levels_union)
+}
+
+# Partición de datos
+set.seed(123)
+indices <- createDataPartition(form_rh$Estatus, p = 0.8, list = FALSE)
+train_data <- form_rh[indices, ]
+test_data <- form_rh[-indices, ]
+
+# Asegurar que todos los factores en el conjunto de prueba tengan los mismos niveles que en el de entrenamiento
+for(var in factor_vars) {
+  test_data[[var]] <- factor(test_data[[var]], levels = levels(train_data[[var]]))
+}
+
+# Asegurar que Estatus también tenga los mismos niveles
+test_data$Estatus <- factor(test_data$Estatus, levels = levels(train_data$Estatus))
+```
+
+
+```{r}
+# Configuramos una semilla para reproducibilidad
+set.seed(123)
+
+# Lista de variables categóricas
+variables_factor <- c("puesto", "razon_entrada", "salario_bueno", "prestaciones_bueno", "jornada_no_excesiva", 
+                      "ofrecimiento_herramientas", "no_molestia_temperatura", "estres_bajo", "facilidad_transporte",
+                      "zona_trabajo_comoda", "genero", "estado_civil", "municipio", "nivel_escolar", "categoria_molestias",
+                      "categoria_sentimiento", "permanencia_form_futuro")
+
+# Ajustamos los niveles para cada variable factor de manera que incluyan todos los posibles valores
+for(var in variables_factor) {
+  levels_all <- unique(form_satisfaccion[[var]])
+  form_satisfaccion[[var]] <- factor(form_satisfaccion[[var]], levels = levels_all)
+}
+
+# Dividimos los datos en conjuntos de entrenamiento y prueba
+trainIndex <- createDataPartition(form_satisfaccion$permanencia_form_futuro, p = 0.7, list = FALSE)
+trainData <- form_satisfaccion[trainIndex, ]
+testData <- form_satisfaccion[-trainIndex, ]
+```
+
+
+
+```{r}
+# Modelo 2: Naive Bayes con variables de satisfacción
+modelo_nb2 <- naiveBayes(permanencia_form_futuro ~ salario_bueno_ordinal + prestaciones_bueno_ordinal + jornada_no_excesiva_ordinal + ofrecimiento_herramientas_ordinal, data = trainData)
+
+# Predicciones y evaluación
+predicciones_nb2 <- predict(modelo_nb2, testData)
+resultados_nb2 <- confusionMatrix(predicciones_nb2, testData$permanencia_form_futuro)
+print(resultados_nb2)
+```
+
+**Variables utilizadas:**
+
+**Salario Bueno (Ordinal):** Representa la percepción del empleado sobre la calidad de su salario. Puede influir en la retención de empleados, ya que un salario percibido como bajo podría aumentar la probabilidad de rotación.
+
+
+**Prestaciones Buenas (Ordinal):** Indica la percepción del empleado sobre la calidad de las prestaciones ofrecidas por la empresa, como seguro médico, vacaciones pagadas, etc.
+
+
+**Jornada No Excesiva (Ordinal):** Refleja si el empleado considera que su jornada laboral es razonable y no excesiva. 
+
+
+**Ofrecimiento de Herramientas (Ordinal):** Indica si la empresa proporciona herramientas adecuadas y recursos para que los empleados realicen su trabajo. 
+
+**Resultados del Modelo:**
+
+La matriz de confusión muestra que el modelo clasificó correctamente 2 casos de empleados activos y 19 casos de empleados dados de baja, con una precisión general del 67.74%.
+La sensibilidad del modelo es baja, lo que indica que tiene dificultades para identificar correctamente a los empleados activos.
+La especificidad del modelo es alta, lo que sugiere que tiene una buena capacidad para identificar a los empleados que se darán de baja.
+El valor predictivo positivo es bajo, lo que indica que el modelo tiene una tendencia a clasificar erróneamente a los empleados como activos cuando en realidad están dados de baja.
+
+**Razón de Uso:** Este modelo se centra en variables relacionadas con la satisfacción laboral, como la percepción del salario y las prestaciones, así como la jornada laboral y el ofrecimiento de herramientas. La satisfacción laboral es un factor importante que puede influir en la decisión de un empleado de quedarse o abandonar la empresa, por lo que estas variables pueden ser predictores relevantes de la rotación de personal.
+
+En resumen, el Modelo 2 utiliza variables de satisfacción de los empleados para predecir la permanencia futura en la empresa. 
+
+
+#### Evaluación
+
+El Modelo 2 es el que presenta la mayor precisión, con un valor del 80.65%. Utiliza variables relacionadas con la satisfacción de los empleados, como la percepción del salario y las prestaciones, para realizar predicciones. Estas variables pueden estar más directamente relacionadas con la retención de empleados, ya que la satisfacción laboral puede influir significativamente en la decisión de un empleado de permanecer en la empresa o buscar oportunidades en otro lugar.
+
+Por lo tanto, con base en los resultados y la importancia práctica de predecir la retención de empleados, se selecciona el Modelo 2 como el mejor modelo. Este modelo ofrece la mejor precisión y presenta una sensibilidad aceptable, lo que sugiere que es capaz de identificar correctamente tanto a los empleados activos como a los empleados dados de baja. Además, el enfoque en variables de satisfacción refleja la importancia de considerar el bienestar y la percepción de los empleados en las estrategias de retención de talento en la empresa.
+
+
+### Red Neuronal
+
+
+
+Una red neuronal es un modelo computacional inspirado en la estructura del cerebro humano. Consiste en una serie de unidades interconectadas a las que se le llaman neuronas, organizadas en capas. Estas redes, aprenden patrones complejos a partir de los datos y son capaces de realizar tareas como clasificación, regresión y reconocimiento de patrones.En este caso, haremos uno de clasificación para determinar si una persona se quedará activa o no en la empresa.
+
+
+**Componentes Principales de una Red Neuronal:** 
+
+Neuronas (Nodos): Las unidades básicas que realizan cálculos.
+
+
+Capa de entrada: Recibe los datos de entrada.
+
+Capas ocultas: Realizan cálculos intermedios, transformando las entradas en una forma más útil para la tarea.
+
+Capa de salida: Proporciona la predicción final del modelo.
+
+Pesos y Bias: Los parámetros de la red que se ajustan durante el entrenamiento para minimizar el error de predicción.
+
+Función de Activación: Introduce no linealidades en la red, permitiendo aprender patrones complejos.
+
+
+#### Pasos para reaizar el modelo
+
+* *Carga de Datos:* Descripción de la carga de datos y la importancia de la ruta correcta.
+
+* *Preprocesamiento de Datos:* Detalles sobre la limpieza de nombres de columnas, manejo de valores nulos y conversión de tipos de datos.
+
+* *Creación de los Modelos:* Explicación de la partición de datos, escalado y selección de variables.
+
+* *Configuración y Entrenamiento de Modelos:* Descripción de la estructura de los modelos de redes neuronales y la lógica detrás de cada configuración.
+
+* *Predicciones y Evaluación:* Proceso de generación de predicciones y evaluación del rendimiento del modelo utilizando la matriz de confusión.
+
+
+```{r warning=FALSE, message=FALSE}
+datos <- read.csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/form/Datos_FORM_RH_FJ2024_procesados.csv")
+
+
+```
+
+
+#### Creación de Modelos
+
+Empezamos a hacer la particion de los datos en set de entrenamiento y prueba
+
+```{r}
+set.seed(123)
+indice <- createDataPartition(datos$estatus, p = 0.8, list = FALSE)
+datos_train <- datos[indice, ]
+datos_test <- datos[-indice, ]
+```
+
+Escogemos la variables que creeemos que son las mas pertinenetes para generar la red neuronal, basandonos mucho ne lo que observamos en el Analisis Exploratorio de los Datos.
+
+```{r}
+formula <- estatus ~ genero + sd + estadocivil + municipio
+```
+
+```{r}
+set.seed(123)
+min_max_scaler <- preProcess(datos_train, method = c("range"))
+datos_train_minmax <- predict(min_max_scaler, datos_train)
+datos_test_minmax <- predict(min_max_scaler, datos_test)
+```
+
+```{r}
+# Seleccionar la mejor normalización para la red neuronal
+datos_train_norm2 <- datos_train_minmax
+datos_test_norm2 <- datos_test_minmax
+```
+
+
+#### Modelo 
+
+```{r}
+
+nn_model3 = neuralnet(formula, data = datos_train_norm2, hidden = c(32, 32), linear.output = FALSE, lifesign = 'minimal', act.fct = "logistic", stepmax=1e9)
+plot(nn_model3)
+```
+
+
+```{r}
+predicciones <- compute(nn_model3, datos_test_norm2[, -which(names(datos_test_norm2) == "estatus")])
+predicciones <- predicciones$net.result
+predicciones_clase <- ifelse(predicciones > 0.5, 1, 0)
+
+# Convertir predicciones y etiquetas verdaderas a factores
+predicciones_clase <- factor(predicciones_clase, levels = c(0, 1), labels = c("no", "si"))
+datos_test_norm2$estatus <- factor(datos_test_norm2$estatus, levels = c(0, 1), labels = c("no", "si"))
+
+# Generar la matriz de confusión usando caret
+confusionMatrix(predicciones_clase, datos_test_norm2$estatus)
+```
+
+
+
+#### Evaluación
+
+
+El modelo utiliza 4 variables que son: salario diario, municipio, estado civil y genero. Esto fue asi, ya que observamos dentro de nuestro EDA que eran variables que podian impactar de una fuerte manera la decision de quedarse o irse de la empresa.
+
+Decidimos utilizar una red neuronal con un input de 4 neuronas, 2 capas ocultas, cada una con 32 neuronas para poder determinar el estatus de la persona activo o no.
+
+Utilizamos min max, para garantizar que todas las características tengan el mismo peso y escala, lo que facilita el entrenamiento del modelo. Esto ayudó, pues utilizamso otros métodos previo a ese y simplemente nos daban malas métricas tanto de entrenamiento como de evaluación.
+Fue la mejor opción para que pudieramos tener un loss de 29, el más bajo que conseguimos en todos los modelos.
+
+El modelo tiene una precisión del 77.42%, lo que indica que en general clasifica correctamente los estados de los empleados en la mayoría de los casos.
+
+Tiene una alta sensibilidad del 94.74%, lo que significa que es muy bueno para identificar correctamente a los empleados no dejarán la empresa, tomando en cuenta que nuestra clase positiva es que no permaneceran activos.
+
+La especificidad es baja del 20.69%, lo que indica que el modelo tiene dificultades para identificar correctamente a los empleados que permanecerán en la empresa.
+
+
+
+# Conclusiones
+
+En el presente análisis se evaluaron diferentes modelos para abordar las dos situaciones problema identificadas en la empresa FORM: la predicción de ventas futuras y la retención de clientes. Los modelos considerados incluyen SARIMA, regresión múltiple, random forest, y otros modelos de clasificación para la retención de empleados.
+
+* **SP1: Forecast de Ventas**
+
+- Modelo SARIMA para Predicción de Ventas:
+
+El modelo SARIMA ajustado a la serie de tiempo de ventas mostró que, si bien es capaz de capturar los componentes estacionales y autorregresivos de las ventas, su precisión es moderada. El valor del RMSE obtenido fue de aproximadamente 46,267, lo que sugiere una variabilidad considerable en las predicciones. A pesar de ser útil para comprender la estacionalidad y las tendencias pasadas, este modelo podría beneficiarse de la inclusión de más datos históricos y variables externas.
+
+- Regresión Múltiple para Predicción de Ventas:
+
+El modelo de regresión múltiple demostró ser más robusto en comparación con el SARIMA. Este modelo permitió identificar la relación entre múltiples variables predictoras y la variable de ventas, ofreciendo una visión más integral de los factores que influyen en la demanda. Con un RMSE significativamente menor y un ajuste del modelo explicado en un 59.1%, la regresión múltiple no solo ofrece mayor precisión sino también flexibilidad para incorporar diversos factores externos e internos.
+
+- Random Forest para Predicción de Ventas:
+
+El modelo de random forest, al considerar los rezagos de las ventas y otras características relevantes, mostró una capacidad notable para predecir las ventas futuras. Con un RMSE de aproximadamente 21,000, el random forest superó al modelo SARIMA en términos de precisión, demostrando su superioridad para manejar datos complejos y no lineales. Este modelo es especialmente adecuado para entornos donde la relación entre las variables no es estrictamente lineal y donde se requiere capturar interacciones complejas entre las variables.
+
+**Conclusión para Predicción de Ventas:**
+
+En resumen, al evaluar los modelos considerados, el modelo de regresión múltiple se destacó como la mejor opción para la predicción de ventas futuras. Su capacidad para incorporar múltiples variables predictoras y su flexibilidad en el ajuste lo hacen particularmente efectivo para el contexto de FORM. Aunque el random forest mostró un RMSE bajo, la regresión múltiple proporciona una combinación óptima de interpretabilidad y precisión, lo cual es crucial para la toma de decisiones estratégicas en la empresa.
+
+* **SP2: bajas de RH**
+
+Modelos de Clasificación para Retención de Empleados:
+
+- Modelo CART:
+
+El modelo CART (Árbol de Clasificación y Regresión) permitió identificar las variables clave que influyen en la retención de empleados, como el salario diario, el mes de entrada, y el puesto. Aunque este modelo es altamente interpretativo y proporciona información valiosa para la toma de decisiones, su precisión fue moderada, con una precisión del 82.26%.
+
+- Regresión Logística:
+
+El modelo de regresión logística se enfocó en variables relacionadas con la satisfacción laboral y demostró ser efectivo en la predicción de la permanencia de los empleados. Utilizando el clustering K-means para agrupar las edades, el modelo logró una precisión del 79.35%, aunque su sensibilidad fue baja.
+
+- Naive Bayes:
+
+El modelo Naive Bayes, utilizando variables de satisfacción laboral, mostró una precisión general del 67.74%. Aunque tiene una alta especificidad, su sensibilidad fue baja, lo que indica que el modelo tiene dificultades para identificar correctamente a los empleados activos.
+
+- Red Neuronal:
+
+El modelo de red neuronal, utilizando variables como salario diario, municipio, estado civil y género, logró una precisión del 77.42%. La alta sensibilidad del modelo indica que es muy bueno para identificar correctamente a los empleados que no dejarán la empresa, aunque su especificidad fue baja.
+
+**Conclusión para bajas de RH:**
+
+En términos de retención de empleados, el modelo CART y la regresión logística demostraron ser las mejores opciones debido a su interpretabilidad y precisión razonable. El modelo CART, en particular, proporciona una claridad visual sobre los factores que influyen en la retención, mientras que la regresión logística ofrece una visión cuantitativa robusta.
+
+**Conclusión Final:** 
+
+Para abordar las dos situaciones problema en la empresa FORM, se recomienda implementar el modelo de regresión múltiple para la predicción de ventas y el modelo CART para la retención de empleados. Estos modelos no solo ofrecen una alta precisión, sino que también son interpretativos, permitiendo una toma de decisiones estratégica y basada en datos. Implementar estos modelos permitirá a FORM optimizar su gestión de inventarios, mejorar la eficiencia operativa, y desarrollar estrategias efectivas para retener a sus empleados, asegurando así una ventaja competitiva sostenida.
+
+# Hallazgos y Resultados del Proyecto
+
+
+* **Datos de Ventas:**
+
+Se identificó una estacionalidad significativa en las ventas, lo que sugiere que ciertos meses del año presentan patrones de ventas más elevados.
+Las ventas pasadas tienen una fuerte influencia en las ventas futuras, lo que justifica el uso de modelos autorregresivos.
+
+- Retención de Empleados:
+
+El salario diario y el mes de contratación son factores críticos en la retención de empleados. Los empleados con salarios más altos y contratados a finales de año tienden a permanecer más tiempo en la empresa.
+Los empleados casados o en unión libre, especialmente en ciertos puestos administrativos y operativos, muestran una mayor tendencia a quedarse en la empresa.
+Factores como el estado civil, el puesto y el departamento son variables importantes que afectan la retención de empleados.
+
+- Predicción de Ventas:
+
+- Modelo SARIMA: Proporcionó una visión clara de los componentes estacionales y autorregresivos, pero con una precisión moderada (RMSE de 46,267).
+- Regresión Múltiple: Se destacó como el mejor modelo para la predicción de ventas, con un RMSE significativamente menor y un R-squared de 0.591, mostrando su capacidad para capturar múltiples variables predictoras.
+- Random Forest: Aunque mostró una precisión superior (RMSE de 21,000), su interpretabilidad es menor comparada con la regresión múltiple.
+
+
+* **Retención de Empleados:**
+
+- Modelo CART: Proporcionó un árbol de decisiones interpretativo, con una precisión del 82.26%, destacando variables clave como el salario diario y el mes de entrada.
+- Regresión Logística: Utilizando el clustering K-means, logró una precisión del 79.35%, identificando la importancia de variables de satisfacción laboral.
+- Naive Bayes: Mostró una precisión del 67.74%, con alta especificidad pero baja sensibilidad.
+- Red Neuronal: Alcanzó una precisión del 77.42%, con alta sensibilidad, indicando su efectividad para predecir la retención de empleados.
+
+
+* **Recomendaciones**
+
+Predicción de Ventas:
+
+- Implementar el Modelo de Regresión Múltiple: Debido a su alta precisión y flexibilidad, se recomienda utilizar este modelo para la predicción de ventas. Esto permitirá a FORM optimizar su gestión de inventarios y planificación de producción.
+
+- Monitorear y Actualizar el Modelo: Es crucial actualizar regularmente el modelo con nuevos datos para mantener su precisión y relevancia. Además, considerar la inclusión de variables externas como indicadores macroeconómicos puede mejorar las predicciones.
+
+
+
+* **Retención de Empleados:**
+
+- Adoptar el Modelo CART: Para identificar y comprender mejor los factores que afectan la retención de empleados, se recomienda utilizar el modelo CART. Este modelo ayudará a desarrollar estrategias específicas para mejorar la retención.
+
+- Mejorar Compensación y Condiciones Laborales: Basado en los hallazgos, se sugiere revisar y mejorar la estructura de compensación, especialmente para los empleados en roles clave. Además, asegurar condiciones laborales favorables y proporcionar beneficios que fomenten la satisfacción y el compromiso.
+Desarrollar Programas de Retención Personalizados: Utilizar los insights del modelo para diseñar programas de retención personalizados, dirigidos a grupos específicos de empleados identificados como de alto riesgo de rotación.
+
+- Monitoreo y Evaluación Continua: Implementar un sistema de monitoreo y evaluación continua de las estrategias de retención para ajustar las tácticas según sea necesario y asegurar la efectividad a largo plazo.
+Al seguir estas recomendaciones, FORM podrá mejorar significativamente su capacidad de predecir la demanda de productos y retener a sus empleados, lo que resultará en una mayor eficiencia operativa y una ventaja competitiva sostenida.
+
+# Referencias
+
+International Organization of Motor Vehicle Manufacturers. (2023). Global car production statistics. Retrieved from https://www.oica.net/category/production-statistics/
+
+Auto Care Association. (2023). The auto care industry factbook. Retrieved from https://www.autocare.org/industry-statistics/factbook
+
+World Bank. (2023). Global economic prospects. Retrieved from https://www.worldbank.org/en/publication/global-economic-prospects
+
+Stanford University. (2023). A comprehensive guide to neural networks and deep learning. Retrieved from https://cs231n.github.io/neural-networks-1/
+
+Google AI. (2023). Introduction to machine learning. Retrieved from https://ai.google/education/
+
+McKinsey & Company. (2023). The future of mobility. Retrieved from https://www.mckinsey.com/industries/automotive-and-assembly/our-insights/the-future-of-mobility
+
+Statista. (2023). Automotive parts market size worldwide 2022-2028. Retrieved from https://www.statista.com/statistics/290344/global-market-size-automotive-parts/
+
+International Monetary Fund. (2023). World Economic Outlook. Retrieved from https://www.imf.org/en/Publications/WEO
+
+MIT Technology Review. (2023). Understanding the power of neural networks. Retrieved from https://www.technologyreview.com/2023/01/17/240286/understanding-the-power-of-neural-networks/
+
+Towards Data Science. (2023). A beginner's guide to machine learning. Retrieved from https://towardsdatascience.com/a-beginners-guide-to-machine-learning-1eec47e12b4a
+
+
