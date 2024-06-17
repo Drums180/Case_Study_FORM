@@ -1,4 +1,4 @@
-const OpenAI = require("openai/index.mjs").default;
+const OpenAI = require("openai").default;
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -10,7 +10,7 @@ async function fetchChatGPTResponse(prompt) {
   try {
     const completion = await openai.chat.completions.create({
       messages: [
-        { role: "system", content: "You are a helpful assistant" },
+        { role: "system", content: "You are a helpfull assistant" },
         { role: "user", content: prompt },
       ],
       model: "gpt-3.5-turbo",
@@ -18,7 +18,7 @@ async function fetchChatGPTResponse(prompt) {
     return completion.choices[0].message.content;
   } catch (error) {
     console.error("Error fetching response from OpenAI:", error);
-    return "Lo siento, no pude procesar tu solicitud.";
+    return "Sorry, I couldn't process your request.";
   }
 }
 

@@ -1273,8 +1273,6 @@ Función de Activación: Introduce no linealidades en la red, permitiendo aprend
 
 ```{r warning=FALSE, message=FALSE}
 datos <- read.csv("/Users/gabrielmedina/Desktop/git 3/Case_Study_FORM/databases/form/Datos_FORM_RH_FJ2024_procesados.csv")
-
-
 ```
 
 

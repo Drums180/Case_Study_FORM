@@ -249,7 +249,7 @@ El siguiente código en R ajusta el modelo CART utilizando un subconjunto espec�
 
 ```{r}
 # Ajustar el modelo CART usando solo las variables especificadas
-modelo <- rpart(Estatus ~ Género + Puesto + Dpto + SD + Municipio + Estado + `Estado Civil` + Dirección + Mes_Nacimiento + Mes_Entrada + Edad,
+modelo <- rpart(Estatus ~ Género + Puesto + Dpto + SD + Municipio + Estado + `Estado Civil` + Mes_Nacimiento + Mes_Entrada + Edad,
                 data = train_data, method = "class")
 
 # Visualizar el árbol de decisión

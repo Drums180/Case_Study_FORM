@@ -9,7 +9,7 @@ const { fetchChatGPTResponse } = require("./chatgpt.js");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const qnaFilePath = "databases/chatbot/q&a.csv";
+const qnaFilePath = "../../databases/chatbot/q&a.csv";
 let qnaData = [];
 
 // Leer el archivo CSV y cargar los datos en memoria
@@ -30,14 +30,18 @@ async function connectionLogic() {
     auth: state,
   });
 
-  sock.ev.on("connection.update", async (update) => {
-    const { connection, lastDisconnect, qr } = update || {};
-    if (qr) console.log(qr);
-    if (
-      connection === "close" &&
-      lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
-    ) {
-      connectionLogic();
+  sock.ev.on("connection.update", (update) => {
+    const { connection, lastDisconnect, qr } = update;
+    if (qr) console.log("QR Code: ", qr);
+    if (connection === "close") {
+      const shouldReconnect =
+        lastDisconnect.error.output?.statusCode !== DisconnectReason.loggedOut;
+      console.log("Connection closed, reconnecting: ", shouldReconnect);
+      if (shouldReconnect) {
+        connectionLogic();
+      }
+    } else if (connection === "open") {
+      console.log("Connection opened");
     }
   });
 

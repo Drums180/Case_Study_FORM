@@ -432,4 +432,46 @@ print(paste("R-squared:", r_squared))
 3. **R-squared**: 0.591
    - El R-squared indica que el modelo explica el 59.1% de la variabilidad en la cantidad semanal. Esto sugiere que el modelo tiene un ajuste moderado.
 
+```{r}
+library(ggplot2)
+library(gridExtra)
+library(reshape2)
+
+# Crear una lista de colores para los clusters
+colores_cluster <- c("red", "green", "blue")
+
+# Seleccionar el tamaño de la muestra
+tamano_muestra <- 20
+
+# Crear una lista para almacenar las gráficas
+plots <- list()
+
+# Generar las gráficas por cada cluster
+for (cluster_id in unique(resultados$Cluster)) {
+  datos_cluster <- subset(resultados, Cluster == cluster_id)
+  muestra <- datos_cluster[sample(nrow(datos_cluster), tamano_muestra), ]
+  muestra$Caso <- 1:nrow(muestra)  # Añadir identificador de caso
+  
+  # Reestructurar los datos para la gráfica de líneas
+  muestra_melt <- melt(muestra, id.vars = c("Caso", "Cluster"), measure.vars = c("Valores_Reales", "Predicciones"))
+  
+  # Crear la gráfica de líneas comparativa para el cluster
+  plot <- ggplot(muestra_melt, aes(x = Caso, y = value, color = variable, group = variable)) +
+    geom_line() +
+    geom_point() +
+    labs(title = paste("Comparación de Predicciones vs Valores Reales - Cluster", cluster_id),
+         x = "Caso",
+         y = "Cantidad",
+         color = "Tipo") +
+    theme_minimal() +
+    theme(legend.position = "bottom")
+  
+  plots[[as.numeric(cluster_id)]] <- plot
+}
+
+# Mostrar la gráfica para el Cluster 1
+plots[[1]]
+plots[[2]]
+plots[[3]]
+```
 
